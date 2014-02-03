@@ -1,9 +1,7 @@
-ODMTSA
+WEB TSA
 ======
 
-A web application for visualizing data stored in an ODM database.
-
-![iUTAH](/doc/images/odmtsa.jpg)
+A web application for visualizing environmental time series data.
 
 Sponsors
 ---------
@@ -16,11 +14,11 @@ This material is based on work supported by the National Science Foundation Gran
 Copying and License
 ----------------------------
 
-This material is copyright (c) 2013 Utah State University.
+This material is copyright (c) 2014 Utah State University.
 
 It is open and licensed under the New Berkeley Software Distribution (BSD) License.  Full text of the license follows.
 
-Copyright (c) 2013, Utah State University. All rights reserved.
+Copyright (c) 2014, Utah State University. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
