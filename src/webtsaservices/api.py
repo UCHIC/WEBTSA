@@ -1,5 +1,5 @@
 from tastypie.resources import ModelResource
-from odmtsaservices.models import DataSeries
+from webtsaservices.models import DataSeries
 
 
 class DataSeriesResource(ModelResource):

@@ -21,9 +21,9 @@ except KeyError:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-TEMPLATE_DEBUG = False
+TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -45,7 +45,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'tastypie',
     'sqlserver_ado',
-    'odmtsaservices',
+    'webtsaservices',
+    'webtsainterface'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -57,9 +58,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'TimeSeriesAnalyst.urls'
+ROOT_URLCONF = 'WEBTSA.urls'
 
-WSGI_APPLICATION = 'TimeSeriesAnalyst.wsgi.application'
+WSGI_APPLICATION = 'WEBTSA.wsgi.application'
 
 
 # Database
@@ -69,7 +70,7 @@ CONN_MAX_AGE = None
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '../Internal',
+        'NAME': 'Internal',
     },
     'tsa': {
         'NAME': 'TSA_Catalog',
@@ -105,10 +106,8 @@ USE_TZ = True
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-STATIC_ROOT = os.path.join(PROJECT_ROOT, "../", "public")
-
-STATICFILES_DIRS = (
-    os.path.join(PROJECT_ROOT, "public"),
-)
+#STATICFILES_DIRS = (
+#    os.path.join(PROJECT_ROOT, "public"),
+#)
 
 STATIC_URL = '/static/'
