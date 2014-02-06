@@ -1,6 +1,4 @@
 Django==1.6.1
-django-bootstrap-toolkit==2.15.0
-django-localflavor==1.0
 django-mssql==1.5a
 django-tastypie==0.11.0
 python-dateutil==2.2
