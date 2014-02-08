@@ -102,10 +102,6 @@
             mapTypeId: google.maps.MapTypeId.TERRAIN
         }
         map = new google.maps.Map(map_canvas, map_options);
-        // Load all markers
-        /*mapData.sites.forEach(function (entry) {            // Create marker for this site
-            addMarker(entry);
-        });*/
     }
 
     function loadDatasets(datasets){
