@@ -1,34 +1,78 @@
 <div class="tab-pane" id="datasetsContent">
-   <div class="panel panel-default" id="listBlocksContainer">
-       <div class="list-group">
+    <div class="panel panel-default" id="listBlocksContainer">
 
-       </div>
-       <button id="btnExportData" type="button" data-toggle="modal" data-target="#ExportDialog" class="btn btn-default glyphicon glyphicon-export"> Export...</button>
-       <!-- Modal -->
-       <div class="modal fade" id="ExportDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-           <div class="modal-dialog">
-               <div class="modal-content">
-                   <div class="modal-header">
-                       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                       <h4 class="modal-title" id="myModalLabel">Export</h4>
-                   </div>
-                   <div class="modal-body">
-                       <div class="control-group">
-                           <h5>Datasets</h5>
-                           <div class="controls">
-                               <label class="checkbox"><input type="checkbox" value="option1" id="inlineCheckbox1"> somefile.zip</label>
-                               <label class="checkbox"><input type="checkbox" value="option2" id="inlineCheckbox2"> anotherfile.rar</label>
-                               <label class="checkbox"><input type="checkbox" value="option3" id="inlineCheckbox3"> yetanotherfile.zip</label>
-                               <label class="checkbox"><input type="checkbox" value="option3" id="inlineCheckbox3"> whynotonemore.rar</label>
-                           </div>
-                       </div>
-                   </div>
-                   <div class="modal-footer">
-                       <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                       <button type="button" class="btn btn-primary">Download Files</button>
-                   </div>
-               </div><!-- /.modal-content -->
-           </div><!-- /.modal-dialog -->
-       </div><!-- /.modal -->
-   </div>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+            <button type="submit" class="btn btn-default glyphicon glyphicon-search"> </button>
+        </div>
+
+        <table class="table" id="datasetsTable">
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+
+        <button id="btnExportData" type="button" data-toggle="modal" data-target="#ExportDialog"
+                class="btn btn-default glyphicon glyphicon-export"> Export...
+        </button>
+
+        <!-- Export Modal -->
+        <div class="modal fade" id="ExportDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Export</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="control-group">
+                            <h5>Datasets</h5>
+
+                            <div class="controls">
+                                <label class="checkbox"><input type="checkbox" value="option1" id="inlineCheckbox1">
+                                    somefile.zip</label>
+                                <label class="checkbox"><input type="checkbox" value="option2" id="inlineCheckbox2">
+                                    anotherfile.rar</label>
+                                <label class="checkbox"><input type="checkbox" value="option3" id="inlineCheckbox3">
+                                    yetanotherfile.zip</label>
+                                <label class="checkbox"><input type="checkbox" value="option3" id="inlineCheckbox3">
+                                    whynotonemore.rar</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary">Download Files</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
+
+    </div>
+    <!-- Dataset Info Modal -->
+    <div class="modal fade" id="InfoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Dataset Info</h4>
+                </div>
+                <div class="modal-body">
+                    <p> This is some content.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">View Dataset</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
 </div>
