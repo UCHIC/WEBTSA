@@ -1,18 +1,20 @@
 <div class="tab-pane" id="datasetsContent">
     <div class="panel panel-default" id="listBlocksContainer">
 
-        <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search">
-            <button type="submit" class="btn btn-default glyphicon glyphicon-search"> </button>
+        <div id="searchtools">
+            <input id="txtSearch" type="text" class="form-control" placeholder="Search">
+            <button id="btnSearch" type="submit" class="btn btn-default glyphicon glyphicon-search"> </button>
+                   <button id="btnExportData" type="button" data-toggle="modal" data-target="#ExportDialog"
+                class="btn btn-default glyphicon glyphicon-export"> Export...
+            </button>
         </div>
+
+
         <table class="table" id="datasetsTable">
             <thead></thead>
             <tbody></tbody>
         </table>
 
-        <button id="btnExportData" type="button" data-toggle="modal" data-target="#ExportDialog"
-                class="btn btn-default glyphicon glyphicon-export"> Export...
-        </button>
 
         <!-- Export Modal -->
         <div class="modal fade" id="ExportDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
