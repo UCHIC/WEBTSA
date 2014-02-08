@@ -14,7 +14,7 @@ class SourcesDataService(models.Model):
 
 class DataSeries(models.Model):
     seriesid = models.IntegerField(db_column='SeriesID', primary_key=True)
-    sourcedataserviceid = models.ForeignKey('SourcesDataService', db_column='SourceDataServiceID')
+    sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID')
     sitecode = models.CharField(db_column='SiteCode', max_length=50)
     sitename = models.CharField(db_column='SiteName', max_length=500)
     latitude = models.FloatField(db_column='Latitude')

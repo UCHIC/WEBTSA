@@ -1,224 +1,34 @@
 ﻿jQuery(document).ready(function ($) {
     var map;
     var markers = [];
-    var mapData = {
-        "sites": [
-            {
-                "SiteCode": "RB_KF_BA",
-                "SiteName": "Foothill Drive Advanced Aquatic",
-                "Latitude": 40.755961,
-                "Longitude": -111.835567,
-                "Network": "GamutRBC"
-            },
-            {
-                "SiteCode": "RB_KF_CLIMATE",
-                "SiteName": "Foothill Drive Advanced Aquatic",
-                "Latitude": 40.760744,
-                "Longitude": -111.831172,
-                "Network": "Logan"
-            },
-            {
-                "SiteCode": "RB_GIRF_C",
-                "SiteName": "Green Infrastructure Climate",
-                "Latitude": 40.764,
-                "Longitude": -111.828181,
-                "Network": "Provo"
-            },
-            {
-                "SiteCode": "RB_RBG_BB",
-                "SiteName": "Cottams Grove Basic Aquatic",
-                "Latitude": 40.774256,
-                "Longitude": -111.816903,
-                "Network": "GIRF"
-            },
-            {
-                "SiteCode": "RB_RBG_BA",
-                "SiteName": "Red Butte Gate Basic Aquatic",
-                "Latitude": 40.780264,
-                "Longitude": -111.807286,
-                "Network": "GIRN"
-            },
-            {
-                "SiteCode": "RB_ARBR_C",
-                "SiteName": "Above Red Butte Reservoir",
-                "Latitude": 40.780369,
-                "Longitude": -111.802456,
-                "Network": "GamutRBC"
-            },
-            {
-                "SiteCode": "RB_ARBR_AA",
-                "SiteName": "Above Red Butte Reservoir",
-                "Latitude": 40.760656565,
-                "Longitude": -111.76656898,
-                "Network": "GIRN"
-            },
-            {
-                "SiteCode": "RB_ARBR_AB",
-                "SiteName": "Above Red Butte Reservoir",
-                "Latitude": 40.779725,
-                "Longitude": -111.8064,
-                "Network": "Logan"
-            }
-        ]
-    };
     var filters = {
         "divisions": [
             {
                 "id": "Network",
-                "title": "Network",
-                "items": [
-                    {
-                        "id": "GamutRBC",
-                        "name": "Red Butte Creek GAMUT",
-                        "count": 9
-                    },
-                    {
-                        "id": "Logan",
-                        "name": "Logan River",
-                        "count": 10
-                    },
-                    {
-                        "id": "Provo",
-                        "name": "Provo River",
-                        "count": 8
-                    },
-                    {
-                        "id": "GIRF",
-                        "name": "GIRF",
-                        "count": 20
-                    },
-                    {
-                        "id": "GIRN",
-                        "name": "GIRN",
-                        "count": 10
-                    }
-                ]
+                "title": "Network"
             },
             {
                 "id": "Site",
-                "title": "Site",
-                "items": [
-                    {
-                        "id": "RB_KF_BA",
-                        "name": "Knowlton Fork Aquatic",
-                        "count": 40,
-                        "network": "GamutRBC"
-                    },
-                    {
-                        "id": "RB_KF_CLIMATE",
-                        "name": "Knowlton Fork Climate",
-                        "count": 40,
-                        "network": "Logan"
-                    },
-                    {
-                        "id": "RB_GIRF_C",
-                        "name": "Green Infrastructure Climate",
-                        "count": 40,
-                        "network": "Provo"
-                    },
-                    {
-                        "id": "RB_RBG_BB",
-                        "name": "Cottams Grove Basic Aquatic",
-                        "count": 40,
-                        "network": "GIRF"
-                    },
-                    {
-                        "id": "RB_RBG_BA",
-                        "name": "Red Butte Gate Basic Aquatic",
-                        "count": 40,
-                        "network": "GIRN"
-                    },
-                    {
-                        "id": "RB_ARBR_C",
-                        "name": "Above Red Butte Reservoir",
-                        "count": 40,
-                        "network": "GamutRBC"
-                    },
-                    {
-                        "id": "RB_ARBR_AA",
-                        "name": "Above Red Butte Reservoir",
-                        "count": 40,
-                        "network": "GIRN"
-                    },
-                    {
-                        "id": "RB_ARBR_AB",
-                        "name": "Above Red Butte Reservoir",
-                        "count": 40,
-                        "network": "Logan"
-                    }
-
-                ]
+                "title": "Site"
             },
             {
                 "id": "VariableCategory",
-                "title": "Variable Category",
-                "items": [
-                    {
-                        "id": "category_climate",
-                        "name": "Climate",
-                        "count": 150
-                    },
-                    {
-                        "id": "category_hydrologic",
-                        "name": "Hydrologic",
-                        "count": 200
-                    },
-                    {
-                        "id": "category_waterquality",
-                        "name": "Water Quality",
-                        "count": 30
-                    },
-                    {
-                        "id": "category_soil",
-                        "name": "Soil",
-                        "count": 135
-                    }
-                ]
+                "title": "Variable Category"
             },
             {
                 "id": "VariableName",
-                "title": "Variable Name",
-                "items": [
-                    {
-                        "id": "variable_temperature",
-                        "name": "Temperature",
-                        "count": 86
-                    },
-                    {
-                        "id": "variable_oxygen",
-                        "name": "Oxygen, dissolved",
-                        "count": 75
-                    },
-                    {
-                        "id": "variable_conductance",
-                        "name": "Specific Conductance",
-                        "count": 75
-                    },
-                    {
-                        "id": "variable_ph",
-                        "name": "pH",
-                        "count": 75
-                    }
-                ]
+                "title": "Variable Name"
             },
             {
                 "id": "ControlLevel",
-                "title": "Quality Control Level",
-                "items": [
-                    {
-                        "id": "level_rawdata",
-                        "name": "Raw Data",
-                        "count": 300
-                    },
-                    {
-                        "id": "level_controlleddata",
-                        "name": "Quality Controlled Data",
-                        "count": 50
-                    }
-                ]
+                "title": "Quality Control Level"
             }
         ]
     };
+    var datasets;
+    var margin = { top: 0, right: 20, bottom: 120, left: 50 },
+        width = $("#visualizationContent").width() - margin.left - margin.right,
+        height = $("#visualizationContent").height() - margin.top - margin.bottom;
 
     function getURLParameter(name) {
         return decodeURI(
@@ -226,7 +36,8 @@
         );
     }
 
-    function loadFilters() {
+    // Load filter categories
+    function loadFiltersCategories() {
         // Build left panel filters from JSON
         filters.divisions.forEach(function (entry) {
             $("#leftPanel").append(
@@ -245,10 +56,6 @@
                         </div>\
                     </div>\
                 </div>");
-            entry.items.forEach(function (item) {
-                $('#' + entry.id + ' ul').append(
-                    '<li class="list-group-item"><span class="badge">' + item.count + '</span><label class="checkbox"><input type="checkbox" checked  data-network="' + item.network + '" value="' + item.id + '"> ' + item.name + '</label></li>');
-            });
         });
     }
 
@@ -276,12 +83,12 @@
 
     // Add a marker to the map
     function addMarker(entry) {
-        var location = new google.maps.LatLng(entry.Latitude, entry.Longitude);
+        var location = new google.maps.LatLng(entry.latitude, entry.longitude);
         marker = new google.maps.Marker({
             position: location,
             map: map,
             animation: google.maps.Animation.DROP,
-            site: entry,
+            site: entry
         });
         markers.push(marker);
     }
@@ -296,122 +103,31 @@
         }
         map = new google.maps.Map(map_canvas, map_options);
         // Load all markers
-        mapData.sites.forEach(function (entry) {            // Create marker for this site
+        /*mapData.sites.forEach(function (entry) {            // Create marker for this site
             addMarker(entry);
-
-        });
+        });*/
     }
 
-    function loadDatasets() {
+    function loadDatasets(datasets){
         // Populate datasets container
         $("#datasetsTable thead").append(
             '<tr>\
-      <th><input type="checkbox"></th>\
-      <th>Site</th>\
-      <th>Variable</th>\
-      <th>Quality Control Level</th>\
-      <th></th>\
-    </tr>');
-        for (var i = 0; i < 20; i++) {
+              <th><input type="checkbox"></th>\
+              <th>Site</th>\
+              <th>Variable</th>\
+              <th>Quality Control Level</th>\
+              <th></th>\
+            </tr>');
+        for (var i = 0; i < datasets.length; i++) {
             $("#datasetsTable tbody").append(
                 '<tr>\
                    <td><input type="checkbox"></td>\
-                   <td data-toggle="modal" data-target="#InfoDialog">Knowlton Fork Aquatic</td>\
-                   <td data-toggle="modal" data-target="#InfoDialog">Temperature </td>\
-                   <td data-toggle="modal" data-target="#InfoDialog">Raw Data</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].sitename + '</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].variablename + '</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].qualitycontrolleveldefinition + '</td>\
                 </tr>');
         }
     }
-
-    // -----------------  Click Events ----------------------
-    $('#Network input[type="checkbox"]').click(function () {
-        var that = this;
-        var sites = $('#Site input[data-network="' + that.value + '"]');
-        //console.log(sites);
-        if (that.checked) {
-            mapData.sites.forEach(function (entry) {            // Load markers from JSON
-                if (entry.Network == that.value) {
-                    var site = $('#Site input[value="' + entry.SiteCode + '"]');
-                    if (site[0] != null) {                      // Check that the marker is not already created
-                        if (site[0].checked == false) {
-                            addMarker(entry);
-                        }
-                    }
-                }
-            });
-            for (var i = 0; i < sites.length; i++) {            // Check site's checkbox
-                sites[i].checked = true;
-            }
-        }
-        else {
-            for (var i = 0; i < markers.length; i++) {          //delete markers from this network
-                if (markers[i].site.Network == that.value) {
-                    //markers[i].setMap(null);
-                    removeMarker(markers[i]);
-                    markers.splice(i, 1);
-                    i--;                                        // because we removed one marker
-                }
-            }
-            for (var i = 0; i < sites.length; i++) {            // Uncheck corresponding sites
-                sites[i].checked = false;
-            }
-        }
-    });
-
-    $('#Site input[type="checkbox"]').click(function () {
-        var that = this;
-        if (that.checked) {
-            var i = 1;
-            mapData.sites.forEach(function (entry) {            // Create marker for this site
-                if (entry.SiteCode == that.value) {
-                    addMarker(entry);
-                    // check the network's checkbox
-                    var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = true;
-                }
-            });
-        }
-        else {
-            for (var i = 0; i < markers.length; i++) {          //delete marker for this site
-                if (markers[i].site.SiteCode == that.value) {
-                    removeMarker(markers[i]);
-                    //markers[i].setMap(null);
-                    markers.splice(i, 1);
-                    i--;                                        // because we removed one marker
-
-                    var checkedSites = $('#Site input[data-network="' + that.getAttribute('data-network') + '"]:checked');  // Get corresponding marked checkboxes
-                    if (checkedSites.length == 0) {
-                        var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = false;
-                    }
-                }
-            }
-        }
-    });
-
-    $('.datepicker').datepicker();
-
-    // Load view
-    var tab = getURLParameter("view");
-    if (tab == "datasets") {
-        $("#datasetsTab").addClass("active");
-        $("#datasetsContent").addClass("active");
-    }
-    else if (tab == "visualization") {
-        $("#visualizationTab").addClass("active");
-        $("#visualizationContent").addClass("active");
-    }
-    else {
-        $("#mapTab").addClass("active");
-        $("#mapContent").addClass("active");
-    }
-
-    loadFilters();
-    loadDatasets();
-    google.maps.event.addDomListener(window, 'load', initialize);
-
-    // Initialize plot area
-    var margin = { top: 0, right: 20, bottom: 120, left: 50 },
-        width = $("#visualizationContent").width() - margin.left - margin.right,
-        height = $("#visualizationContent").height() - margin.top - margin.bottom;
 
     /* Data Visualization */
     function drawTimeSeries() {
@@ -1105,6 +821,191 @@
 
     }
 
-    drawTimeSeries();
+    loadFiltersCategories();
+
+    // Load filters from JSON
+    $.getJSON( "/api/v1/dataseries", function( data ){
+        datasets = data['objects'];
+
+        var sites = new Array();
+        var networks = new Array();
+        var varcategories = new Array();
+        var varnames = new Array();
+        var qualitycontrols = new Array();
+        for (var i = 0; i < datasets.length; i++){
+            if (networks[datasets[i].sourcedataserviceid] == null){
+                networks[datasets[i].sourcedataserviceid] = 1;
+                $('#Network ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked  data-network="' +
+                datasets[i].sourcedataserviceid + '" value="' + datasets[i].sourcedataserviceid + '"> ' + "Network " +  datasets[i].sourcedataserviceid + '</label></li>');
+            }
+            else{
+                networks[datasets[i].sourcedataserviceid]++;
+            }
+
+            if (sites[datasets[i].sitecode] == null){
+                sites[datasets[i].sitecode] = 1;
+                $('#Site ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked  data-network="' +
+                datasets[i].sourcedataserviceid + '" value="' + datasets[i].sitecode + '"> ' + datasets[i].sitename + '</label></li>');
+                addMarker(datasets[i]);
+            }
+            else{
+                sites[datasets[i].sitecode]++;
+            }
+
+            if(varnames[datasets[i].variablename] == null){
+                varnames[datasets[i].variablename] = 1;
+                $('#VariableName ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked " value="' + datasets[i].variablecode + '"> ' + datasets[i].variablename + '</label></li>');
+            }
+            else{
+                varnames[datasets[i].variablename]++;
+            }
+
+            if(qualitycontrols[datasets[i].qualitycontrollevelcode] == null){
+                qualitycontrols[datasets[i].qualitycontrollevelcode] = 1;
+                $('#ControlLevel ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked " value="' + datasets[i].qualitycontrollevelcode + '"> ' + datasets[i].qualitycontrolleveldefinition + '</label></li>');
+            }
+            else{
+                qualitycontrols[datasets[i].qualitycontrollevelcode]++;
+            }
+
+            if(varcategories[datasets[i].generalcategory] == null){
+               varcategories[datasets[i].generalcategory] = 1;
+                $('#VariableCategory ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked " value="' + datasets[i].generalcategory + '"> ' + datasets[i].generalcategory + '</label></li>');
+            }
+            else{
+                varcategories[datasets[i].generalcategory]++;
+            }
+        }
+        console.log(datasets);
+        console.log(networks);
+        console.log(sites);
+        console.log(varcategories);
+        console.log(varnames);
+        console.log(qualitycontrols);
+
+        //console.log(datasets[0]);
+        // Bind Click Events
+        $('#Network input[type="checkbox"]').click(function(){
+            var that = this;
+            sites = new Array();    // array to keep track of sites with markers displayed
+            var sites = $('#Site input[data-network="' + that.value + '"]');
+            if (that.checked) {
+                datasets.forEach(function (entry) {            // Load markers from JSON
+                    if (entry.sourcedataserviceid == that.value && sites[entry.sitecode] == null){
+                        var site = $('#Site input[value="' + entry.sitecode + '"]');
+                        if (site[0] != null) {                      // Check that the element exists, just in case
+                            if (site[0].checked == false) {
+                                addMarker(entry);
+                                sites[entry.sitecode] = 1;          // Marker is placed
+                            }
+                        }
+                    }
+                });
+                for (var i = 0; i < sites.length; i++) {            // Check site's checkbox
+                    sites[i].checked = true;
+                }
+            }
+            else {
+                for (var i = 0; i < markers.length; i++) {          //delete markers from this network
+                    if (markers[i].site.sourcedataserviceid == that.value) {
+                        //markers[i].setMap(null);
+                        removeMarker(markers[i]);
+                        markers.splice(i, 1);
+                        i--;                                        // because we removed one marker
+                    }
+                }
+                for (var i = 0; i < sites.length; i++) {            // Uncheck corresponding sites
+                    sites[i].checked = false;
+                }
+            }
+            // console.log(markers);
+        });
+
+        $('#Site input[type="checkbox"]').click(function () {
+            var that = this;
+            if (that.checked) {
+                var i = 1;
+                datasets.forEach(function (entry) {            // Create marker for this site
+                    if (entry.sitecode == that.value) {
+                        addMarker(entry);
+                        // check the network's checkbox
+                        var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = true;
+                    }
+                });
+            }
+            else {
+                for (var i = 0; i < markers.length; i++) {          //delete marker for this site
+                    if (markers[i].site.sitecode == that.value) {
+                        removeMarker(markers[i]);
+                        //markers[i].setMap(null);
+                        markers.splice(i, 1);
+                        i--;                                        // because we removed one marker
+
+                        var checkedSites = $('#Site input[data-network="' + that.getAttribute('data-network') + '"]:checked');  // Get corresponding marked checkboxes
+                        if (checkedSites.length == 0) {
+                            var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = false;
+                        }
+                    }
+                }
+            }
+        });
+
+        $('#VariableName input[type="checkbox"]').click(function () {
+            var that = this;
+            if (that.checked) {
+
+            }
+            else {
+
+            }
+        });
+
+        $('#ControlLevel input[type="checkbox"]').click(function () {
+            var that = this;
+            if (that.checked) {
+
+            }
+            else {
+
+            }
+        });
+
+        // Load datasets
+        loadDatasets(datasets);
+    });
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+        // -----------------  Click Events ----------------------
+
+    // Run Date Picker plugin
+    $('.datepicker').datepicker();
+
+    // Load view
+    var tab = getURLParameter("view");
+    if (tab == "datasets") {
+        $("#datasetsTab").addClass("active");
+        $("#datasetsContent").addClass("active");
+    }
+    else if (tab == "visualization") {
+        $("#visualizationTab").addClass("active");
+        $("#visualizationContent").addClass("active");
+    }
+    else {
+        $("#mapTab").addClass("active");
+        $("#mapContent").addClass("active");
+    }
+
+    //drawTimeSeries();
 
 });
