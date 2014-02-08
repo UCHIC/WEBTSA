@@ -51,6 +51,7 @@
                         <div class='panel-body'>\
                             <div class='list-group'>\
                                 <ul class='list-group inputs-group'>\
+                                    <div class='ring'></div>\
                                 </ul>\
                             </div>\
                         </div>\
@@ -828,6 +829,7 @@
         var varcategories = new Array();
         var varnames = new Array();
         var qualitycontrols = new Array();
+
         for (var i = 0; i < datasets.length; i++){
             if (networks[datasets[i].sourcedataserviceid] == null){
                 networks[datasets[i].sourcedataserviceid] = 1;
@@ -882,7 +884,12 @@
                 varcategories[datasets[i].generalcategory]++;
             }
         }
-        console.log(datasets);
+        // Remove spinners
+        $('.ring').remove();
+
+        //console.log(datasets);
+
+        // These are the counts
         console.log(networks);
         console.log(sites);
         console.log(varcategories);
@@ -943,7 +950,7 @@
                 for (var i = 0; i < markers.length; i++) {          //delete marker for this site
                     if (markers[i].site.sitecode == that.value) {
                         removeMarker(markers[i]);
-                        //markers[i].setMap(null);
+
                         markers.splice(i, 1);
                         i--;                                        // because we removed one marker
 
