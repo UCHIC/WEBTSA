@@ -308,19 +308,25 @@
 
     function loadDatasets(){
         // Populate datasets container
+         $("#datasetsTable thead").append(
+                                  '<tr>\
+                            <th><input type="checkbox"></th>\
+                            <th>Site</th>\
+                            <th>Variable</th>\
+                            <th>Quality Control Level</th>\
+                            <th></th>\
+                          </tr>');
         for (var i = 0; i < 20; i++) {
             $("#datasetsTable tbody").append(
                 '<tr>\
                    <td><input type="checkbox"></td>\
-                   <td>Knowlton Fork Aquatic</td>\
-                   <td>Temperature </td>\
-                   <td>Raw Data</td>\
-                   <td data-toggle="modal" data-target="#InfoDialog"><button type="button" class="btn btn-default btn-sm glyphicon glyphicon-collapse-up"> </button></td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">Knowlton Fork Aquatic</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">Temperature </td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">Raw Data</td>\
                 </tr>');
         }
     }
 
-    loadDatasets();
 
     // -----------------  Click Events ----------------------
     $('#Network input[type="checkbox"]').click(function () {
@@ -403,6 +409,7 @@
     }
 
     loadFilters();
+    loadDatasets();
     google.maps.event.addDomListener(window, 'load', initialize);
 
     // Initialize plot area
