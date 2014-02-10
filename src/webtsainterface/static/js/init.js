@@ -285,7 +285,7 @@
             position: location,
             map: map,
             animation: google.maps.Animation.DROP,
-            site: entry,
+            site: entry
         });
         markers.push(marker);
     }
