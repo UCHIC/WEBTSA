@@ -110,7 +110,7 @@
         $("#datasetsTable thead").append(
             '<tr>\
               <th><input type="checkbox"></th>\
-              <th>Site</th>\
+              <th>Site Code</th>\
               <th>Variable</th>\
               <th>Quality Control Level</th>\
               <th></th>\
@@ -119,7 +119,7 @@
             $("#datasetsTable tbody").append(
                 '<tr>\
                    <td><input type="checkbox"></td>\
-                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].sitename + '</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].sitecode + '</td>\
                    <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].variablename + '</td>\
                    <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].qualitycontrolleveldefinition + '</td>\
                 </tr>');
@@ -813,9 +813,7 @@
                 .text(function (d) {
                     return d;
                 });
-
         });
-
     }
 
     loadFiltersCategories();
@@ -854,14 +852,14 @@
                 sites[datasets[i].sitecode]++;
             }
 
-            if(varnames[datasets[i].variablename] == null){
-                varnames[datasets[i].variablename] = 1;
+            if(varnames[datasets[i].variablecode] == null){
+                varnames[datasets[i].variablecode] = 1;
                 $('#VariableName ul').append('<li class="list-group-item">' +
                 '<span class="badge">' + 0 + '</span><label class="checkbox">' +
                 '<input type="checkbox" checked " value="' + datasets[i].variablecode + '"> ' + datasets[i].variablename + '</label></li>');
             }
             else{
-                varnames[datasets[i].variablename]++;
+                varnames[datasets[i].variablecode]++;
             }
 
             if(qualitycontrols[datasets[i].qualitycontrollevelcode] == null){
@@ -884,19 +882,38 @@
                 varcategories[datasets[i].generalcategory]++;
             }
         }
-        // Remove spinners
-        $('.ring').remove();
-
-        //console.log(datasets);
-
-        // These are the counts
-        console.log(networks);
-        console.log(sites);
-        console.log(varcategories);
-        console.log(varnames);
-        console.log(qualitycontrols);
 
         //console.log(datasets[0]);
+
+        /* ---------------Load badges--------------------------*/
+        for (var i = 0; i < $("#Network .badge").length; i++){
+            $("#Network .badge")[i].innerHTML = networks[i + 1];
+        }
+
+        var mySites = $("#Site input[type='checkbox']");
+        for (var i = 0; i < mySites.length; i++){
+            var index = mySites[i].getAttribute("value");
+            $("#Site input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = sites[index];
+        }
+
+        var myCategories = $("#VariableCategory input[type='checkbox']");
+        for (var i = 0; i < myCategories.length; i++){
+            var index = myCategories[i].getAttribute("value");
+            $("#VariableCategory input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = varcategories[index];
+        }
+
+        var myVarNames = $("#VariableName input[type='checkbox']");
+        for (var i = 0; i < myVarNames.length; i++){
+            var index = myVarNames[i].getAttribute("value");
+            $("#VariableName input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = varnames[index];
+        }
+
+        var myControlLevels = $("#ControlLevel input[type='checkbox']");
+        for (var i = 0; i < qualitycontrols.length; i++){
+            var index = myControlLevels[i].getAttribute("value");
+            $("#ControlLevel input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = qualitycontrols[index];
+        }
+
         // Bind Click Events
         $('#Network input[type="checkbox"]').click(function(){
             var that = this;
@@ -985,6 +1002,9 @@
 
         // Load datasets
         loadDatasets(datasets);
+
+        // Remove spinners
+        $('.ring').remove();
     });
 
     google.maps.event.addDomListener(window, 'load', initialize);
@@ -1009,6 +1029,34 @@
         $("#mapContent").addClass("active");
     }
 
+    //default each row to visible
+  $('tbody tr').addClass('visible');
+        //filter results based on query
+    function filter(selector, query) {
+      query =   $.trim(query); //trim white space
+      query = query.replace(/ /gi, '|'); //add OR for regex query
+
+      $(selector).each(function() {
+        ($(this).text().search(new RegExp(query, "i")) < 0) ? $(this).hide().removeClass('visible') : $(this).show().addClass('visible');
+      });
+    }
+
+  $('#txtSearch').keyup(function(event) {
+    //if esc is pressed or nothing is entered
+    if (event.keyCode == 27 || $(this).val() == '') {
+      //if esc is pressed we want to clear the value of search box
+      $(this).val('');
+
+      //we want each row to be visible because if nothing
+      //is entered then all rows are matched.
+      $('tbody tr').removeClass('visible').show().addClass('visible');
+    }
+
+    //if there is text, lets filter
+    else {
+      filter('tbody tr', $(this).val());
+    }
+  });
     //drawTimeSeries();
 
 });
