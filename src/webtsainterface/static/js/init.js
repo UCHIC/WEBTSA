@@ -1003,7 +1003,7 @@
         // Load datasets
         loadDatasets(datasets);
 
-        // Remove spinners
+        // Loading ends, Remove spinners
         $('.ring').remove();
     });
 
