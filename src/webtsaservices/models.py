@@ -1,12 +1,30 @@
 from __future__ import unicode_literals
 from django.db import models
 
+# class DataSeriesField(models.Model):
+#     fieldname = models.CharField(db_column='FieldName', max_length=128, primary_key=True)
+#
+#     class Meta:
+#         managed = False
+#         db_table = 'DataSeriesFields'
+
+
+class SearchFacet(models.Model):
+    keyfield = models.CharField(max_length=128)
+    namefield = models.CharField(max_length=128)
+    name = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.name
+
 
 class SourcesDataService(models.Model):
-    sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID')
+    sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID', primary_key=True)
     servicename = models.CharField(db_column='ServiceName', max_length=255)
     servicedescription = models.CharField(db_column='ServiceDescription', max_length=500)
     serviceurl = models.CharField(db_column='ServiceURL', max_length=500)
+    sourcenetworkname = models.CharField(db_column='SourceNetworkName', max_length=255)
+
     class Meta:
         managed = False
         db_table = 'SourceDataServices'
@@ -49,6 +67,49 @@ class DataSeries(models.Model):
     datelastupdated = models.DateTimeField(db_column='DateLastUpdated')
     isactive = models.BigIntegerField(db_column='IsActive')
     getdataurl = models.CharField(db_column='GetDataURL', max_length=500)
+
     class Meta:
         managed = False
         db_table = 'DataSeries'
+
+
+class Site(models.Model):
+    sourcedataserviceid = models.ForeignKey('SourcesDataService', db_column='SourceDataServiceID')
+    sitecode = models.CharField(db_column='SiteCode', max_length=50, primary_key=True)
+    sitename = models.CharField(db_column='SiteName', max_length=500)
+    latitude = models.FloatField(db_column='Latitude')
+    longitude = models.FloatField(db_column='Longitude')
+    state = models.CharField(db_column='State', max_length=50)
+    county = models.CharField(db_column='County', max_length=50)
+    sitetype = models.CharField(db_column='SiteType', max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'Sites'
+
+
+class VariableCategory(models.Model):
+    generalcategory = models.CharField(db_column='GeneralCategory', max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'VariableCategories'
+
+
+class Variable(models.Model):
+    variablecode = models.CharField(db_column='VariableCode', max_length=50)
+    variablename = models.CharField(db_column='VariableName', max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = 'Variable'
+
+
+class QualityControlLevel(models.Model):
+    code = models.CharField(db_column='QualityControlLevelCode', max_length=50)
+    definition = models.CharField(db_column='QualityControlLevelDefinition', max_length=500)
+    explanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500)
+
+    class Meta:
+        managed = False
+        db_table = 'QualityControlLevels'

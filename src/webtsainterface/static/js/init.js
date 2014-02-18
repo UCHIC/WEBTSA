@@ -819,7 +819,7 @@
     loadFiltersCategories();
 
     // Load filters from JSON
-    $.getJSON( "/api/v1/dataseries", function( data ){
+    $.getJSON("/api/v1/dataseries", function(data){
         datasets = data['objects'];
 
         var sites = new Array();
