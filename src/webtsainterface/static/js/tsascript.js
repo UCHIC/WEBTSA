@@ -73,8 +73,8 @@ TsaApplication.DataManager = (function (self) {
         self.facets.forEach(function(facet) {
             var filters = _.uniq(self.dataseries, function(item){ return item[facet.keyfield]; });
             filters.forEach(function(filter){
-                _.extend(filter, {  key: facet.keyfield, value: facet.namefield });
-                self.filterItems.push(_.pick(filter, "key", "value", facet.keyfield, facet.namefield));
+                _.extend(filter, {  key: facet.keyfield, value: facet.namefields });
+                self.filterItems.push(_.pick(filter, "key", "value", facet.keyfield, facet.namefields));
             });
         });
     }
@@ -102,6 +102,9 @@ TsaApplication.DataManager = (function (self) {
         $.getJSON("/api/v1/facets")
             .done(function(data){
                               self.facets = data.objects;
+                              self.facets.forEach(function(facet){
+                                  facet.namefields = facet.namefields.split(',');
+                              });
                               self.loadedData++;
                               document.dispatchEvent(self.facetsLoaded);
                           });
@@ -215,7 +218,11 @@ TsaApplication.UiHelper = (function (self) {
 
     self.renderFilters = function() {
         TsaApplication.DataManager.filterItems.forEach(function(item){
-            $("#" + item.key + " ul").append(self.filterTemplate({id: item[item.key], name: item[item.value]}));
+            var filterName = "";
+            item.value.forEach(function(field, index){
+                filterName += (index === 0)? item[field]: (", " + item[field]);
+            });
+            $("#" + item.key + " ul").append(self.filterTemplate({id: item[item.key], name: filterName}));
         });
     }
 
