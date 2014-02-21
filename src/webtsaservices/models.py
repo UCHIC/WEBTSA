@@ -16,7 +16,7 @@ class SearchFacet(models.Model):
     namefields = models.CharField(max_length=128, validators=[
         RegexValidator(
             regex=re.compile(r"^\w+(,\w+)*$"),
-            message=u'Value must be a comma separated value without spaces.',
+            message=u'Value must be a comma separated value.',
             code='invalid_values'
         ),
     ])
@@ -41,6 +41,7 @@ class SourcesDataService(models.Model):
 class DataSeries(models.Model):
     seriesid = models.IntegerField(db_column='SeriesID', primary_key=True)
     sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID')
+    network = models.CharField(db_column='Network', max_length=50)
     sitecode = models.CharField(db_column='SiteCode', max_length=50)
     sitename = models.CharField(db_column='SiteName', max_length=500)
     latitude = models.FloatField(db_column='Latitude')
@@ -83,6 +84,7 @@ class DataSeries(models.Model):
 
 class Site(models.Model):
     sourcedataserviceid = models.ForeignKey('SourcesDataService', db_column='SourceDataServiceID')
+    network = models.CharField(db_column='Network', max_length=50)
     sitecode = models.CharField(db_column='SiteCode', max_length=50, primary_key=True)
     sitename = models.CharField(db_column='SiteName', max_length=500)
     latitude = models.FloatField(db_column='Latitude')
