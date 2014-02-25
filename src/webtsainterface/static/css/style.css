@@ -127,7 +127,7 @@
 .row {
     margin-right: 0px;
     margin-left: 0px;
-    height: calc(100% - 50px);
+    height: calc(100% - 51px);
 }
 
 .navbar{
@@ -142,6 +142,10 @@
 #datasetsContent{
 
 }
+
+
+#datasetsContent .input[type]
+
 
 #btnExportData{
     margin-right:26px;
@@ -180,17 +184,16 @@
 }
 #btnExportData{
     float:right;
+    display:inline;
     margin-top: 1px;
+    margin-right: 20px;
 }
 
-#searchtools{
-    width:100%;
-    padding:15px;
-}
 
 #txtSearch{
     width:30%;
     display:inline;
+    margin:5px;
 }
 
 #listBlocksContainer{
@@ -226,7 +229,8 @@
 }
 
 #visualizationContent{
-   height:100%;
+   height:95%;
+   width:95%;
    overflow:hidden;
 }
 

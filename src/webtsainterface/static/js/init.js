@@ -1,228 +1,34 @@
-﻿﻿jQuery(document).ready(function ($) {
+﻿jQuery(document).ready(function ($) {
     var map;
     var markers = [];
-
-    $('.datepicker').datepicker();
-
-    var mapData = {
-        "sites": [
+    var filters = {
+        "divisions": [
             {
-                "SiteCode": "RB_KF_BA",
-                "SiteName": "Foothill Drive Advanced Aquatic",
-                "Latitude": 40.755961,
-                "Longitude": -111.835567,
-                "Network": "GamutRBC"
+                "id": "Network",
+                "title": "Network"
             },
             {
-                "SiteCode": "RB_KF_CLIMATE",
-                "SiteName": "Foothill Drive Advanced Aquatic",
-                "Latitude": 40.760744,
-                "Longitude": -111.831172,
-                "Network": "Logan"
+                "id": "Site",
+                "title": "Site"
             },
             {
-                "SiteCode": "RB_GIRF_C",
-                "SiteName": "Green Infrastructure Climate",
-                "Latitude": 40.764,
-                "Longitude": -111.828181,
-                "Network": "Provo"
+                "id": "VariableCategory",
+                "title": "Variable Category"
             },
             {
-                "SiteCode": "RB_RBG_BB",
-                "SiteName": "Cottams Grove Basic Aquatic",
-                "Latitude": 40.774256,
-                "Longitude": -111.816903,
-                "Network": "GIRF"
+                "id": "VariableName",
+                "title": "Variable Name"
             },
             {
-                "SiteCode": "RB_RBG_BA",
-                "SiteName": "Red Butte Gate Basic Aquatic",
-                "Latitude": 40.780264,
-                "Longitude": -111.807286,
-                "Network": "GIRN"
-            },
-            {
-                "SiteCode": "RB_ARBR_C",
-                "SiteName": "Above Red Butte Reservoir",
-                "Latitude": 40.780369,
-                "Longitude": -111.802456,
-                "Network": "GamutRBC"
-            },
-            {
-                "SiteCode": "RB_ARBR_AA",
-                "SiteName": "Above Red Butte Reservoir",
-                "Latitude": 40.760656565,
-                "Longitude": -111.76656898,
-                "Network": "GIRN"
-            },
-            {
-                "SiteCode": "RB_ARBR_AB",
-                "SiteName": "Above Red Butte Reservoir",
-                "Latitude": 40.779725,
-                "Longitude": -111.8064,
-                "Network": "Logan"
+                "id": "ControlLevel",
+                "title": "Quality Control Level"
             }
         ]
     };
-
-    var filters = {
-        "divisions": [
-          {
-              "id": "Network",
-              "title": "Network",
-              "items": [
-                {
-                    "id": "GamutRBC",
-                    "name": "Red Butte Creek GAMUT",
-                    "count": 9
-                },
-               { 
-                    "id": "Logan",
-                    "name": "Logan River",
-                    "count": 10
-                },
-                {
-                    "id": "Provo",
-                    "name": "Provo River",
-                    "count": 8
-                },
-                {
-                    "id": "GIRF",
-                    "name": "GIRF",
-                    "count": 20
-                },
-                {
-                    "id": "GIRN",
-                    "name": "GIRN",
-                    "count": 10
-                }
-              ]
-          },
-          {
-              "id": "Site",
-              "title": "Site",
-              "items": [
-                {
-                    "id": "RB_KF_BA",
-                    "name": "Knowlton Fork Aquatic",
-                    "count": 40,
-                    "network": "GamutRBC"
-                },
-                {
-                    "id": "RB_KF_CLIMATE",
-                    "name": "Knowlton Fork Climate",
-                    "count": 40,
-                    "network": "Logan"
-                },
-                {
-                    "id": "RB_GIRF_C",
-                    "name": "Green Infrastructure Climate",
-                    "count": 40,
-                    "network": "Provo"
-                },
-                {
-                    "id": "RB_RBG_BB",
-                    "name": "Cottams Grove Basic Aquatic",
-                    "count": 40,
-                    "network": "GIRF"
-                },
-                {
-                    "id": "RB_RBG_BA",
-                    "name": "Red Butte Gate Basic Aquatic",
-                    "count": 40,
-                    "network": "GIRN"
-                },
-                {
-                    "id": "RB_ARBR_C",
-                    "name": "Above Red Butte Reservoir",
-                    "count": 40,
-                    "network": "GamutRBC"
-                },
-                {
-                    "id": "RB_ARBR_AA",
-                    "name": "Above Red Butte Reservoir",
-                    "count": 40,
-                    "network": "GIRN"
-                },
-                {
-                    "id": "RB_ARBR_AB",
-                    "name": "Above Red Butte Reservoir",
-                    "count": 40,
-                    "network": "Logan"
-                }
-
-              ]
-          },
-          {
-              "id": "VariableCategory",
-              "title": "Variable Category",
-              "items": [
-                {
-                    "id": "category_climate",
-                    "name": "Climate",
-                    "count": 150
-                },
-                {
-                    "id": "category_hydrologic",
-                    "name": "Hydrologic",
-                    "count": 200
-                },
-                {
-                    "id": "category_waterquality",
-                    "name": "Water Quality",
-                    "count": 30
-                },
-                {
-                    "id": "category_soil",
-                    "name": "Soil",
-                    "count": 135
-                }
-              ]
-          },
-          {
-              "id": "VariableName",
-              "title": "Variable Name",
-              "items": [
-                {
-                    "id": "variable_temperature",
-                    "name": "Temperature",
-                    "count": 86
-                },
-                {
-                    "id": "variable_oxygen",
-                    "name": "Oxygen, dissolved",
-                    "count": 75
-                },
-                {
-                    "id": "variable_conductance",
-                    "name": "Specific Conductance",
-                    "count": 75
-                },
-                {
-                    "id": "variable_ph",
-                    "name": "pH",
-                    "count": 75
-                }
-              ]
-          },
-          {
-              "id": "ControlLevel",
-              "title": "Quality Control Level",
-              "items": [
-                {
-                    "id": "level_rawdata",
-                    "name": "Raw Data",
-                    "count": 300
-                },
-                {
-                    "id": "level_controlleddata",
-                    "name": "Quality Controlled Data",
-                    "count": 50
-                }
-              ]
-          }
-        ]
-    };
+    var datasets;
+    var margin = { top: 0, right: 20, bottom: 120, left: 50 },
+        width = $("#visualizationContent").width() - margin.left - margin.right,
+        height = $("#visualizationContent").height() - margin.top - margin.bottom;
 
     function getURLParameter(name) {
         return decodeURI(
@@ -230,9 +36,10 @@
         );
     }
 
-    function loadFilters(){
+    // Load filter categories
+    function loadFilterCategories() {
         // Build left panel filters from JSON
-        filters.divisions.forEach(function (entry) {
+        filters.divisions.forEach(function (entry){
             $("#leftPanel").append(
                 "<div class='panel panel-default'>\
                     <div class='panel-heading'>\
@@ -244,15 +51,12 @@
                         <div class='panel-body'>\
                             <div class='list-group'>\
                                 <ul class='list-group inputs-group'>\
+                                    <div class='ring'></div>\
                                 </ul>\
                             </div>\
                         </div>\
                     </div>\
                 </div>");
-            entry.items.forEach(function (item) {
-                $('#' + entry.id + ' ul').append(
-                    '<li class="list-group-item"><span class="badge">' + item.count + '</span><label class="checkbox"><input type="checkbox" checked  data-network="' + item.network +  '" value="' + item.id + '"> ' + item.name + '</label></li>');
-            });
         });
     }
 
@@ -280,7 +84,7 @@
 
     // Add a marker to the map
     function addMarker(entry) {
-        var location = new google.maps.LatLng(entry.Latitude, entry.Longitude);
+        var location = new google.maps.LatLng(entry.latitude, entry.longitude);
         marker = new google.maps.Marker({
             position: location,
             map: map,
@@ -299,176 +103,89 @@
             mapTypeId: google.maps.MapTypeId.TERRAIN
         }
         map = new google.maps.Map(map_canvas, map_options);
-        // Load all markers
-        mapData.sites.forEach(function (entry) {            // Create marker for this site
-            addMarker(entry);
-
-        });
     }
 
-    function loadDatasets(){
+    function loadDatasets(datasets){
         // Populate datasets container
-         $("#datasetsTable thead").append(
-                                  '<tr>\
-                            <th><input type="checkbox"></th>\
-                            <th>Site</th>\
-                            <th>Variable</th>\
-                            <th>Quality Control Level</th>\
-                            <th></th>\
-                          </tr>');
-        for (var i = 0; i < 20; i++) {
+        $("#datasetsTable thead").append(
+            '<tr>\
+              <th><input type="checkbox"></th>\
+              <th>Site Code</th>\
+              <th>Variable</th>\
+              <th>Quality Control Level</th>\
+              <th></th>\
+            </tr>');
+        for (var i = 0; i < datasets.length; i++) {
             $("#datasetsTable tbody").append(
                 '<tr>\
                    <td><input type="checkbox"></td>\
-                   <td data-toggle="modal" data-target="#InfoDialog">Knowlton Fork Aquatic</td>\
-                   <td data-toggle="modal" data-target="#InfoDialog">Temperature </td>\
-                   <td data-toggle="modal" data-target="#InfoDialog">Raw Data</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].sitecode + '</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].variablename + '</td>\
+                   <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].qualitycontrolleveldefinition + '</td>\
                 </tr>');
         }
     }
 
-
-    // -----------------  Click Events ----------------------
-    $('#Network input[type="checkbox"]').click(function () {
-        var that = this;
-        var sites = $('#Site input[data-network="' + that.value + '"]');
-        //console.log(sites);
-        if (that.checked) {
-            mapData.sites.forEach(function (entry) {            // Load markers from JSON
-                if (entry.Network == that.value) {
-                    var site = $('#Site input[value="' + entry.SiteCode + '"]');
-                    if (site[0] != null) {                      // Check that the marker is not already created
-                        if (site[0].checked == false) {
-                            addMarker(entry);
-                        }
-                    }
-                }
-            });
-            for (var i = 0; i < sites.length; i++) {            // Check site's checkbox
-                sites[i].checked = true;
-            }
-        }
-        else {
-            for (var i = 0; i < markers.length; i++) {          //delete markers from this network
-                if (markers[i].site.Network == that.value) {
-                    //markers[i].setMap(null);
-                    removeMarker(markers[i]);
-                    markers.splice(i, 1);
-                    i--;                                        // because we removed one marker
-                }
-            }
-            for (var i = 0; i < sites.length; i++) {            // Uncheck corresponding sites
-                sites[i].checked = false;
-            }
-        }
-    });
-
-    $('#Site input[type="checkbox"]').click(function () {
-        var that = this;
-        if (that.checked) {
-            var i = 1;
-            mapData.sites.forEach(function (entry) {            // Create marker for this site
-                if (entry.SiteCode == that.value) {
-                    addMarker(entry);
-                    // check the network's checkbox
-                    var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = true;
-                }
-            });
-        }
-        else {
-            for (var i = 0; i < markers.length; i++) {          //delete marker for this site
-                if (markers[i].site.SiteCode == that.value) {
-                    removeMarker(markers[i]);
-                    //markers[i].setMap(null);
-                    markers.splice(i, 1);
-                    i--;                                        // because we removed one marker
-
-                    var checkedSites = $('#Site input[data-network="' + that.getAttribute('data-network') + '"]:checked');  // Get corresponding marked checkboxes
-                    if (checkedSites.length == 0) {
-                        var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = false;
-                    }
-                }
-            }
-        }
-    });
-
-
-    // Load view
-    var tab = getURLParameter("view");
-    if (tab == "datasets") {
-        $("#datasetsTab").addClass("active");
-        $("#datasetsContent").addClass("active");
-    }
-    else if (tab == "visualization") {
-        $("#visualizationTab").addClass("active");
-        $("#visualizationContent").addClass("active");
-    }
-    else {
-        $("#mapTab").addClass("active");
-        $("#mapContent").addClass("active");
-    }
-
-    loadFilters();
-    loadDatasets();
-    google.maps.event.addDomListener(window, 'load', initialize);
-
-    // Initialize plot area
-    var margin = { top: 0, right: 20, bottom: 120, left: 50 },
-            width = $("#visualizationContent").width() - margin.left - margin.right,
-            height = $("#visualizationContent").height() - margin.top - margin.bottom;
-
     /* Data Visualization */
     function drawTimeSeries() {
         var parseDate = d3.time.format("%d-%b-%y").parse;
-        
+
         var x = d3.time.scale()
             .range([0, width]);
-    
+
         var y = d3.scale.linear()
             .range([height, 0]);
-    
+
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
-    
+
         var yAxis = d3.svg.axis()
             .scale(y)
             .orient("left");
-    
+
         var line = d3.svg.line()
-            .x(function (d) { return x(d.date); })
-            .y(function (d) { return y(d.close); });
-    
+            .x(function (d) {
+                return x(d.date);
+            })
+            .y(function (d) {
+                return y(d.close);
+            });
+
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
-        d3.tsv("/files/data.tsv", function (error, data) {
+
+        d3.tsv("/static/files/data.tsv", function (error, data) {
             data.forEach(function (d) {
                 d.date = parseDate(d.date);
                 d.close = +d.close;
             });
-    
-            x.domain(d3.extent(data, function (d) { return d.date; }));
-            y.domain(d3.extent(data, function (d) { return d.close; }));
-    
+
+            x.domain(d3.extent(data, function (d) {
+                return d.date;
+            }));
+            y.domain(d3.extent(data, function (d) {
+                return d.close;
+            }));
+
             svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis);
-    
+
             svg.append("g")
                 .attr("class", "y axis")
                 .call(yAxis)
-              .append("text")
+                .append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 6)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
                 .text("pH ");
-    
+
             svg.append("path")
                 .datum(data)
                 .attr("class", "line")
@@ -479,14 +196,16 @@
     function drawHistogram() {
         /* Initialize Histogram*/
         // Generate an Irwin–Hall distribution of 10 random variables.
-        var values = d3.range(1000).map(d3.random.irwinHall(10));
+        //var values = d3.range(1000).map(d3.random.irwinHall(10));
 
+        var values = new Array(1,2,3, 5, 5, 6, 7, 2);   // populate this array like this
         // A formatter for counts.
         var formatCount = d3.format(",.0f");
 
         var x = d3.scale.linear()
-            .domain([0, 1])
+            .domain([0, 10])
             .range([0, width]);
+
 
         // Generate a histogram using twenty uniformly-spaced bins.
         var data = d3.layout.histogram()
@@ -494,7 +213,9 @@
             (values);
 
         var y = d3.scale.linear()
-            .domain([0, d3.max(data, function (d) { return d.y; })])
+            .domain([0, d3.max(data, function (d) {
+                return d.y;
+            })])
             .range([height, 0]);
 
         var xAxis = d3.svg.axis()
@@ -504,26 +225,32 @@
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var bar = svg.selectAll(".bar")
             .data(data)
-          .enter().append("g")
+            .enter().append("g")
             .attr("class", "bar")
-            .attr("transform", function (d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+            .attr("transform", function (d) {
+                return "translate(" + x(d.x) + "," + y(d.y) + ")";
+            });
 
         bar.append("rect")
             .attr("x", 1)
             .attr("width", x(data[0].dx) - 1)
-            .attr("height", function (d) { return height - y(d.y); });
+            .attr("height", function (d) {
+                return height - y(d.y);
+            });
 
         bar.append("text")
             .attr("dy", ".75em")
             .attr("y", 6)
             .attr("x", x(data[0].dx) / 2)
             .attr("text-anchor", "middle")
-            .text(function (d) { return formatCount(d.y); });
+            .text(function (d) {
+                return formatCount(d.y);
+            });
 
         svg.append("g")
             .attr("class", "x axis")
@@ -531,7 +258,7 @@
             .call(xAxis);
     }
 
-    function drawScatterPlot() {
+    function drawScatterPlot(data2) {
         var x = d3.scale.linear()
             .range([0, width]);
 
@@ -551,23 +278,29 @@
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.tsv("/files/scatterplot.tsv", function (error, data) {
+        d3.tsv("/static/files/scatterplot.tsv", function (error, data) {
+            console.log(data2);
+            console.log(data);
             data.forEach(function (d) {
                 d.sepalLength = +d.sepalLength;
                 d.sepalWidth = +d.sepalWidth;
             });
 
-            x.domain(d3.extent(data, function (d) { return d.sepalWidth; })).nice();
-            y.domain(d3.extent(data, function (d) { return d.sepalLength; })).nice();
+            x.domain(d3.extent(data, function (d) {
+                return d.sepalWidth;
+            })).nice();
+            y.domain(d3.extent(data, function (d) {
+                return d.sepalLength;
+            })).nice();
 
             svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis)
-              .append("text")
+                .append("text")
                 .attr("class", "label")
                 .attr("x", width)
                 .attr("y", -6)
@@ -577,7 +310,7 @@
             svg.append("g")
                 .attr("class", "y axis")
                 .call(yAxis)
-              .append("text")
+                .append("text")
                 .attr("class", "label")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 6)
@@ -587,18 +320,26 @@
 
             svg.selectAll(".dot")
                 .data(data)
-              .enter().append("circle")
+                .enter().append("circle")
                 .attr("class", "dot")
                 .attr("r", 3.5)
-                .attr("cx", function (d) { return x(d.sepalWidth); })
-                .attr("cy", function (d) { return y(d.sepalLength); })
-                .style("fill", function (d) { return color(d.species); });
+                .attr("cx", function (d) {
+                    return x(d.sepalWidth);
+                })
+                .attr("cy", function (d) {
+                    return y(d.sepalLength);
+                })
+                .style("fill", function (d) {
+                    return color(d.species);
+                });
 
             var legend = svg.selectAll(".legend")
                 .data(color.domain())
-              .enter().append("g")
+                .enter().append("g")
                 .attr("class", "legend")
-                .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+                .attr("transform", function (d, i) {
+                    return "translate(0," + i * 20 + ")";
+                });
 
             legend.append("rect")
                 .attr("x", width - 18)
@@ -611,14 +352,14 @@
                 .attr("y", 9)
                 .attr("dy", ".35em")
                 .style("text-anchor", "end")
-                .text(function (d) { return d; });
+                .text(function (d) {
+                    return d;
+                });
 
         });
     }
 
-    function drawMultiSeries() {
-
-
+    function drawMultiSeries(data2) {
         var parseDate = d3.time.format("%Y%m%d").parse;
 
         var x = d3.time.scale()
@@ -639,36 +380,55 @@
 
         var line = d3.svg.line()
             .interpolate("basis")
-            .x(function (d) { return x(d.date); })
-            .y(function (d) { return y(d.temperature); });
+            .x(function (d) {
+                return x(d.date);
+            })
+            .y(function (d) {
+                return y(d.temperature);
+            });
 
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.tsv("/files/multiseries.tsv", function (error, data) {
-            color.domain(d3.keys(data[0]).filter(function (key) { return key !== "date"; }));
+        d3.tsv("/static/files/multiseries.tsv", function (error, data) {
+            console.log(data2);
+            //console.log(data[0]);
 
-            data.forEach(function (d) {
+            color.domain(d3.keys(data2[0]).filter(function (key) {
+                return key !== "date";
+            }));
+
+            data2.forEach(function (d) {
                 d.date = parseDate(d.date);
             });
 
             var cities = color.domain().map(function (name) {
                 return {
                     name: name,
-                    values: data.map(function (d) {
+                    values: data2.map(function (d) {
                         return { date: d.date, temperature: +d[name] };
                     })
                 };
             });
 
-            x.domain(d3.extent(data, function (d) { return d.date; }));
+            x.domain(d3.extent(data2, function (d) {
+                return d.date;
+            }));
 
             y.domain([
-              d3.min(cities, function (c) { return d3.min(c.values, function (v) { return v.temperature; }); }),
-              d3.max(cities, function (c) { return d3.max(c.values, function (v) { return v.temperature; }); })
+                d3.min(cities, function (c) {
+                    return d3.min(c.values, function (v) {
+                        return v.temperature;
+                    });
+                }),
+                d3.max(cities, function (c) {
+                    return d3.max(c.values, function (v) {
+                        return v.temperature;
+                    });
+                })
             ]);
 
             svg.append("g")
@@ -679,38 +439,43 @@
             svg.append("g")
                 .attr("class", "y axis")
                 .call(yAxis)
-              .append("text")
+                .append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 6)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
-                .text("Temperature (ºF)");
+                .text("Some scale");
 
             var city = svg.selectAll(".city")
                 .data(cities)
-              .enter().append("g")
+                .enter().append("g")
                 .attr("class", "city");
 
             city.append("path")
                 .attr("class", "line")
-                .attr("d", function (d) { return line(d.values); })
-                .style("stroke", function (d) { return color(d.name); });
+                .attr("d", function (d) {
+                    return line(d.values);
+                })
+                .style("stroke", function (d) {
+                    return color(d.name);
+                });
 
             city.append("text")
-                .datum(function (d) { return { name: d.name, value: d.values[d.values.length - 1] }; })
-                .attr("transform", function (d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
+                .datum(function (d) {
+                    return { name: d.name, value: d.values[d.values.length - 1] };
+                })
+                .attr("transform", function (d) {
+                    return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")";
+                })
                 .attr("x", 3)
                 .attr("dy", ".35em")
-                .text(function (d) { return d.name; });
-        });
-
-
-
+                .text(function (d) {
+                    return d.name;
+                });
+            });
     }
 
-    function drawAreaChart() {
-
-
+    function drawAreaChart(data2) {
         var parseDate = d3.time.format("%Y%m%d").parse;
 
         var x = d3.time.scale()
@@ -728,25 +493,39 @@
             .orient("left");
 
         var area = d3.svg.area()
-            .x(function (d) { return x(d.date); })
-            .y0(function (d) { return y(d.low); })
-            .y1(function (d) { return y(d.high); });
+            .x(function (d) {
+                return x(d.date);
+            })
+            .y0(function (d) {
+                return y(d.low);
+            })
+            .y1(function (d) {
+                return y(d.high);
+            });
 
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.tsv("/files/areachart.tsv", function (error, data) {
+        d3.tsv("/static/files/areachart.tsv", function (error, data) {
+            console.log(data2);
+            console.log(data);
             data.forEach(function (d) {
                 d.date = parseDate(d.date);
                 d.low = +d.low;
                 d.high = +d.high;
             });
 
-            x.domain(d3.extent(data, function (d) { return d.date; }));
-            y.domain([d3.min(data, function (d) { return d.low; }), d3.max(data, function (d) { return d.high; })]);
+            x.domain(d3.extent(data, function (d) {
+                return d.date;
+            }));
+            y.domain([d3.min(data, function (d) {
+                return d.low;
+            }), d3.max(data, function (d) {
+                return d.high;
+            })]);
 
             svg.append("path")
                 .datum(data)
@@ -761,7 +540,7 @@
             svg.append("g")
                 .attr("class", "y axis")
                 .call(yAxis)
-              .append("text")
+                .append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 6)
                 .attr("dy", ".71em")
@@ -772,12 +551,22 @@
 
     function drawMultiHistogram() {
         var n = 5, // number of layers
-        m = 20, // number of samples per layer
+            m = 20, // number of samples per layer
 
-        stack = d3.layout.stack(),
-        layers = stack(d3.range(n).map(function () { return bumpLayer(m, .1); })),
-        yGroupMax = d3.max(layers, function (layer) { return d3.max(layer, function (d) { return d.y; }); }),
-        yStackMax = d3.max(layers, function (layer) { return d3.max(layer, function (d) { return d.y0 + d.y; }); });
+            stack = d3.layout.stack(),
+            layers = stack(d3.range(n).map(function () {
+                return bumpLayer(m, .1);
+            })),
+            yGroupMax = d3.max(layers, function (layer) {
+                return d3.max(layer, function (d) {
+                    return d.y;
+                });
+            }),
+            yStackMax = d3.max(layers, function (layer) {
+                return d3.max(layer, function (d) {
+                    return d.y0 + d.y;
+                });
+            });
 
 
         var x = d3.scale.ordinal()
@@ -801,28 +590,40 @@
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var layer = svg.selectAll(".layer")
             .data(layers)
-          .enter().append("g")
+            .enter().append("g")
             .attr("class", "layer")
-            .style("fill", function (d, i) { return color(i); });
+            .style("fill", function (d, i) {
+                return color(i);
+            });
 
         var rect = layer.selectAll("rect")
-            .data(function (d) { return d; })
-          .enter().append("rect")
-            .attr("x", function (d) { return x(d.x); })
+            .data(function (d) {
+                return d;
+            })
+            .enter().append("rect")
+            .attr("x", function (d) {
+                return x(d.x);
+            })
             .attr("y", height)
             .attr("width", x.rangeBand())
             .attr("height", 0);
 
         rect.transition()
-            .delay(function (d, i) { return i * 10; })
-            .attr("y", function (d) { return y(d.y0 + d.y); })
-            .attr("height", function (d) { return y(d.y0) - y(d.y0 + d.y); });
-        
+            .delay(function (d, i) {
+                return i * 10;
+            })
+            .attr("y", function (d) {
+                return y(d.y0 + d.y);
+            })
+            .attr("height", function (d) {
+                return y(d.y0) - y(d.y0 + d.y);
+            });
+
         svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
@@ -845,12 +646,20 @@
 
             rect.transition()
                 .duration(500)
-                .delay(function (d, i) { return i * 10; })
-                .attr("x", function (d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+                .delay(function (d, i) {
+                    return i * 10;
+                })
+                .attr("x", function (d, i, j) {
+                    return x(d.x) + x.rangeBand() / n * j;
+                })
                 .attr("width", x.rangeBand() / n)
-              .transition()
-                .attr("y", function (d) { return y(d.y); })
-                .attr("height", function (d) { return height - y(d.y); });
+                .transition()
+                .attr("y", function (d) {
+                    return y(d.y);
+                })
+                .attr("height", function (d) {
+                    return height - y(d.y);
+                });
         }
 
         function transitionStacked() {
@@ -858,11 +667,19 @@
 
             rect.transition()
                 .duration(500)
-                .delay(function (d, i) { return i * 10; })
-                .attr("y", function (d) { return y(d.y0 + d.y); })
-                .attr("height", function (d) { return y(d.y0) - y(d.y0 + d.y); })
-              .transition()
-                .attr("x", function (d) { return x(d.x); })
+                .delay(function (d, i) {
+                    return i * 10;
+                })
+                .attr("y", function (d) {
+                    return y(d.y0 + d.y);
+                })
+                .attr("height", function (d) {
+                    return y(d.y0) - y(d.y0 + d.y);
+                })
+                .transition()
+                .attr("x", function (d) {
+                    return x(d.x);
+                })
                 .attr("width", x.rangeBand());
         }
 
@@ -882,7 +699,9 @@
             var a = [], i;
             for (i = 0; i < n; ++i) a[i] = o + o * Math.random();
             for (i = 0; i < 5; ++i) bump(a);
-            return a.map(function (d, i) { return { x: i, y: Math.max(0, d) }; });
+            return a.map(function (d, i) {
+                return { x: i, y: Math.max(0, d) };
+            });
         }
     }
 
@@ -909,22 +728,32 @@
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.csv("/files/multibarchart.csv", function (error, data) {
-            color.domain(d3.keys(data[0]).filter(function (key) { return key !== "State"; }));
+        d3.csv("/static/files/multibarchart.csv", function (error, data) {
+            color.domain(d3.keys(data[0]).filter(function (key) {
+                return key !== "State";
+            }));
 
             data.forEach(function (d) {
                 var y0 = 0;
-                d.ages = color.domain().map(function (name) { return { name: name, y0: y0, y1: y0 += +d[name] }; });
+                d.ages = color.domain().map(function (name) {
+                    return { name: name, y0: y0, y1: y0 += +d[name] };
+                });
                 d.total = d.ages[d.ages.length - 1].y1;
             });
 
-            data.sort(function (a, b) { return b.total - a.total; });
+            data.sort(function (a, b) {
+                return b.total - a.total;
+            });
 
-            x.domain(data.map(function (d) { return d.State; }));
-            y.domain([0, d3.max(data, function (d) { return d.total; })]);
+            x.domain(data.map(function (d) {
+                return d.State;
+            }));
+            y.domain([0, d3.max(data, function (d) {
+                return d.total;
+            })]);
 
             svg.append("g")
                 .attr("class", "x axis")
@@ -934,7 +763,7 @@
             svg.append("g")
                 .attr("class", "y axis")
                 .call(yAxis)
-              .append("text")
+                .append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 6)
                 .attr("dy", ".71em")
@@ -943,23 +772,35 @@
 
             var state = svg.selectAll(".state")
                 .data(data)
-              .enter().append("g")
+                .enter().append("g")
                 .attr("class", "g")
-                .attr("transform", function (d) { return "translate(" + x(d.State) + ",0)"; });
+                .attr("transform", function (d) {
+                    return "translate(" + x(d.State) + ",0)";
+                });
 
             state.selectAll("rect")
-                .data(function (d) { return d.ages; })
-              .enter().append("rect")
+                .data(function (d) {
+                    return d.ages;
+                })
+                .enter().append("rect")
                 .attr("width", x.rangeBand())
-                .attr("y", function (d) { return y(d.y1); })
-                .attr("height", function (d) { return y(d.y0) - y(d.y1); })
-                .style("fill", function (d) { return color(d.name); });
+                .attr("y", function (d) {
+                    return y(d.y1);
+                })
+                .attr("height", function (d) {
+                    return y(d.y0) - y(d.y1);
+                })
+                .style("fill", function (d) {
+                    return color(d.name);
+                });
 
             var legend = svg.selectAll(".legend")
                 .data(color.domain().slice().reverse())
-              .enter().append("g")
+                .enter().append("g")
                 .attr("class", "legend")
-                .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+                .attr("transform", function (d, i) {
+                    return "translate(0," + i * 20 + ")";
+                });
 
             legend.append("rect")
                 .attr("x", width - 18)
@@ -972,12 +813,272 @@
                 .attr("y", 9)
                 .attr("dy", ".35em")
                 .style("text-anchor", "end")
-                .text(function (d) { return d; });
-
+                .text(function (d) {
+                    return d;
+                });
         });
-
     }
 
-    drawTimeSeries();
+    loadFilterCategories();
+
+
+
+    $.getJSON( "/api/v1/dataseries", function( data ){
+        datasets = data['objects'];
+
+        var sites = new Array();
+        var networks = new Array();
+        var varcategories = new Array();
+        var varnames = new Array();
+        var qualitycontrols = new Array();
+        //console.log(datasets[1]);
+        for (var i = 0; i < datasets.length; i++){
+
+            // Load Networks
+            if (networks[datasets[i].sourcedataserviceid] == null){
+                networks[datasets[i].sourcedataserviceid] = 1;
+                $('#Network ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked  data-network="' +
+                datasets[i].sourcedataserviceid + '" value="' + datasets[i].sourcedataserviceid + '"> ' + "Network " +  datasets[i].sourcedataserviceid + '</label></li>');
+            }
+            else{
+                networks[datasets[i].sourcedataserviceid]++;
+            }
+            // Load Sites
+            if (sites[datasets[i].sitecode] == null){
+                sites[datasets[i].sitecode] = 1;
+                $('#Site ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked  data-network="' +
+                datasets[i].sourcedataserviceid + '" value="' + datasets[i].sitecode + '"> ' + datasets[i].sitename + '</label></li>');
+                addMarker(datasets[i]);
+            }
+            else{
+                sites[datasets[i].sitecode]++;
+            }
+            // Load Variable Names
+            if(varnames[datasets[i].variablecode] == null){
+                varnames[datasets[i].variablecode] = 1;
+                $('#VariableName ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked " value="' + datasets[i].variablecode + '"> ' + datasets[i].variablename + '</label></li>');
+            }
+            else{
+                varnames[datasets[i].variablecode]++;
+            }
+            // Load Quality Control Levels
+            if(qualitycontrols[datasets[i].qualitycontrollevelcode] == null){
+                qualitycontrols[datasets[i].qualitycontrollevelcode] = 1;
+                $('#ControlLevel ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked " value="' + datasets[i].qualitycontrollevelcode + '"> ' + datasets[i].qualitycontrolleveldefinition + '</label></li>');
+            }
+            else{
+                qualitycontrols[datasets[i].qualitycontrollevelcode]++;
+            }
+            // Load Variable Categories
+            if(varcategories[datasets[i].generalcategory] == null){
+               varcategories[datasets[i].generalcategory] = 1;
+                $('#VariableCategory ul').append('<li class="list-group-item">' +
+                '<span class="badge">' + 0 + '</span><label class="checkbox">' +
+                '<input type="checkbox" checked " value="' + datasets[i].generalcategory + '"> ' + datasets[i].generalcategory + '</label></li>');
+            }
+            else{
+                varcategories[datasets[i].generalcategory]++;
+            }
+        }
+
+        //console.log(datasets[0]);
+
+        /* ---------------Load badges--------------------------*/
+        for (var i = 0; i < $("#Network .badge").length; i++){
+            $("#Network .badge")[i].innerHTML = networks[i + 1];
+        }
+
+        var mySites = $("#Site input[type='checkbox']");
+        for (var i = 0; i < mySites.length; i++){
+            var index = mySites[i].getAttribute("value");
+            $("#Site input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = sites[index];
+        }
+
+        var myCategories = $("#VariableCategory input[type='checkbox']");
+        for (var i = 0; i < myCategories.length; i++){
+            var index = myCategories[i].getAttribute("value");
+            $("#VariableCategory input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = varcategories[index];
+        }
+
+        var myVarNames = $("#VariableName input[type='checkbox']");
+        for (var i = 0; i < myVarNames.length; i++){
+            var index = myVarNames[i].getAttribute("value");
+            $("#VariableName input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = varnames[index];
+        }
+
+        var myControlLevels = $("#ControlLevel input[type='checkbox']");
+        for (var i = 0; i < qualitycontrols.length; i++){
+            var index = myControlLevels[i].getAttribute("value");
+            $("#ControlLevel input[value='"+ index +"']").closest("li").children(".badge")[0].innerHTML = qualitycontrols[index];
+        }
+
+        // Bind Click Events
+        $('#Network input[type="checkbox"]').click(function(){
+            var that = this;
+            sites = new Array();    // array to keep track of sites with markers displayed
+            var sites = $('#Site input[data-network="' + that.value + '"]');
+            if (that.checked) {
+                datasets.forEach(function (entry) {            // Load markers from JSON
+                    if (entry.sourcedataserviceid == that.value && sites[entry.sitecode] == null){
+                        var site = $('#Site input[value="' + entry.sitecode + '"]');
+                        if (site[0] != null) {                      // Check that the element exists, just in case
+                            if (site[0].checked == false) {
+                                addMarker(entry);
+                                sites[entry.sitecode] = 1;          // Marker is placed
+                            }
+                        }
+                    }
+                });
+                for (var i = 0; i < sites.length; i++) {            // Check site's checkbox
+                    sites[i].checked = true;
+                }
+            }
+            else {
+                for (var i = 0; i < markers.length; i++) {          //delete markers from this network
+                    if (markers[i].site.sourcedataserviceid == that.value) {
+                        //markers[i].setMap(null);
+                        removeMarker(markers[i]);
+                        markers.splice(i, 1);
+                        i--;                                        // because we removed one marker
+                    }
+                }
+                for (var i = 0; i < sites.length; i++) {            // Uncheck corresponding sites
+                    sites[i].checked = false;
+                }
+            }
+            // console.log(markers);
+        });
+
+        $('#Site input[type="checkbox"]').click(function () {
+            var that = this;
+            if (that.checked) {
+                var i = 1;
+                datasets.forEach(function (entry) {                 // Create marker for this site
+                    if (entry.sitecode == that.value) {
+                        addMarker(entry);
+                        // check the network's checkbox
+                        var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = true;
+                    }
+                });
+            }
+            else {
+                for (var i = 0; i < markers.length; i++) {          //delete marker for this site
+                    if (markers[i].site.sitecode == that.value) {
+                        removeMarker(markers[i]);
+
+                        markers.splice(i, 1);
+                        i--;                                        // because we removed one marker
+
+                        var checkedSites = $('#Site input[data-network="' + that.getAttribute('data-network') + '"]:checked');  // Get corresponding marked checkboxes
+                        if (checkedSites.length == 0) {
+                            var network = $('#Network input[value="' + that.getAttribute('data-network') + '"]')[0].checked = false;
+                        }
+                    }
+                }
+            }
+        });
+
+        $('#VariableName input[type="checkbox"]').click(function () {
+            var that = this;
+            if (that.checked) {
+
+            }
+            else {
+
+            }
+        });
+
+        $('#ControlLevel input[type="checkbox"]').click(function () {
+            var that = this;
+            if (that.checked) {
+
+            }
+            else {
+
+            }
+        });
+
+        // Load datasets
+        loadDatasets(datasets);
+
+        // Loading ends, Remove spinners
+        $('.ring').remove();
+
+        // PRUEBA DE LA VAINA DE VISUALIZACION
+        console.log(datasets);
+        $.ajax(datasets[0].getdataurl).done(function(data){
+            var series = data.getElementsByTagName("value");
+            var datas = new Array();
+            for (var i = 0; i < series.length; i++){
+                var obj = {
+                    value: series[i].innerHTML,
+                    date: series[i].getAttribute('dateTime').substr(0,10).replace("-", "").replace("-", "") //remove the 2 dashes
+                };
+                datas.push(obj);
+            }
+            drawMultiSeries(datas);
+            //drawScatterPlot(datas);
+        });
+    });
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+        // -----------------  Click Events ----------------------
+
+    // Run Date Picker plugin
+    $('.datepicker').datepicker();
+
+    // Load view
+    var tab = getURLParameter("view");
+    if (tab == "datasets") {
+        $("#datasetsTab").addClass("active");
+        $("#datasetsContent").addClass("active");
+    }
+    else if (tab == "visualization") {
+        $("#visualizationTab").addClass("active");
+        $("#visualizationContent").addClass("active");
+    }
+    else {
+        $("#mapTab").addClass("active");
+        $("#mapContent").addClass("active");
+    }
+
+    //default each row to visible
+  $('tbody tr').addClass('visible');
+        //filter results based on query
+    function filter(selector, query) {
+      query =   $.trim(query); //trim white space
+      query = query.replace(/ /gi, '|'); //add OR for regex query
+
+      $(selector).each(function() {
+        ($(this).text().search(new RegExp(query, "i")) < 0) ? $(this).hide().removeClass('visible') : $(this).show().addClass('visible');
+      });
+    }
+
+  $('#txtSearch').keyup(function(event) {
+    //if esc is pressed or nothing is entered
+    if (event.keyCode == 27 || $(this).val() == '') {
+      //if esc is pressed we want to clear the value of search box
+      $(this).val('');
+
+      //we want each row to be visible because if nothing
+      //is entered then all rows are matched.
+      $('tbody tr').removeClass('visible').show().addClass('visible');
+    }
+
+    //if there is text, lets filter
+    else {
+      filter('tbody tr', $(this).val());
+    }
+  });
 
 });
+
