@@ -1,4 +1,8 @@
-﻿jQuery(document).ready(function ($) {
+﻿var datasets;
+var obsMultiSeries = [];
+var obsHistogram = [];
+
+jQuery(document).ready(function ($) {
     var map;
     var markers = [];
     var filters = {
@@ -25,7 +29,7 @@
             }
         ]
     };
-    var datasets;
+
     var margin = { top: 0, right: 20, bottom: 120, left: 50 },
         width = $("#visualizationContent").width() - margin.left - margin.right,
         height = $("#visualizationContent").height() - margin.top - margin.bottom;
@@ -358,7 +362,7 @@
         });
     }
 
-    function drawMultiSeries(data2) {
+    function drawMultiSeries(observations) {
         var parseDate = d3.time.format("%Y%m%d").parse;
 
         var x = d3.time.scale()
@@ -392,28 +396,25 @@
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.tsv("/static/files/multiseries.tsv", function (error, data) {
-            console.log(data2);
-            //console.log(data[0]);
 
-            color.domain(d3.keys(data2[0]).filter(function (key) {
+            color.domain(d3.keys(observations[0]).filter(function (key) {
                 return key !== "date";
             }));
 
-            data2.forEach(function (d) {
+            observations.forEach(function (d) {
                 d.date = parseDate(d.date);
             });
 
             var cities = color.domain().map(function (name) {
                 return {
                     name: name,
-                    values: data2.map(function (d) {
+                    values: observations.map(function (d) {
                         return { date: d.date, temperature: +d[name] };
                     })
                 };
             });
 
-            x.domain(d3.extent(data2, function (d) {
+            x.domain(d3.extent(observations, function (d) {
                 return d.date;
             }));
 
@@ -443,7 +444,7 @@
                 .attr("y", 6)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
-                .text("Some scal");
+                .text("Some scale Y");
 
             var city = svg.selectAll(".city")
                 .data(cities)
@@ -471,7 +472,6 @@
                 .text(function (d) {
                     return d.name;
                 });
-            });
     }
 
     function drawAreaChart(data2) {
@@ -818,12 +818,37 @@
         });
     }
 
+
+    function draw(url, type){
+        url = datasets[0].getdataurl;
+        $.ajax(url).done(function(data){
+            var series = data.getElementsByTagName("value");
+
+            for (var i = 0; i < series.length; i++){
+                obsMultiSeries.push({
+                    value: series[i].innerHTML,
+                    date: series[i].getAttribute('dateTime').substr(0,10).replace("-", "").replace("-", "") //remove the 2 dashes
+                });
+                obsHistogram.push(series[i].innerHTML);
+            }
+
+            if (type == "multiseries"){
+                drawMultiSeries(obsMultiSeries);
+            }
+            else if (type == "histogram"){
+                drawHistogram(obsHistogram);
+            }
+            //drawScatterPlot(datas);
+        });
+    }
     loadFilterCategories();
 
 
 
     $.getJSON( "/api/v1/dataseries", function( data ){
         datasets = data['objects'];
+
+        draw(null, "histogram");
 
         var sites = new Array();
         var networks = new Array();
@@ -1010,24 +1035,6 @@
 
         // Loading ends, Remove spinners
         $('.ring').remove();
-
-        // PRUEBA DE LA VAINA DE VISUALIZACION
-        $.ajax(datasets[0].getdataurl).done(function(data){
-            var series = data.getElementsByTagName("value");
-            var datas = new Array();
-            var values = [];
-            for (var i = 0; i < series.length; i++){
-                var obj = {
-                    value: series[i].innerHTML,
-                    date: series[i].getAttribute('dateTime').substr(0,10).replace("-", "").replace("-", "") //remove the 2 dashes
-                };
-                datas.push(obj);
-                values.push(series[i].innerHTML);
-            }
-            drawHistogram(values);
-            //drawMultiSeries(datas);
-            //drawScatterPlot(datas);
-        });
     });
 
     google.maps.event.addDomListener(window, 'load', initialize);
@@ -1080,6 +1087,8 @@
       filter('tbody tr', $(this).val());
     }
   });
+
+
 
 });
 
