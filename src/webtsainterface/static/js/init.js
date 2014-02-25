@@ -193,23 +193,22 @@
         });
     }
 
-    function drawHistogram() {
+    function drawHistogram(values) {
         /* Initialize Histogram*/
-        // Generate an Irwin–Hall distribution of 10 random variables.
-        //var values = d3.range(1000).map(d3.random.irwinHall(10));
 
-        var values = new Array(1,2,3, 5, 5, 6, 7, 2);   // populate this array like this
         // A formatter for counts.
         var formatCount = d3.format(",.0f");
 
-        var x = d3.scale.linear()
-            .domain([0, 10])
-            .range([0, width]);
+        var domainMin = Math.min.apply(Math, values);
+        var domainMax = Math.max.apply(Math, values);
 
+        var x = d3.scale.linear()
+            .domain([domainMin, domainMax])
+            .range([0, width]);
 
         // Generate a histogram using twenty uniformly-spaced bins.
         var data = d3.layout.histogram()
-            .bins(x.ticks(20))
+            .bins(x.ticks(40))
             (values);
 
         var y = d3.scale.linear()
@@ -238,7 +237,7 @@
 
         bar.append("rect")
             .attr("x", 1)
-            .attr("width", x(data[0].dx) - 1)
+            .attr("width",  x(data[0].dx + domainMin) - 1)
             .attr("height", function (d) {
                 return height - y(d.y);
             });
@@ -246,7 +245,7 @@
         bar.append("text")
             .attr("dy", ".75em")
             .attr("y", 6)
-            .attr("x", x(data[0].dx) / 2)
+            .attr("x", x(data[0].dx + domainMin) / 2)
             .attr("text-anchor", "middle")
             .text(function (d) {
                 return formatCount(d.y);
@@ -444,7 +443,7 @@
                 .attr("y", 6)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
-                .text("Some scale");
+                .text("Some scal");
 
             var city = svg.selectAll(".city")
                 .data(cities)
@@ -1013,18 +1012,20 @@
         $('.ring').remove();
 
         // PRUEBA DE LA VAINA DE VISUALIZACION
-        console.log(datasets);
         $.ajax(datasets[0].getdataurl).done(function(data){
             var series = data.getElementsByTagName("value");
             var datas = new Array();
+            var values = [];
             for (var i = 0; i < series.length; i++){
                 var obj = {
                     value: series[i].innerHTML,
                     date: series[i].getAttribute('dateTime').substr(0,10).replace("-", "").replace("-", "") //remove the 2 dashes
                 };
                 datas.push(obj);
+                values.push(series[i].innerHTML);
             }
-            drawMultiSeries(datas);
+            drawHistogram(values);
+            //drawMultiSeries(datas);
             //drawScatterPlot(datas);
         });
     });

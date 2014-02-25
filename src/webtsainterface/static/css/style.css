@@ -229,13 +229,13 @@
 }
 
 #visualizationContent{
-   height:95%;
-   width:95%;
+   height:100%;
+   width:100%;
    overflow:hidden;
 }
 
 .graphContainer{
-
+    height: calc(100% - 45px);
 }
 
 /* Spinner icon */
