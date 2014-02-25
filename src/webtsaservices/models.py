@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
+from django.core.validators import RegexValidator
+import re
 
 # class DataSeriesField(models.Model):
 #     fieldname = models.CharField(db_column='FieldName', max_length=128, primary_key=True)
@@ -11,7 +13,13 @@ from django.db import models
 
 class SearchFacet(models.Model):
     keyfield = models.CharField(max_length=128)
-    namefield = models.CharField(max_length=128)
+    namefields = models.CharField(max_length=128, validators=[
+        RegexValidator(
+            regex=re.compile(r"^\w+(,\w+)*$"),
+            message=u'Value must be a comma separated value.',
+            code='invalid_values'
+        ),
+    ])
     name = models.CharField(max_length=255)
 
     def __unicode__(self):
@@ -33,6 +41,7 @@ class SourcesDataService(models.Model):
 class DataSeries(models.Model):
     seriesid = models.IntegerField(db_column='SeriesID', primary_key=True)
     sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID')
+    network = models.CharField(db_column='Network', max_length=50)
     sitecode = models.CharField(db_column='SiteCode', max_length=50)
     sitename = models.CharField(db_column='SiteName', max_length=500)
     latitude = models.FloatField(db_column='Latitude')
@@ -75,6 +84,7 @@ class DataSeries(models.Model):
 
 class Site(models.Model):
     sourcedataserviceid = models.ForeignKey('SourcesDataService', db_column='SourceDataServiceID')
+    network = models.CharField(db_column='Network', max_length=50)
     sitecode = models.CharField(db_column='SiteCode', max_length=50, primary_key=True)
     sitename = models.CharField(db_column='SiteName', max_length=500)
     latitude = models.FloatField(db_column='Latitude')
