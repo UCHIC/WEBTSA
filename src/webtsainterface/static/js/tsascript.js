@@ -1,32 +1,27 @@
 var TsaApplication = TsaApplication || {};
 
 TsaApplication.bindEvents = function() {
-    document.addEventListener("facetsloaded", function(event)  {
+    document.addEventListener("facetsloaded", function()  {
         TsaApplication.UiHelper.renderFacets($("#leftPanel"));
     });
 
-    document.addEventListener("dataloaded", function(event) {
-        TsaApplication.Search.filteredDataseries = TsaApplication.DataManager.dataseries;
-        TsaApplication.Search.filteredSites = TsaApplication.DataManager.sites;
-        TsaApplication.DataManager.populateFilterItems();
-        TsaApplication.UiHelper.renderFilters();
+    document.addEventListener("dataloaded", function() {
+        TsaApplication.UiHelper.renderFilterItems();
     });
 
     document.addEventListener('datafiltered', function(event) {
         //update map markers and dataseries table.
+        TsaApplication.UiHelper.updateSeriesCount();
     });
 };
-
 
 /**
  *  Data Manager
  */
 TsaApplication.DataManager = (function (self) {
-    var dataToLoad = ['facets', 'dataseries', 'sites'];
-    self.loadedData = 0;
+    var dataLoader = { loadedData: 0, dataToLoad: ['facets', 'dataseries', 'sites'] }
 
     //data
-    self.filterItems = [];
     self.dataseries = [];
     self.facets = [];
     self.sites = [];
@@ -37,49 +32,82 @@ TsaApplication.DataManager = (function (self) {
     var sitesLoaded = new CustomEvent("sitesloaded", { bubbles:true, cancelable:false });
     var facetsLoaded = new CustomEvent("facetsloaded", { bubbles:true, cancelable:false });
 
-    self.populateFilterItems = function() {
-        var keys = _.pluck(self.facets, "keyfield");
-
-        self.facets.forEach(function(facet) {
-            var filters = _.uniq(self.dataseries, function(item){ return item[facet.keyfield]; });
-            filters.forEach(function(filter){
-                filter = _.clone(filter);
-                _.extend(filter, {  key: facet.keyfield, value: facet.namefields });
-                self.filterItems.push(_.pick(filter, "key", "value", facet.keyfield, facet.namefields));
-            });
-        });
-    }
-
     self.loadData = function() {
-        self.watch("loadedData", function(id, oldval, newval) {
-            if (newval === dataToLoad.length) {
+        dataLoader.watch("loadedData", function(id, oldval, newval) {
+            if (newval === dataLoader.dataToLoad.length) {
                 document.dispatchEvent(dataLoaded);
             }
             return newval;
         });
 
-        $.getJSON("/api/v1/dataseries")
-            .done(function(data) {
-                              self.dataseries = data.objects;
-                              self.loadedData++;
-                              document.dispatchEvent(dataseriesLoaded);
-                          });
-        $.getJSON("/api/v1/sites")
-            .done(function(data) {
-                              self.sites = data.objects;
-                              self.loadedData++;
-                              document.dispatchEvent(sitesLoaded);
-                          });
-        $.getJSON("/api/v1/facets")
-            .done(function(data) {
-                              self.facets = data.objects;
-                              self.facets.forEach(function(facet){
-                                  facet.namefields = facet.namefields.split(',');
-                              });
-                              self.loadedData++;
-                              document.dispatchEvent(facetsLoaded);
-                          });
+        $.getJSON("/api/v1/dataseries").done(function(data) {
+            self.dataseries = data.objects;
+            defineFilters();
+            dataLoader.loadedData++;
+            document.dispatchEvent(dataseriesLoaded);
+        });
+
+        $.getJSON("/api/v1/sites").done(function(data) {
+            self.sites = data.objects;
+            dataLoader.loadedData++;
+            document.dispatchEvent(sitesLoaded);
+        });
+
+        $.getJSON("/api/v1/facets").done(function(data) {
+            self.facets = data.objects;
+            defineFacets();
+            dataLoader.loadedData++;
+            document.dispatchEvent(facetsLoaded);
+        });
     };
+
+    function defineFacets() {
+        self.facets.forEach(function(facet) {
+            facet.namefields = facet.namefields.split(',');
+            facet.filteredFacetSeries = [];
+            facet.filters = [];
+
+            facet.isFiltered = function() {
+                return _.some(this.filters, function(filter) {
+                    return filter.applied;
+                });
+            };
+
+            facet.updateFacetSeries = function() {
+                var series = [];
+                var isFiltered = this.isFiltered();
+
+                this.filters.forEach(function(filter) {
+                    if (!isFiltered || filter.applied) {
+                        series = _.union(series, filter.filteredSeries);
+                    }
+                });
+
+                return this.filteredFacetSeries = series;
+            }
+        });
+    }
+
+    function defineFilters() {
+        self.facets.forEach(function(facet) {
+            var filters = _.uniq(self.dataseries, function(item){ return item[facet.keyfield]; });
+
+            filters.forEach(function(filter){
+                filter = _.clone(filter);
+                filter = _.pick(filter, facet.keyfield, facet.namefields);
+
+                var series = _.filter(self.dataseries, function(series){ return filter[facet.keyfield] === series[facet.keyfield]; });
+                _.extend(filter, {
+                    filteredSeries: series,
+                    dataseriesCount: series.length,
+                    applied: false
+                });
+                facet.filters.push(filter);
+            });
+
+            facet.updateFacetSeries();
+        });
+    }
 
 	return self;
 }(TsaApplication.DataManager || {}));
@@ -126,41 +154,51 @@ TsaApplication.VisualizationManager = (function (self) {
 TsaApplication.Search = (function (self) {
     self.filteredDataseries = [];
     self.filteredSites = [];
-    self.currentFilters = {};
+
     var dataFiltered = new CustomEvent("datafiltered", { bubbles:true, cancelable:false });
 
-
     self.toggleFilter = function(property, value) {
-        self.currentFilters[property] = self.currentFilters[property] || [];
-        if (_.contains(self.currentFilters[property], value)) {
-            //remove it
-            self.currentFilters[property] = _.without(self.currentFilters[property], value);
-        } else {
-            //add the filter
-            self.currentFilters[property].push(value);
-        }
-        updateFilteredData();
-        document.dispatchEvent(dataFiltered);
-    }
+        var facet = _.find(TsaApplication.DataManager.facets, function(facet){ return facet.keyfield === property; });
+        var filter = _.find(facet.filters, function(filter){ return filter[facet.keyfield] == value; });
+        filter.applied = !filter.applied;
+        updateFilteredData(facet);
 
-    var updateFilteredData = function() {
+        document.dispatchEvent(dataFiltered);
+    };
+
+    function updateFilteredData(facetFiltered) {
         self.filteredDataseries = TsaApplication.DataManager.dataseries;
         self.filteredSites = TsaApplication.DataManager.sites;
+        var filteredFacetSeries = {};
 
-        for (var property in self.currentFilters) {
-            if (self.currentFilters[property].length === 0) {
-                continue;
-            }
-            self.filteredDataseries = _.filter(self.filteredDataseries, function(series) {
-                var value = "" + series[property];
-                return _.contains(self.currentFilters[property], value);
-            });
-        }
+        // update dataseries
+        TsaApplication.DataManager.facets.forEach(function(facet) {
+            var facetSeries = (facet === facetFiltered)? facet.updateFacetSeries(): facet.filteredFacetSeries;
+            filteredFacetSeries[facet.keyfield] = facetSeries;
+            self.filteredDataseries = _.intersection(self.filteredDataseries, facetSeries);
+        });
 
-        var uniqueSites = _.uniq(self.filteredDataseries, function(series){ return series["sitecode"]; });
+        // update sites
+        var uniqueSites = _.uniq(self.filteredDataseries, function(series) { return series["sitecode"]; });
         var siteCodes = _.pluck(uniqueSites, 'sitecode');
         self.filteredSites = _.filter(self.filteredSites, function(site) {
             return _.contains(siteCodes, site.sitecode);
+        });
+
+        // update filters count
+        TsaApplication.DataManager.facets.forEach(function(facet) {
+            if (!facet.isFiltered()) {
+                facet.filters.forEach(function(filter) {
+                    filter.dataseriesCount = _.intersection(filter.filteredSeries, self.filteredDataseries).length;
+                });
+                return;
+            }
+
+            var outerFacets = _.values(_.omit(filteredFacetSeries, facet.keyfield));
+            var outerFacetsJoin = _.reduce(outerFacets, function(a, b) { return _.intersection(a, b); });
+            facet.filters.forEach(function(filter) {
+                filter.dataseriesCount = _.intersection(filter.filteredSeries, outerFacetsJoin).length;
+            });
         });
     }
 
@@ -191,8 +229,8 @@ TsaApplication.UiHelper = (function (self) {
         </div>\
     </div>");
 
-    self.filterTemplate = _.template("<li class='list-group-item'>\
-        <span class='badge'></span>\
+    self.filterTemplate = _.template("<li class='list-group-item' id='<%= id %>'>\
+        <span class='badge'><%= count %></span>\
         <label class='checkbox'>\
             <input type='checkbox' data-facet='<%= facet %>' value='<%= id %>'><%= name %>\
         </label>\
@@ -200,7 +238,7 @@ TsaApplication.UiHelper = (function (self) {
 
     self.renderFacets = function(parent){
         var facets = [];
-        var facetsHtml = "";
+        var facetsHtml;
 
         TsaApplication.DataManager.facets.forEach(function(facet){
             facets = facets.concat(self.facetsTemplate({facetid: facet.keyfield, facettitle: facet.name}));
@@ -209,35 +247,47 @@ TsaApplication.UiHelper = (function (self) {
         parent.append($(facetsHtml));
     };
 
-    self.renderFilters = function() {
-        TsaApplication.DataManager.filterItems.forEach(function(item){
-            var filterName = "";
-            item.value.forEach(function(field, index){
-                filterName += (index === 0)? item[field]: (", " + item[field]);
-            });
-            var filter = $(self.filterTemplate({id: item[item.key], facet: item.key, name: filterName}))
-                .appendTo($("#" + item.key + " ul"))
-                .find("input:checkbox");
-
-            filter.on('change', function(filter){
-                TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
+    self.renderFilterItems = function() {
+        TsaApplication.DataManager.facets.forEach(function(facet) {
+            facet.filters.forEach(function(filter) {
+                var filterName = _.map(facet.namefields, function(namefield){ return filter[namefield]; }).join(', ');
+                var elementData = { facet: facet.keyfield, id: filter[facet.keyfield], name: filterName, count: filter.dataseriesCount };
+                var filterElement = $(self.filterTemplate(elementData))
+                    .appendTo($("#" + facet.keyfield + " ul"))
+                    .find("input:checkbox");
+                filterElement.on('change', function(){
+                    TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
+                });
             });
         });
-    }
+    };
+
+    self.updateSeriesCount = function() {
+        TsaApplication.DataManager.facets.forEach(function(facet) {
+            var filters = _.sortBy(facet.filters, function(filter) { return filter.dataseriesCount; });
+            filters.forEach(function(filter) {
+                var filterElement = $("#" + facet.keyfield + " [id='" + filter[facet.keyfield] + "']");
+                var counterElement = filterElement.find(".badge");
+                if (filter.dataseriesCount) {
+                    filterElement.slideDown();
+                    counterElement.text(filter.dataseriesCount);
+                } else {
+                    filterElement.slideUp();
+                }
+            });
+        });
+    };
+
+
 
 	return self;
 }(TsaApplication.UiHelper || {}));
-
 
 
 $(document).ready(function(){
     TsaApplication.bindEvents();
     TsaApplication.DataManager.loadData();
 });
-
-
-
-
 
 /*
  * object.watch polyfill
