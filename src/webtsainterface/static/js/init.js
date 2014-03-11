@@ -1,6 +1,5 @@
 ﻿var datasets;
-var obsMultiSeries = [];
-var obsHistogram = [];
+
 
 jQuery(document).ready(function ($) {
     var map;
@@ -122,7 +121,7 @@ jQuery(document).ready(function ($) {
         for (var i = 0; i < datasets.length; i++) {
             $("#datasetsTable tbody").append(
                 '<tr>\
-                   <td><input type="checkbox"></td>\
+                   <td data-id="'+i+'"><input type="checkbox"></td>\
                    <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].sitecode + '</td>\
                    <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].variablename + '</td>\
                    <td data-toggle="modal" data-target="#InfoDialog">' + datasets[i].qualitycontrolleveldefinition + '</td>\
@@ -199,66 +198,77 @@ jQuery(document).ready(function ($) {
 
     function drawHistogram(values) {
         /* Initialize Histogram*/
+        var minHeight = 15;                 // minimum height in pixels of a rectangle
+        var textHeight = 2;                 // distance in pixels for the text from the top of the rectangle
+        var numOfDatasets = values.length;
+        var numOfTicks = 20;                // Number of divisions for columns
 
         // A formatter for counts.
-        var formatCount = d3.format(",.0f");
+        for (var i = 0; i < numOfDatasets; i++){
+            var formatCount = d3.format(",.0f");
+            var graphHeight = (height - (20 * numOfDatasets))/numOfDatasets; // 20 pixels correspond to the space needed for the numbers in the x-axis
+            var domainMin = Math.min.apply(Math, values[i]);
+            var domainMax = Math.max.apply(Math, values[i]);
 
-        var domainMin = Math.min.apply(Math, values);
-        var domainMax = Math.max.apply(Math, values);
+            var x = d3.scale.linear()
+                .domain([domainMin, domainMax])
+                .range([0, width]);
 
-        var x = d3.scale.linear()
-            .domain([domainMin, domainMax])
-            .range([0, width]);
+            // Generate a histogram using uniformly-spaced bins.
+            var data = d3.layout.histogram()
+                .bins(x.ticks(numOfTicks))
+                (values[i]);
 
-        // Generate a histogram using twenty uniformly-spaced bins.
-        var data = d3.layout.histogram()
-            .bins(x.ticks(40))
-            (values);
+            var y = d3.scale.linear()
+                .domain([0, d3.max(data, function (d) {
+                    return d.y;
+                })])
+                .range([height/numOfDatasets, 0]);
 
-        var y = d3.scale.linear()
-            .domain([0, d3.max(data, function (d) {
-                return d.y;
-            })])
-            .range([height, 0]);
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
 
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
+            var svg = d3.select(".graphContainer").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", graphHeight + 20)   // +20 to make space for the x-axis numbers on the bottom
+                .append("g")
+                .attr("transform", "translate(" + margin.left + ",0)");
 
-        var svg = d3.select(".graphContainer").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            var bar = svg.selectAll(".bar")
+                .data(data)
+                .enter().append("g")
+                .attr("class", "bar")
+                .attr("transform", function (d) {
+                    return "translate(" + x(d.x) + "," + Math.min ((graphHeight - minHeight), y(d.y)) + ")";
+                });
 
-        var bar = svg.selectAll(".bar")
-            .data(data)
-            .enter().append("g")
-            .attr("class", "bar")
-            .attr("transform", function (d) {
-                return "translate(" + x(d.x) + "," + y(d.y) + ")";
-            });
+            bar.append("rect")
+                .attr("x", 1)
+                .attr("width",  x(data[0].dx + domainMin) - 1)
+                .attr("height", function (d) {
+                    if(d.y != 0){
+                        return Math.max(minHeight, graphHeight - y(d.y));
+                    }
+                    else{
+                        return 0;
+                    }
+                });
 
-        bar.append("rect")
-            .attr("x", 1)
-            .attr("width",  x(data[0].dx + domainMin) - 1)
-            .attr("height", function (d) {
-                return height - y(d.y);
-            });
+            bar.append("text")
+                .attr("dy", ".75em")
+                .attr("y", textHeight)
+                .attr("x", x(data[0].dx + domainMin) / 2)
+                .attr("text-anchor", "middle")
+                .text(function (d) {
+                    return formatCount(d.y);
+                });
 
-        bar.append("text")
-            .attr("dy", ".75em")
-            .attr("y", 6)
-            .attr("x", x(data[0].dx + domainMin) / 2)
-            .attr("text-anchor", "middle")
-            .text(function (d) {
-                return formatCount(d.y);
-            });
-
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + graphHeight + ")")
+                .call(xAxis);
+            }
     }
 
     function drawScatterPlot(data2) {
@@ -358,20 +368,37 @@ jQuery(document).ready(function ($) {
                 .text(function (d) {
                     return d;
                 });
-
         });
     }
 
-    function drawMultiSeries(observations) {
-        var parseDate = d3.time.format("%Y%m%d").parse;
+    function drawMultiSeries(data) {
+// first we need to corerce the data into the right formats
+        var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
+
+        data = data.map( function (d){
+            return {
+              provider: +d.seriesID,
+              date:parseDate(d['date']),
+              patients: +d['value'] };
+        });
+
+        // then we need to nest the data on Provider since we want to only draw one
+        // line per provider
+        data = d3.nest().key(function(d) { return d.provider; }).entries(data);
 
         var x = d3.time.scale()
-            .range([0, width]);
+            .domain([d3.min(data, function(d) { return d3.min(d.values, function (d) { return d.date; }); }),
+                     d3.max(data, function(d) { return d3.max(d.values, function (d) { return d.date; }); })])
+            .range([0, width])
+            .nice(d3.time.month);
 
         var y = d3.scale.linear()
+            .domain([d3.min(data, function(d) { return d3.min(d.values, function (d) { return d.patients; }); }), d3.max(data, function(d) { return d3.max(d.values, function (d) { return d.patients; }); })])
             .range([height, 0]);
 
-        var color = d3.scale.category10();
+
+        var color = d3.scale.category10()
+            .domain(d3.keys(data[0]).filter(function(key) { return key === "provider"; }));
 
         var xAxis = d3.svg.axis()
             .scale(x)
@@ -382,96 +409,34 @@ jQuery(document).ready(function ($) {
             .orient("left");
 
         var line = d3.svg.line()
-            .interpolate("basis")
-            .x(function (d) {
-                return x(d.date);
-            })
-            .y(function (d) {
-                return y(d.temperature);
-            });
+            //.interpolate("basis")
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.patients); });
 
         var svg = d3.select(".graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-            .append("g")
+          .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+        svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis);
 
-            color.domain(d3.keys(observations[0]).filter(function (key) {
-                return key !== "date";
-            }));
+        svg.append("g")
+              .attr("class", "y axis")
+              .call(yAxis);
 
-            observations.forEach(function (d) {
-                d.date = parseDate(d.date);
-            });
+        var providers = svg.selectAll(".provider")
+              .data(data, function(d) { return d.key; })
+            .enter().append("g")
+              .attr("class", "provider");
 
-            var cities = color.domain().map(function (name) {
-                return {
-                    name: name,
-                    values: observations.map(function (d) {
-                        return { date: d.date, temperature: +d[name] };
-                    })
-                };
-            });
-
-            x.domain(d3.extent(observations, function (d) {
-                return d.date;
-            }));
-
-            y.domain([
-                d3.min(cities, function (c) {
-                    return d3.min(c.values, function (v) {
-                        return v.temperature;
-                    });
-                }),
-                d3.max(cities, function (c) {
-                    return d3.max(c.values, function (v) {
-                        return v.temperature;
-                    });
-                })
-            ]);
-
-            svg.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(xAxis);
-
-            svg.append("g")
-                .attr("class", "y axis")
-                .call(yAxis)
-                .append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")
-                .style("text-anchor", "end")
-                .text("Some scale Y");
-
-            var city = svg.selectAll(".city")
-                .data(cities)
-                .enter().append("g")
-                .attr("class", "city");
-
-            city.append("path")
-                .attr("class", "line")
-                .attr("d", function (d) {
-                    return line(d.values);
-                })
-                .style("stroke", function (d) {
-                    return color(d.name);
-                });
-
-            city.append("text")
-                .datum(function (d) {
-                    return { name: d.name, value: d.values[d.values.length - 1] };
-                })
-                .attr("transform", function (d) {
-                    return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")";
-                })
-                .attr("x", 3)
-                .attr("dy", ".35em")
-                .text(function (d) {
-                    return d.name;
-                });
+        providers.append("path")
+              .attr("class", "line")
+              .attr("d", function(d) { return line(d.values); })
+              .style("stroke", function(d) { return color(d.key); });
     }
 
     function drawAreaChart(data2) {
@@ -578,7 +543,7 @@ jQuery(document).ready(function ($) {
 
         var color = d3.scale.linear()
             .domain([0, n - 1])
-            .range(["#aad", "#556"]);
+            .range(["#4F3FFC", "#3FEAFC"]);
 
         var xAxis = d3.svg.axis()
             .scale(x)
@@ -820,36 +785,62 @@ jQuery(document).ready(function ($) {
 
 
     function draw(url, type){
-        url = datasets[0].getdataurl;
-        $.ajax(url).done(function(data){
-            var series = data.getElementsByTagName("value");
+        var obsMultiSeries = [];
+        var obsHistogram = [];
+        var seriesID = 0;
+        var point = 0;
+        var urls = [];
 
-            for (var i = 0; i < series.length; i++){
-                obsMultiSeries.push({
-                    value: series[i].innerHTML,
-                    date: series[i].getAttribute('dateTime').substr(0,10).replace("-", "").replace("-", "") //remove the 2 dashes
-                });
-                obsHistogram.push(series[i].innerHTML);
-            }
+        // Get all the urls from the dataset keys provided
+        for (var i = 0; i < url.length; i++){
+            var newUrl = datasets[url[i]].getdataurl;
+            urls.push(newUrl);
+        }
 
-            if (type == "multiseries"){
-                drawMultiSeries(obsMultiSeries);
-            }
-            else if (type == "histogram"){
-                drawHistogram(obsHistogram);
-            }
-            //drawScatterPlot(datas);
+        var done = urls.length; // jobs counter
+
+        urls.forEach(function(entry){
+            $.ajax(entry, {async:true}).done(function(data){
+                var myID = seriesID;
+                seriesID++;
+                var series = data.getElementsByTagName("value");
+                obsHistogram[myID] = [];
+                for (var i = 0; i < series.length; i++){
+                    if (obsMultiSeries[point] == null){
+                        obsMultiSeries[point]={};
+                    }
+                    // Array for multiseries
+                    obsMultiSeries[point]['seriesID'] = myID;
+                    obsMultiSeries[point]['value'] = series[i].innerHTML;
+                    obsMultiSeries[point]['date'] = series[i].getAttribute('dateTime');
+                    point++;
+                    // Array for multihistogram
+                    obsHistogram[myID].push(series[i].innerHTML);
+                }
+                done -= 1;
+                if (done == 0){ // If all jobs done
+                    if (type == "multiseries"){
+                         drawMultiSeries(obsMultiSeries);
+                    }
+                    else if (type == "histogram"){
+                         drawHistogram(obsHistogram);
+                    }
+                }
+            });
         });
+
+
     }
+
+    function clear(){
+        $("#graphContainer").empty();
+    }
+
     loadFilterCategories();
-
-
 
     $.getJSON( "/api/v1/dataseries", function( data ){
         datasets = data['objects'];
-
-        draw(null, "histogram");
-
+        //console.log(datasets[0])
         var sites = new Array();
         var networks = new Array();
         var varcategories = new Array();
@@ -1088,6 +1079,20 @@ jQuery(document).ready(function ($) {
     }
   });
 
+    $('#btnTimeSeries').click(function(){
+        $(".graphContainer").empty();
+        draw(new Array(1,2,3), "multiseries");
+    });
+
+    $('#btnHistogram').click(function(){
+        $(".graphContainer").empty();
+        draw(new Array(6,7,8,9,10), "histogram");
+    });
+
+    $('.table > tbody > tr').click(function() {
+        // row was clicked
+        console.log("asdf");
+    });
 
 
 });
