@@ -21,7 +21,7 @@ v1_api.register(QualityControlLevelsResource())
 v1_api.register(SearchFacetsResource())
 
 urlpatterns = patterns('',
-    url(r'^$', TsaView.as_view(), name='index'),
+    url(r'^$', TsaView.as_view(), name='tsa-application'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(v1_api.urls)),
 )

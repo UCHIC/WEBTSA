@@ -50,7 +50,6 @@ class DataSeries(models.Model):
     county = models.CharField(db_column='County', max_length=50, blank=True)
     sitetype = models.CharField(db_column='SiteType', max_length=50)
     variablecode = models.CharField(db_column='VariableCode', max_length=50)
-    variablecode = models.CharField(db_column='VariableCode', max_length=50)
     variablename = models.CharField(db_column='VariableName', max_length=255)
     methoddescription = models.CharField(db_column='MethodDescription', max_length=500)
     variableunitsname = models.CharField(db_column='VariableUnitsName', max_length=255)
@@ -83,7 +82,7 @@ class DataSeries(models.Model):
 
 
 class Site(models.Model):
-    sourcedataserviceid = models.ForeignKey('SourcesDataService', db_column='SourceDataServiceID')
+    sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID')
     network = models.CharField(db_column='Network', max_length=50)
     sitecode = models.CharField(db_column='SiteCode', max_length=50, primary_key=True)
     sitename = models.CharField(db_column='SiteName', max_length=500)
