@@ -1087,8 +1087,4 @@ jQuery(document).ready(function ($) {
       filter('tbody tr', $(this).val());
     }
   });
-
-
-
 });
-
