@@ -2,7 +2,6 @@ var TsaApplication = (function(self){
     self.initialParameters = {};
 
     self.initializeApplication = function() {
-
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
         self.UiHelper.loadView(selectedView);
@@ -19,7 +18,6 @@ var TsaApplication = (function(self){
     }
 
     function bindEvents() {
-
        document.addEventListener("facetsloaded", function()  {
            self.UiHelper.renderFacets($("#leftPanel"));
        });
@@ -33,6 +31,7 @@ var TsaApplication = (function(self){
            //update map markers and dataseries table.
            self.UiHelper.updateSeriesCount();
            self.MapController.updateSitesMarkers();
+           self.TableController.updateDataseries();
        });
 
        document.addEventListener('sitesloaded', function() {
@@ -254,34 +253,20 @@ TsaApplication.MapController = (function (self) {
 
 TsaApplication.TableController = (function(self) {
     self.dataseriesTable = {};
+    var tableOffsetY = 115;
 
     self.initializeTable = function() {
         self.dataseriesTable = $('#datasetsTable').DataTable({
-            "sDom": 'RCfrtiS',
-            "sScrollY": "350px",
-            "sScrollX": "100%",
-            "bScrollCollapse": true,
-            "bProcessing": true,
-            "bFilter": true,
-            "bDeferRender": true,
-            "bAutoWidth": true,
-            "bStateSave": true,
-            "oColReorder": {
-                "iFixedColumns": 1
-            },
-            "oColVis": {
-                "aiExclude": [0, 1]
-            },
+            "sDom": 'RCfrtiS', "bDestroy": true,
             "aaData": TsaApplication.DataManager.dataseries,
+            "sScrollY": ($('div#datasetsContent').height() - tableOffsetY),
+            "sScrollX": "100%", "bScrollCollapse": true, "bProcessing": true,
+            "bFilter": true, "bDeferRender": true, "bAutoWidth": true, "bStateSave": true,
+            "oColReorder": { "iFixedColumns": 1 }, "oColVis": { "aiExclude": [0, 1] },
             "aoColumns": [
                 {
-                    "mDataProp": 'seriesid',
-                    "bSearchable": false,
-                    "bSortable": false,
-                    "sType": "html",
-                    "mRender": function ( data, type ) {
-                        return '<input type="checkbox" data-seriesid="' + data + '">';
-                    }
+                    "mDataProp": 'seriesid', "bSearchable": false, "bSortable": false, "sType": "html",
+                    "mRender": function(data, type) { return '<input type="checkbox" data-seriesid="' + data + '">'; }
                 },
                 { "sTitle": "Series",  "mDataProp": 'seriesid' },
                 { "sTitle": "Network",  "mDataProp": 'network' },
@@ -317,7 +302,21 @@ TsaApplication.TableController = (function(self) {
                 { "sTitle": "Active", "mDataProp": 'isactive' }
             ]
         });
+
+        window.addEventListener('resize', function() {
+            var oSettings = self.dataseriesTable.fnSettings();
+            oSettings.oScroll.sY = ($('div#datasetsContent').height() - tableOffsetY);
+            self.dataseriesTable.fnDraw();
+        }, false);
     };
+
+    self.updateDataseries = function() {
+        //make so it doesn't remove all data, but just the necessary.
+        self.dataseriesTable.fnClearTable();
+        self.dataseriesTable.fnAddData(TsaApplication.Search.filteredDataseries);
+    };
+
+
 
     return self;
 }(TsaApplication.TableController || {}));

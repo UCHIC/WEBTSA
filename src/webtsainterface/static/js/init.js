@@ -1,4 +1,4 @@
-﻿﻿var datasets;
+﻿var datasets;
 
 
 jQuery(document).ready(function ($) {
