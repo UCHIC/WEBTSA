@@ -1,15 +1,39 @@
 <div class="tab-pane " id="visualizationContent">
    <div id="actionsPanel">
-       <span>Begin Date: </span><input type="text" class="datepicker" data-date-format="mm/dd/yyyy">
-       <span>End Date: </span><input type="text" class="datepicker" data-date-format="mm/dd/yyyy">
-       <button type="button" class="btn btn-default"> Summary Statistics</button>
-       <button type="button" class="btn btn-primary"> Set Plot Options</button>
+       <span>Begin Date: </span><input id="dpd1" type="text" class="datepicker" data-date-format="mm/dd/yyyy">
+       <span>End Date: </span><input id="dpd2" type="text" class="datepicker" data-date-format="mm/dd/yyyy">
+       <button id ="btnSetPlotOptions" type="button" class="btn btn-primary"> Set Plot Options</button>
+
        <div class="btn-group btn-group-sm">
           <button id="btnTimeSeries" type="button" class="btn btn-default">Time Series</button>
           <button id="btnHistogram" type="button" class="btn btn-default">Histogram</button>
           <button id="btnBoxAndWhisker" type="button" class="btn btn-default">Box and Whisker</button>
        </div>
    </div>
-   <div class="graphContainer" id="graphContainer"></div>
-   <div style="clear:both"></div>
+
+   <div id="graphArea">
+       <div class='ring'></div>
+       <div id="graphContainer"></div>
+       <div id="summarystats">
+           <div id="legendContainer" class="panel panel-default ">
+               <div class="panel-heading glyphicon glyphicon-th-list"> Legend</div>
+                <ul class="list-group">
+                </ul>
+           </div>
+           <div id="summaryContainer" class="panel panel-default">
+               <div class="panel-heading  glyphicon glyphicon-list-alt"> Summary Statistics</div>
+               <table class="table">
+                    <tbody>
+                        <tr><td>Arithmetic Mean</td><td>0.00</td></tr>
+                        <tr><td>Geometric Mean</td><td>0.00</td></tr>
+                        <tr><td>Maximum</td><td>0.00</td></tr>
+                        <tr><td>Minimum</td><td>0.00</td></tr>
+                        <tr><td>Standard Deviation</td><td>0.00</td></tr>
+                        <tr><td>Coefficient of Variation</td><td>0.00</td></tr>
+                    </tbody>
+               </table>
+
+           </div>
+       </div>
+   </div>
 </div>
