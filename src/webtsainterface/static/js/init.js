@@ -229,14 +229,19 @@ function drawMultiSeries(data, varnames) {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
     svg.append("g")
         .attr("class", "x axis")
         //.attr("width", width  - margin.left - margin.right)
         .attr("transform", "translate(0," + (height) + ")")
-        .call(xAxis);
+        .call(xAxis)
+    .append("text")
+      .style("text-anchor", "end")
+      .attr("x", -10)
+      .attr("y", 5)
+      .text("Date");;
 
 
+    // This loop builds and draws each time series
     for (var i = 0; i < data.length; i++) {
         y[i] = d3.scale.linear()
             .domain([d3.min(data, function (d) {
@@ -273,19 +278,18 @@ function drawMultiSeries(data, varnames) {
             .style("fill", color(i))
             .attr("transform", "translate(" + axisProperties[i].xTranslate + " ,0)")
             .call(yAxis[i])
-        /*.append("text")
+        .append("text")
          .attr("transform", "rotate(-90)")
          .attr("y", axisProperties[i].textdistance)
          .attr("dy", ".71em")
          .style("text-anchor", "end")
-         .text(varnames[i]);*/
+         .text("variable");
 
         $("#legendContainer ul").append(
             '<li class="list-group-item"><label class="checkbox">' +
                 '<input type="checkbox" checked="" data-id="' + i + '">' +
                 '<font color=' + color(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
                 '</label></li>');
-
     }
 
     $('#summarystats input[type="checkbox"]').click(function () {
@@ -314,8 +318,6 @@ function drawMultiSeries(data, varnames) {
         .attr("class", "line")
         .style("stroke-width", 1.5)
         .on("click", function (d) {
-
-
             if(d3.select(this).style("stroke-width") == "2.5px"){
                d3.select(this)
                 .style("stroke-width", 1.5);
@@ -326,8 +328,6 @@ function drawMultiSeries(data, varnames) {
                 d3.select(this)
                 .style("stroke-width", 2.5);
             }
-
-
             this.parentNode.parentNode.appendChild(this.parentNode);
         })
 
@@ -344,22 +344,20 @@ function drawMultiSeries(data, varnames) {
 function drawHistogram(values, varnames) {
     /* Initialize Histogram*/
     var minHeight = 15;                 // minimum height in pixels of a rectangle
-    var textHeight = 2;                 // distance in pixels for the text from the top of the rectangle
+    var textHeight = -8;                 // distance in pixels for the text from the top of the rectangle
     var numOfDatasets = values.length;
     var numOfTicks = 20;                // Number of divisions for columns
     var colors = d3.scale.category10();
 
-    //height = $("#graphContainer").height() - margin.top - margin.bottom - 45;
-    var margin = {top: 20, right: 80, bottom: 30, left: 50},
+    var margin = {top: 10, right: 30, bottom: 50, left: 80},
         width = $("#graphContainer").width() - margin.left - margin.right,
-        height = $("#graphContainer").height() - margin.top - margin.bottom;
+        height = $("#graphContainer").height() - margin.bottom - margin.top;
 
     // A formatter for counts.
 
-
     for (var i = 0; i < numOfDatasets; i++) {
         var formatCount = d3.format(",.0f");
-        var graphHeight = (height - margin.top - margin.bottom * 2) / numOfDatasets - 20; // 20 pixels correspond to the space needed for the numbers in the x-axis
+        var graphHeight = $("#graphContainer").height() / numOfDatasets - margin.bottom;
         var domainMin = Math.min.apply(Math, values[i]);
         var domainMax = Math.max.apply(Math, values[i]);
 
@@ -378,18 +376,21 @@ function drawHistogram(values, varnames) {
             (values[i]);
 
         var y = d3.scale.linear()
-            .domain([0, d3.max(data, function (d) {
-                return d.y;
-            })])
-            .range([height / numOfDatasets, 0]);
+            .domain([0, d3.max(data, function (d) {return d.y;})])
+            .range([graphHeight, 0]);
+            //.range([height / numOfDatasets - 16, 0]);
 
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
 
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
         var svg = d3.select("#graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
-            .attr("height", graphHeight + 20)   // +20 to make space for the x-axis numbers on the bottom
+            .attr("height", graphHeight + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + ",0)");
 
@@ -398,7 +399,20 @@ function drawHistogram(values, varnames) {
             .enter().append("g")
             .attr("class", "bar")
             .attr("transform", function (d) {
-                return "translate(" + x(d.x) + "," + Math.min((graphHeight - minHeight), y(d.y)) + ")";
+                return "translate(" + x(d.x) + "," + y(d.y) + ")";
+            })
+            .on("mouseover", function (d) {
+               d3.select(this).append("text")
+                .attr("dy", ".75em")
+                .attr("y", 0)
+                .attr("x", x(data[0].dx + domainMin) / 2)
+                .attr("text-anchor", "middle")
+                .text(function (d) {
+                    return formatCount(d.y);
+                });
+            })
+            .on("mouseout", function (d) {
+               d3.select(this).select("text").remove();
             });
 
         bar.append("rect")
@@ -406,27 +420,28 @@ function drawHistogram(values, varnames) {
             .attr("width", x(data[0].dx + domainMin) - 1)
             .style("fill", colors(i))
             .attr("height", function (d) {
-                if (d.y != 0) {
-                    return Math.max(minHeight, graphHeight - y(d.y));
-                }
-                else {
-                    return 0;
-                }
-            });
-
-        bar.append("text")
-            .attr("dy", ".75em")
-            .attr("y", textHeight)
-            .attr("x", x(data[0].dx + domainMin) / 2)
-            .attr("text-anchor", "middle")
-            .text(function (d) {
-                return formatCount(d.y);
+                    return graphHeight - y(d.y);
             });
 
         svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + graphHeight + ")")
-            .call(xAxis);
+            .call(xAxis)
+            .append("text")
+            .attr("class", "x label")
+              .attr("x", width / 2)
+              .attr("y", margin.bottom - 15)
+              .style("text-anchor", "end")
+              .text("VarName (Unit)");
+
+        svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        .append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 14)
+          .style("text-anchor", "end")
+          .text("Y Label");
     }
     graphEnd();
 }
@@ -823,8 +838,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    var test = [6,7,8,9,10];
-    //var test = [7];
+    var test = [6, 7];
 
     $('#btnSetPlotOptions').click(function () {
         $("#graphContainer").empty();
@@ -838,7 +852,6 @@ jQuery(document).ready(function ($) {
                 draw(test, "multiseries");
             }, 500);
          });
-
     });
 
     $('#btnTimeSeries').click(function () {

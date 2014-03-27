@@ -81,7 +81,7 @@
 .line {
   fill: none;
   stroke: steelblue;
-  stroke-width: 1px;
+  stroke-width: 1.5px;
 }
 
 /* BOX PLOTS */
@@ -143,7 +143,7 @@ svg.box{
 }
 
 .bar text {
-  fill: #fff;
+  fill: #000;
 }
 
 /* ---------------------Scatter Plot---------------------------*/
