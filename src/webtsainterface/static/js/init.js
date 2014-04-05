@@ -33,12 +33,12 @@ var id;
 
 function graphEnd() {
     $("#graphArea .ring").hide();
-    $("#summarystats").show();
+    $("#panel-right").show();
     //$("#graphContainer").show();
 }
 
 function graphStart() {
-    $("#summarystats").hide();
+    $("#panel-right").hide();
     //$("#graphContainer").hide();
     $("#graphArea .ring").show();
 }
@@ -124,11 +124,11 @@ function drawMultiSeries(data, varnames) {
     // even: f(n) = n * 10
     // odd: f(n) = width - (n-1) * 10
     var axisProperties = [
-        {xTranslate: 0, orient: "left", textdistance: 6},
-        {xTranslate: width, orient: "right", textdistance: -20},
-        {xTranslate: -65, orient: "left", textdistance: 6},
-        {xTranslate: width + 65, orient: "right", textdistance: -20},
-        {xTranslate: -130, orient: "left", textdistance: 6}
+        {xTranslate: 0, orient: "left", textdistance: -50},
+        {xTranslate: width, orient: "right", textdistance: 50},
+        {xTranslate: -65, orient: "left", textdistance: -50},
+        {xTranslate: width + 65, orient: "right", textdistance: 50},
+        {xTranslate: -130, orient: "left", textdistance: -50}
     ];
 
     var minDate = new Date(8640000000000000);
@@ -236,10 +236,9 @@ function drawMultiSeries(data, varnames) {
         .call(xAxis)
     .append("text")
       .style("text-anchor", "end")
-      .attr("x", -10)
-      .attr("y", 5)
+      .attr("x", width/2)
+      .attr("y", 35)
       .text("Date");;
-
 
     // This loop builds and draws each time series
     for (var i = 0; i < data.length; i++) {
@@ -281,18 +280,19 @@ function drawMultiSeries(data, varnames) {
         .append("text")
          .attr("transform", "rotate(-90)")
          .attr("y", axisProperties[i].textdistance)
+         .attr("x", 5)
          .attr("dy", ".71em")
          .style("text-anchor", "end")
          .text("variable");
 
         $("#legendContainer ul").append(
-            '<li class="list-group-item"><label class="checkbox">' +
+            '<li class="list-group-item">' +
                 '<input type="checkbox" checked="" data-id="' + i + '">' +
                 '<font color=' + color(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-                '</label></li>');
+                '</li>');
     }
 
-    $('#summarystats input[type="checkbox"]').click(function () {
+    $('#panel-right input[type="checkbox"]').click(function () {
         var that = this;
         var path = $("#path" + that.getAttribute("data-id"));
 
@@ -349,7 +349,7 @@ function drawHistogram(values, varnames) {
     var numOfTicks = 20;                // Number of divisions for columns
     var colors = d3.scale.category10();
 
-    var margin = {top: 10, right: 30, bottom: 50, left: 80},
+    var margin = {top: 10, right: 30, bottom: 60, left: 80},
         width = $("#graphContainer").width() - margin.left - margin.right,
         height = $("#graphContainer").height() - margin.bottom - margin.top;
 
@@ -362,9 +362,9 @@ function drawHistogram(values, varnames) {
         var domainMax = Math.max.apply(Math, values[i]);
 
          $("#legendContainer ul").append(
-        '<li class="list-group-item"><label class="checkbox">' +
+        '<li class="list-group-item">' +
             '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-            '</label></li>');
+            '</li>');
 
         var x = d3.scale.linear()
             .domain([domainMin, domainMax])
@@ -378,13 +378,15 @@ function drawHistogram(values, varnames) {
         var y = d3.scale.linear()
             .domain([0, d3.max(data, function (d) {return d.y;})])
             .range([graphHeight, 0]);
-            //.range([height / numOfDatasets - 16, 0]);
 
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
 
         var yAxis = d3.svg.axis()
+            .ticks(25 / numOfDatasets)
+            //.tickSize(-width, 0, 0)
+            //.orient("right")
             .scale(y)
             .orient("left");
 
@@ -419,6 +421,8 @@ function drawHistogram(values, varnames) {
             .attr("x", 1)
             .attr("width", x(data[0].dx + domainMin) - 1)
             .style("fill", colors(i))
+
+            .style("opacity", 1)
             .attr("height", function (d) {
                     return graphHeight - y(d.y);
             });
@@ -430,9 +434,10 @@ function drawHistogram(values, varnames) {
             .append("text")
             .attr("class", "x label")
               .attr("x", width / 2)
-              .attr("y", margin.bottom - 15)
+              .attr("y", margin.bottom - 25)
               .style("text-anchor", "end")
               .text("VarName (Unit)");
+
 
         svg.append("g")
           .attr("class", "y axis")
@@ -442,6 +447,7 @@ function drawHistogram(values, varnames) {
           .attr("y", 14)
           .style("text-anchor", "end")
           .text("Y Label");
+
     }
     graphEnd();
 }
@@ -838,7 +844,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    var test = [6, 7];
+    var test = [6,7];
 
     $('#btnSetPlotOptions').click(function () {
         $("#graphContainer").empty();
@@ -855,6 +861,8 @@ jQuery(document).ready(function ($) {
     });
 
     $('#btnTimeSeries').click(function () {
+        $("#visualizationDropDown").text("Time Series ");
+        $("#visualizationDropDown").append("<span class='caret'></span>");
         $("#graphContainer").empty();
         $("#legendContainer ul").empty();
         draw(test, "multiseries");
@@ -869,6 +877,8 @@ jQuery(document).ready(function ($) {
     });
 
     $('#btnHistogram').click(function () {
+        $("#visualizationDropDown").text("Histogram ");
+        $("#visualizationDropDown").append("<span class='caret'></span>");
         $("#graphContainer").empty();
         $("#legendContainer ul").empty();
         draw(test, "histogram");
@@ -883,6 +893,8 @@ jQuery(document).ready(function ($) {
     });
 
     $('#btnBoxAndWhisker').click(function () {
+        $("#visualizationDropDown").text("Box and Whisker ");
+        $("#visualizationDropDown").append("<span class='caret'></span>");
         $("#graphContainer").empty();
         $("#legendContainer ul").empty();
         draw(test, "boxplot");

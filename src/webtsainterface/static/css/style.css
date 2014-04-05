@@ -132,7 +132,6 @@ svg.box{
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
 
-
 .bar rect {
   fill: steelblue;
   shape-rendering: crispEdges;
@@ -146,16 +145,8 @@ svg.box{
   fill: #000;
 }
 
-/* ---------------------Scatter Plot---------------------------*/
-.dot {
-  stroke: #000;
-}
+line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 
-
-/* ---------------------Area Chart-------------------------------*/
-.area {
-  fill: steelblue;
-}
 
 
 /* body*/
@@ -233,21 +224,24 @@ svg.box{
     width:100%;
 }
 
+#btnSetPlotOptions{
+    float:right;
+}
 #datasetsContent .table tbody tr:hover td,
 #datasetsContent .table tbody tr:hover th{
   background-color: #f5f5f5;
 }
 
-.table{
+#datasetsContent .table{
     width:100%;
     height:calc(100% - 70px);
 }
 
-.table tbody, .table thead{
+#datasetsContent .table tbody, #datasetsContent .table thead{
     display:block;
 }
 
-.table tbody{
+#datasetsContent .table tbody{
     height:calc(100% - 40px);
     overflow:auto;
 }
@@ -255,13 +249,13 @@ svg.box{
 .table-container{
     max-height: 80%;
 }
+
 #btnExportData{
     float:right;
     display:inline;
     margin-top: 1px;
     margin-right: 20px;
 }
-
 
 #txtSearch{
     width:30%;
@@ -274,20 +268,11 @@ svg.box{
     border:0px;
 }
 
+#datePanel{
+    float:right;
+}
 #leftPanel .list-group li.active{
     background:#a6cae9;
-}
-
-#actionsPanel{
-    margin: 10px 6px;
-}
-
-#actionsPanel input{
-    margin-right:15px;  
-}
-
-#actionsPanel .btn-group{
-    float:right
 }
 
 
@@ -311,47 +296,57 @@ svg.box{
 }
 
 #graphArea{
-    height: calc(100% - 45px);
+    height: 100%;
     width: 100%;
 }
+
 #graphContainer{
     height: 100%;
     width: calc(100% - 300px);
     float:left;
+    padding-top: 5px;
     /*display:none;*/
 }
 
-#summarystats{
+#panel-right{
     height: calc(100% - 20px);
     width: 295px;
     float:right;
-    margin-right: 5px;
-    display:none;
+    margin-right: 3px;
+    margin-top:3px;
+    /*display:none;*/
 }
 
-#summarystats .panel{
+#panel-right .panel{
     border:1px solid #dddddd;
-    box-shadow: -5px 5px 10px #dddddd;
+    /*box-shadow: -5px 5px 10px #dddddd;*/
     padding: 3px;
+    margin-bottom: 5px;
+    margin-top:5px;
 }
 
-#summarystats .panel-heading{
+#panel-right .panel-heading{
     width:100%;
 }
-#summaryContainer p {
-    text-align: right;
-}
 
-#summaryContainer ul{
-    /*width:50%;*/
-}
 
-#summarystats ul li{
+
+#panel-right ul li{
     padding: 3px 15px;
 }
 
+#plotOptionsContainer td{
+    border-top:0px;
+    vertical-align: middle;
+    padding-bottom: 2px;
+}
+
+#plotOptionsContainer tr td:first-child{
+    text-align: right;
+}
+
 #legendContainer{
-        margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 /* Spinner icon */
 .ring{
