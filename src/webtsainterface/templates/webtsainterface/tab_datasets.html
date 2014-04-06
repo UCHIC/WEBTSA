@@ -38,12 +38,10 @@
                         <button type="button" class="btn btn-primary">Download Files</button>
                     </div>
                 </div>
-                <!-- /.modal-content -->
             </div>
-            <!-- /.modal-dialog -->
         </div>
-        <!-- /.modal -->
     </div>
+
     <!-- Dataset Info Modal -->
     <div class="modal fade" id="InfoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
          aria-hidden="true">
@@ -51,19 +49,178 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="datasetInfoTitle">Dataset Info</h4>
+                    <h4 class="modal-title" id="datasetInfoTitle">Dataseries Information</h4>
+                    <span id="series-active-info"></span>
                 </div>
-                <div class="modal-body">
-                    <p> This is some content.</p>
+                <div class="modal-body panel-group">
+
+                    <div class="panel panel-default">
+                        <div class='panel-heading'>
+                            <h4 class='panel-title'><a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#general-info'>General</a></h4>
+                        </div>
+                        <div id='general-info' class='panel-collapse collapse in'>
+                            <div class='panel-body'>
+                                <ul class='list-group series-info-group'>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Number Of Observations: </span><span class="series-item-value" data-field="numberobservations"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Date Last Updated: </span><span class="series-item-value" data-field="datelastupdated"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Begin Date: </span><span class="series-item-value" data-field="begindatetime"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">End Date: </span><span class="series-item-value" data-field="enddatetime"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">UTC Offset: </span><span class="series-item-value" data-field="utcoffset"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Data Type: </span><span class="series-item-value" data-field="datatype"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Value Type: </span><span class="series-item-value" data-field="valuetype"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Method Description: </span><span class="series-item-value" data-field="methoddescription"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Sample Medium: </span><span class="series-item-value" data-field="samplemedium"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Source Organization: </span><span class="series-item-value" data-field="sourceorganization"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Source Description: </span><span class="series-item-value" data-field="sourcedescription"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class='panel-heading'>
+                            <h4 class='panel-title'><a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#location-info'>Location</a></h4>
+                        </div>
+                        <div id='location-info' class='panel-collapse collapse'>
+                            <div class='panel-body'>
+                                <ul class='list-group series-info-group'>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Site Code: </span><span class="series-item-value" data-field="sitecode"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Site Name: </span><span class="series-item-value" data-field="sitename"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Network: </span><span class="series-item-value" data-field="network"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Latitude: </span><span class="series-item-value" data-field="latitude"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Longitude: </span><span class="series-item-value" data-field="longitude"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">State: </span><span class="series-item-value" data-field="state"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">County: </span><span class="series-item-value" data-field="county"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Site Type: </span><span class="series-item-value" data-field="sitetype"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class='panel-heading'>
+                            <h4 class='panel-title'><a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#variable-info'>Variable</a></h4>
+                        </div>
+                        <div id='variable-info' class='panel-collapse collapse'>
+                            <div class='panel-body'>
+                                <ul class='list-group series-info-group'>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Variable Code: </span><span class="series-item-value" data-field="variablecode"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Variable Name: </span><span class="series-item-value" data-field="variablename"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Variable Category: </span><span class="series-item-value" data-field="generalcategory"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Variable Units Name: </span><span class="series-item-value" data-field="variableunitsname"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Variable Units Type: </span><span class="series-item-value" data-field="variableunitstype"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Variable Units Abbreviation: </span><span class="series-item-value" data-field="variableunitsabbreviation"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class='panel-heading'>
+                            <h4 class='panel-title'><a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#time-info'>Time Support</a></h4>
+                        </div>
+                        <div id='time-info' class='panel-collapse collapse'>
+                            <div class='panel-body'>
+                                <ul class='list-group series-info-group'>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Time Support: </span><span class="series-item-value" data-field="supporttime"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Time Support Units Name: </span><span class="series-item-value" data-field="timesupportunitsname"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Time Support Units Type: </span><span class="series-item-value" data-field="timesupportunitstype"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Time Support Units Abbreviation: </span><span class="series-item-value" data-field="timesupportunitsabbreviation"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class='panel-heading'>
+                            <h4 class='panel-title'><a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#qcl-info'>Quality Control Level</a></h4>
+                        </div>
+                        <div id='qcl-info' class='panel-collapse collapse'>
+                            <div class='panel-body'>
+                                <ul class='list-group series-info-group'>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Quality Control Level Code: </span><span class="series-item-value" data-field="qualitycontrollevelcode"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Quality Control Level Definition: </span><span class="series-item-value" data-field="qualitycontrolleveldefinition"></span>
+                                    </li>
+                                    <li class='list-group-item series-info-item'>
+                                        <span class="series-item-field">Quality Control Level Explanation: </span><span class="series-item-value" data-field="qualitycontrollevelexplanation"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" id="btnViewDataSets" class="btn btn-primary">View Dataset</button>
+                    <button type="button" id="btnAddToPlot" class="btn btn-primary" title="You can't plot more than 5 dataseries.">Add To Current Plot</button>
+                    <button type="button" id="btnPlotDataset" class="btn btn-primary">Plot</button>
                 </div>
             </div>
-            <!-- /.modal-content -->
         </div>
-        <!-- /.modal-dialog -->
     </div>
-    <!-- /.modal -->
 </div>
+
+
+
+
+
