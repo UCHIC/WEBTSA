@@ -64,47 +64,41 @@ var TsaApplication = (function(self){
         });
 
         $("#btnAddToPlot").click(function() {
-            var id = +$("#InfoDialog").get(0).dataset['series'];
+            var dialog = $("#InfoDialog");
+            var id = +dialog.get(0).dataset['series'];
             var method = self.VisualizationController.plottingMethods.addPlot;
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
             self.VisualizationController.prepareSeries(series, method);
             self.UiHelper.loadView('visualization');
-            $("#InfoDialog").modal('hide');
+            dialog.modal('hide');
         });
 
         $("#btnPlotDataset").click(function() {
-            var id = +$("#InfoDialog").get(0).dataset['series'];
+            var dialog = $("#InfoDialog");
+            var id = +dialog.get(0).dataset['series'];
             var method = self.VisualizationController.plottingMethods.newPlot;
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
             self.VisualizationController.prepareSeries(series, method);
             self.UiHelper.loadView('visualization');
-            $("#InfoDialog").modal('hide');
+            dialog.modal('hide');
         });
 
         $("#btnTimeSeries").click(function() {
-            if (self.VisualizationController.currentPlot === self.VisualizationController.plotTypes.multiseries) {
-                return;
-            }
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
             self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.multiseries;
-            self.VisualizationController.plotSeries();
         });
 
         $("#btnHistogram").click(function() {
-            if (self.VisualizationController.currentPlot === self.VisualizationController.plotTypes.histogram) {
-                return;
-            }
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
             self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.histogram;
-            self.VisualizationController.plotSeries();
         });
 
         $("#btnBoxAndWhisker").click(function() {
-            if (self.VisualizationController.currentPlot === self.VisualizationController.plotTypes.box) {
-                return;
-            }
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
             self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.box;
+        });
+
+        $("#btnSetPlotOptions").click(function() {
             self.VisualizationController.plotSeries();
         });
     }
@@ -113,9 +107,11 @@ var TsaApplication = (function(self){
 }(TsaApplication || {}));
 
 
+
 $(document).ready(function(){
     TsaApplication.initializeApplication();
 });
+
 
 /*
  * object.watch polyfill
