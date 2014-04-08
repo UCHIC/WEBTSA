@@ -57,6 +57,7 @@ TsaApplication.VisualizationController = (function (self) {
 
         self.currentPlot();
         document.dispatchEvent(plotFinished);
+        $("#panelRight").show();
     };
 
     $(window).resize(_.debounce(function(){
@@ -64,9 +65,9 @@ TsaApplication.VisualizationController = (function (self) {
     }, 500));
 
 
-
     function drawMultiseries() {
         var varnames = _.pluck(self.plottedSeries, 'variablename');
+        // var noDataValues = _.pluck(self.plottedSeries, 'nodatavalue');
         var data = _(_(self.plottedSeries).pluck('dataset')).flatten();
 
         // first we need to corerce the data into the right formats
@@ -135,6 +136,11 @@ TsaApplication.VisualizationController = (function (self) {
         var nowTemp = new Date();
         var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
+
+        // Filter no-data value
+        data = data.filter(function (d) {
+            return (d.val != -9999);
+        })
         // If no dates are set, display the whole thing
         if (dateFirst.date.valueOf() == now.valueOf() && dateLast.date.valueOf() == now.valueOf()) {
             dateFirst.date = minDate;
@@ -239,16 +245,16 @@ TsaApplication.VisualizationController = (function (self) {
              .attr("x", 5)
              .attr("dy", ".71em")
              .style("text-anchor", "end")
-             .text("variable");
+             .text(varnames[i]);
 
             $("#legendContainer ul").append(
                 '<li class="list-group-item">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
-                    '<font color=' + color(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-                    '</li>');
+                    '<font color=' + color(i) + '> ■ '  + '</font><span data-id="' + i + '">' + varnames[i] +
+                    '</span></li>');
         }
 
-        $('#panel-right input[type="checkbox"]').click(function () {
+        $('#legendContainer input[type="checkbox"]').click(function () {
             var that = this;
             var path = $("#path" + that.getAttribute("data-id"));
 
@@ -270,11 +276,8 @@ TsaApplication.VisualizationController = (function (self) {
             })
             .attr("class", "seriesID");
 
-        seriesID.append("path")
-            .attr("class", "line")
-            .style("stroke-width", 1.5)
-            .on("click", function (d) {
-                if(d3.select(this).style("stroke-width") == "2.5px"){
+        function pathClickHandler (d){
+             if(d3.select(this).style("stroke-width") == "2.5px"){
                    d3.select(this)
                     .style("stroke-width", 1.5);
                 }
@@ -284,9 +287,12 @@ TsaApplication.VisualizationController = (function (self) {
                     d3.select(this)
                     .style("stroke-width", 2.5);
                 }
-                this.parentNode.parentNode.appendChild(this.parentNode);
-            })
+        }
 
+        seriesID.append("path")
+            .attr("class", "line")
+            .style("stroke-width", 1.5)
+            .on("click", pathClickHandler)
             .attr("d", function (d) {
                 return lines[d.key](d.values);
             })
@@ -294,6 +300,13 @@ TsaApplication.VisualizationController = (function (self) {
                 return color(d.key);
             }
         );
+
+        $('#legendContainer span').click(function () {
+            var that = this;
+            var path = d3.select("#path" + that.getAttribute("data-id") + " path");
+            path.each(pathClickHandler);
+
+        });
     }
 
     function drawHistogram() {

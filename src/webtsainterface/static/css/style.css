@@ -192,7 +192,7 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 .row {
     margin-right: 0px;
     margin-left: 0px;
-    height: calc(100% - 52px);
+    height: calc(100% - 51px);
 }
 
 .navbar{
@@ -388,6 +388,7 @@ button.ColVis_Button {
 #listBlocksContainer{
     height: 100%;
     border: 0px;
+    margin-bottom: 0px;
 }
 
 #datePanel{
@@ -429,16 +430,16 @@ button.ColVis_Button {
     padding-top: 5px;
 }
 
-#panel-right {
+#panelRight{
     height: calc(100% - 20px);
     width: 295px;
     float:right;
     margin-right: 3px;
     margin-top:3px;
-    /*display:none;*/
+    display:none;
 }
 
-#panel-right .panel{
+#panelRight .panel{
     border:1px solid #dddddd;
     /*box-shadow: -5px 5px 10px #dddddd;*/
     padding: 3px;
@@ -446,11 +447,11 @@ button.ColVis_Button {
     margin-top:5px;
 }
 
-#panel-right .panel-heading{
+#panelRight .panel-heading{
     width:100%;
 }
 
-#panel-right ul li{
+#panelRight ul li{
     padding: 3px 15px;
 }
 
@@ -466,6 +467,14 @@ button.ColVis_Button {
 
 #legendContainer{
   margin-bottom: 4px;
+}
+
+#legendContainer span{
+    cursor: default;
+}
+#legendContainer font{
+    font-size: 22px;
+    line-height: 1;
 }
 /* Spinner icon */
 .ring{
