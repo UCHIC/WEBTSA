@@ -44,6 +44,9 @@ TsaApplication.VisualizationController = (function (self) {
         $("#graphContainer").empty();
         $("#legendContainer").find("ul").empty();
 
+        self.currentPlot();
+
+        
         $("#dpd1").datepicker('setValue', _.min(
             _(self.plottedSeries)
                 .pluck('begindatetime')
@@ -55,7 +58,7 @@ TsaApplication.VisualizationController = (function (self) {
                 .map(function(date){return new Date(date)}))
         );
 
-        self.currentPlot();
+
         document.dispatchEvent(plotFinished);
         $("#panelRight").show();
     };
