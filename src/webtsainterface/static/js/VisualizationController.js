@@ -8,10 +8,10 @@ TsaApplication.VisualizationController = (function (self) {
     self.currentPlot = self.plotTypes.multiseries;
     self.plottedSeries = [];
 
-    var plotDataReady = new CustomEvent("plotdataready", { bubbles:true, cancelable:false });
-    var plotDataLoading = new CustomEvent("plotdataloading", { bubbles:true, cancelable:false });
-    var plotStarted = new CustomEvent("plotstarted", { bubbles:true, cancelable:false });
-    var plotFinished = new CustomEvent("plotfinished", { bubbles:true, cancelable:false });
+    var plotDataReady = jQuery.Event("plotdataready");
+    var plotDataLoading = jQuery.Event("plotdataloading");
+    var plotStarted = jQuery.Event("plotstarted");
+    var plotFinished = jQuery.Event("plotfinished");
 
     self.prepareSeries = function(series, method) {
         if (method === self.plottingMethods.addPlot && self.plottedSeries.length >= 5) {
@@ -23,12 +23,12 @@ TsaApplication.VisualizationController = (function (self) {
 
         var loadedData = 0;
         self.plottedSeries.push(series);
-        document.dispatchEvent(plotDataLoading);
+        $(document).trigger(plotDataLoading);
 
         self.plottedSeries.forEach(function(dataseries) {
             dataseries.loadDataset(function() {
                 if (++loadedData >= self.plottedSeries.length) {
-                    document.dispatchEvent(plotDataReady);
+                    $(document).trigger(plotDataReady);
                 }
             });
         });
@@ -39,7 +39,7 @@ TsaApplication.VisualizationController = (function (self) {
             return;
         }
 
-        document.dispatchEvent(plotStarted);
+        $(document).trigger(plotStarted);
 
         $("#graphContainer").empty();
         $("#legendContainer").find("ul").empty();
@@ -58,8 +58,7 @@ TsaApplication.VisualizationController = (function (self) {
                 .map(function(date){return new Date(date)}))
         );
 
-
-        document.dispatchEvent(plotFinished);
+        $(document).trigger(plotFinished);
         $("#panelRight").show();
     };
 

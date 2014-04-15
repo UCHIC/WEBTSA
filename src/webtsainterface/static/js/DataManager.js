@@ -11,15 +11,15 @@ TsaApplication.DataManager = (function (self) {
     self.sites = [];
 
     //events
-    var dataLoaded = new CustomEvent("dataloaded", { bubbles:true, cancelable:false });
-    var dataseriesLoaded = new CustomEvent("dataseriesloaded", { bubbles:true, cancelable:false });
-    var sitesLoaded = new CustomEvent("sitesloaded", { bubbles:true, cancelable:false });
-    var facetsLoaded = new CustomEvent("facetsloaded", { bubbles:true, cancelable:false });
+    var dataLoaded = jQuery.Event("dataloaded");
+    var dataseriesLoaded = jQuery.Event("dataseriesloaded");
+    var sitesLoaded = jQuery.Event("sitesloaded");
+    var facetsLoaded = jQuery.Event("facetsloaded");
 
     self.loadData = function() {
         dataLoader.watch("loadedData", function(id, oldval, newval) {
             if (newval === dataLoader.dataToLoad.length) {
-                document.dispatchEvent(dataLoaded);
+                $(document).trigger(dataLoaded);
             }
             return newval;
         });
@@ -29,20 +29,20 @@ TsaApplication.DataManager = (function (self) {
             extendDataseries();
             extendFilters();
             dataLoader.loadedData++;
-            document.dispatchEvent(dataseriesLoaded);
+            $(document).trigger(dataseriesLoaded);
         });
 
         $.getJSON("/api/v1/sites").done(function(data) {
             self.sites = data.objects;
             dataLoader.loadedData++;
-            document.dispatchEvent(sitesLoaded);
+            $(document).trigger(sitesLoaded);
         });
 
         $.getJSON("/api/v1/facets").done(function(data) {
             self.facets = data.objects;
             extendFacets();
             dataLoader.loadedData++;
-            document.dispatchEvent(facetsLoaded);
+            $(document).trigger(facetsLoaded);
         });
     };
 

@@ -192,6 +192,8 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 .row {
     margin-right: 0px;
     margin-left: 0px;
+    height: -moz-calc(100% - 51px);
+    height: -webkit-calc(100% - 51px);
     height: calc(100% - 51px);
 }
 
@@ -209,6 +211,8 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 }
 
 .tab-content{
+    height: -moz-calc(100% - 44px);
+    height: -webkit-calc(100% - 44px);
     height:calc(100% - 44px);
 }
 
@@ -413,9 +417,11 @@ button.ColVis_Button {
 }
 
 #visualizationContent{
-   height:calc(100% - 45);
-   width:100%;
-   overflow:hidden;
+    height:-moz-calc(100% - 45);
+    height:-webkit-calc(100% - 45);
+    height:calc(100% - 45);
+    width:100%;
+    overflow:hidden;
 }
 
 #graphArea {
@@ -425,12 +431,16 @@ button.ColVis_Button {
 
 #graphContainer {
     height: 100%;
+    width: -moz-calc(100% - 300px);
+    width: -webkit-calc(100% - 300px);
     width: calc(100% - 300px);
     float:left;
     padding-top: 5px;
 }
 
-#panelRight{
+#panel-right {
+    height:-moz-calc(100% - 20px);
+    height:-webkit-calc(100% - 20px);
     height: calc(100% - 20px);
     width: 295px;
     float:right;

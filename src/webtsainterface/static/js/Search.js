@@ -6,7 +6,7 @@ TsaApplication.Search = (function (self) {
     self.filteredDataseries = [];
     self.filteredSites = [];
 
-    var dataFiltered = new CustomEvent("datafiltered", { bubbles:true, cancelable:false });
+    var dataFiltered = jQuery.Event("datafiltered");
 
     self.toggleFilter = function(property, value) {
         var facet = _.find(TsaApplication.DataManager.facets, function(facet){ return facet.keyfield === property; });
@@ -14,7 +14,7 @@ TsaApplication.Search = (function (self) {
         filter.applied = !filter.applied;
         updateFilteredData(facet);
 
-        document.dispatchEvent(dataFiltered);
+        $(document).trigger(dataFiltered);
     };
 
     function updateFilteredData(facetFiltered) {
