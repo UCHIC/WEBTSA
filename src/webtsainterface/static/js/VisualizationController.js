@@ -46,8 +46,9 @@ TsaApplication.VisualizationController = (function (self) {
 
         self.currentPlot();
 
-        
-        $("#dpd1").datepicker('setValue', _.min(
+
+
+        /*$("#dpd1").datepicker('setValue', _.min(
             _(self.plottedSeries)
                 .pluck('begindatetime')
                 .map(function(date){return new Date(date)}))
@@ -56,7 +57,7 @@ TsaApplication.VisualizationController = (function (self) {
             _(self.plottedSeries)
                 .pluck('enddatetime')
                 .map(function(date){return new Date(date)}))
-        );
+        );*/
 
 
         document.dispatchEvent(plotFinished);
@@ -69,9 +70,12 @@ TsaApplication.VisualizationController = (function (self) {
 
 
     function drawMultiseries() {
-        var varnames = _.pluck(self.plottedSeries, 'variablename');
-        // var noDataValues = _.pluck(self.plottedSeries, 'nodatavalue');
-        var data = _(_(self.plottedSeries).pluck('dataset')).flatten();
+        var varnames = _(self.plottedSeries).pluck('variablename');
+        var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
+
+        var datasets = _(self.plottedSeries).pluck('dataset');
+        var noDataValues = _(datasets).pluck('noDataValue');
+        var data = _(datasets).flatten();
 
         // first we need to corerce the data into the right formats
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
@@ -112,12 +116,14 @@ TsaApplication.VisualizationController = (function (self) {
         });
 
         // Update minimum and maximum dates
-
         var dateFirst = $('#dpd1').datepicker({
             onRender: function (date) {
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';
             }
-        }).on('changeDate',function (ev) {
+        }).on('click', function(){
+            dateLast.hide();
+        })
+            .on('changeDate',function (ev) {
             if (ev.date.valueOf() < dateLast.date.valueOf()) {
                 var newDate = new Date(ev.date)
                 newDate.setDate(newDate.getDate() + 1);
@@ -131,6 +137,8 @@ TsaApplication.VisualizationController = (function (self) {
             onRender: function (date) {
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';
             }
+        }).on('click', function(){
+            dateFirst.hide();
         }).on('changeDate',function (ev) {
             dateLast.hide();
         }).data('datepicker');
@@ -139,11 +147,11 @@ TsaApplication.VisualizationController = (function (self) {
         var nowTemp = new Date();
         var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
-
         // Filter no-data value
         data = data.filter(function (d) {
-            return (d.val != -9999);
+           return (d.val != noDataValues[d.seriesID]);
         })
+
         // If no dates are set, display the whole thing
         if (dateFirst.date.valueOf() == now.valueOf() && dateLast.date.valueOf() == now.valueOf()) {
             dateFirst.date = minDate;
@@ -207,6 +215,7 @@ TsaApplication.VisualizationController = (function (self) {
 
         // This loop builds and draws each time series
         for (var i = 0; i < data.length; i++) {
+
             y[i] = d3.scale.linear()
                 .domain([d3.min(data, function (d) {
                     if (d.key == i) {
@@ -248,7 +257,7 @@ TsaApplication.VisualizationController = (function (self) {
              .attr("x", 5)
              .attr("dy", ".71em")
              .style("text-anchor", "end")
-             .text(varnames[i]);
+             .text(varnames[i] + " (" +  varUnits[i] + ")");
 
             $("#legendContainer ul").append(
                 '<li class="list-group-item">' +
@@ -304,23 +313,92 @@ TsaApplication.VisualizationController = (function (self) {
             }
         );
 
+        var arithmeticMean = calcArithmeticMean(data);
+        var max = calcMax(data);
+        var min = calcMin(data);
+
         $('#legendContainer span').click(function () {
             var that = this;
+            var id = that.getAttribute("data-id");
             var path = d3.select("#path" + that.getAttribute("data-id") + " path");
             path.each(pathClickHandler);
+            this.setAttribute("font-weight", "bold");
+
+            // Set summary statistics here
+            $("#statisticsTable tbody").empty();
+            $("#statisticsTable tbody").append(
+                '<tr><td>Arithmetic Mean</td><td>' + arithmeticMean[id] + '</td></tr>\
+                        <tr><td>Geometric Mean</td><td>0.00</td></tr>\
+                        <tr><td>Maximum</td><td>' + max[id] + '</td></tr>\
+                        <tr><td>Minimum</td><td>' + min[id] + '</td></tr>\
+                        <tr><td>Standard Deviation</td><td>0.00</td></tr>\
+                        <tr><td>Coefficient of Variation</td><td>0.00</td></tr>  '
+            );
 
         });
+
+
+    }
+
+    function calcMax(data){
+        var max = [];
+        for (var i =0; i < data.length; i++){
+            var maxVal = 0;
+            for (var j=0; j < data[i].values.length; j++){
+                if (maxVal < data[i].values[j].val){
+                    maxVal = data[i].values[j].val;
+                }
+            }
+            max[i] = maxVal;
+        }
+        return max;
+    }
+
+    function calcMin(data){
+        var min = [];
+        for (var i =0; i < data.length; i++){
+            var minVal = Infinity;
+            for (var j=0; j < data[i].values.length; j++){
+                if (minVal > data[i].values[j].val){
+                    minVal = data[i].values[j].val;
+                }
+            }
+            min[i] = minVal;
+        }
+        return min;
+    }
+
+    function calcArithmeticMean(data){
+        sum = [];
+        count = [];
+
+        for(var i = 0; i < data.length; i++){
+            sum[i] = 0;
+            count[i] = 0;
+        }
+        for (var i = 0; i < data.length; i++){
+            for(var j = 0; j < data[i].values.length; j++){
+                sum[data[i].values[j].seriesID] += data[i].values[j].val;
+                count[i] += 1;
+            }
+        }
+        for (var i = 0; i < sum.length; i++){
+            sum[i] = sum[i] / count [i];
+        }
+        return sum;
     }
 
     function drawHistogram() {
         /* Initialize Histogram*/
         var varnames = _.pluck(self.plottedSeries, 'variablename');
-        var values = _(_(self.plottedSeries).pluck('dataset')).map(function(dataset) {
+        var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
+        var datasets = _(self.plottedSeries).pluck('dataset');
+        var noDataValues = _(datasets).pluck('noDataValue');
+
+        var values = _(datasets).map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
 
-        var minHeight = 15;                 // minimum height in pixels of a rectangle
-        var textHeight = -8;                 // distance in pixels for the text from the top of the rectangle
         var numOfDatasets = values.length;
         var numOfTicks = 20;                // Number of divisions for columns
         var colors = d3.scale.category10();
@@ -329,8 +407,14 @@ TsaApplication.VisualizationController = (function (self) {
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.bottom - margin.top;
 
-        // A formatter for counts.
+         // Filter no-data value
+        for (var i = 0; i < values.length;i++){
+            values[i] = values[i].filter(function (d) {
+                return (d != noDataValues[i]);
+            })
+        }
 
+        // A formatter for counts.
         for (var i = 0; i < numOfDatasets; i++) {
             var formatCount = d3.format(",.0f");
             var graphHeight = $("#graphContainer").height() / numOfDatasets - margin.bottom;
@@ -389,15 +473,27 @@ TsaApplication.VisualizationController = (function (self) {
                         return formatCount(d.y);
                     });
                 })
+
                 .on("mouseout", function (d) {
                    d3.select(this).select("text").remove();
                 });
 
+            // TODO: IMPLEMENT DIV
+                /*.on("mouseover", function(d) {
+                    var bar_width = parseInt($(this).attr("width"), 10);
+                    var x = parseInt($(this).attr("x"), 10) + bar_width / 2 + 5;
+                    var y = parseInt($(this).attr("y"), 10) - 20;
+                    div.transition().duration(200).style("opacity", 1);
+                    // include info you want to display here:
+                    div.html(formatCount(d.y) + "<br/>").style("left", x + "px").style("top", y + "px");
+                }).on("mouseout", function(d) {
+                    div.transition().duration(500).style("opacity", 0);
+                });
+*/
             bar.append("rect")
                 .attr("x", 1)
                 .attr("width", x(data[0].dx + domainMin) - 1)
                 .style("fill", colors(i))
-
                 .style("opacity", 1)
                 .attr("height", function (d) {
                         return graphHeight - y(d.y);
@@ -411,18 +507,18 @@ TsaApplication.VisualizationController = (function (self) {
                 .attr("class", "x label")
                   .attr("x", width / 2)
                   .attr("y", margin.bottom - 25)
-                  .style("text-anchor", "end")
-                  .text("VarName (Unit)");
-
+                  .style("text-anchor", "middle")
+                  .text(varnames[i] + " (" + varUnits[i] + ")");
 
             svg.append("g")
               .attr("class", "y axis")
               .call(yAxis)
             .append("text")
+                .attr("class", "y label")
               .attr("transform", "rotate(-90)")
-              .attr("y", 14)
-              .style("text-anchor", "end")
-              .text("Y Label");
+              .attr("x", -(graphHeight + margin.bottom) / 2)
+              .attr("y", -50)
+              .text("Data points");
         }
     }
 

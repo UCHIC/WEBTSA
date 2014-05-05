@@ -441,7 +441,7 @@ button.ColVis_Button {
 
 #panelRight .panel{
     border:1px solid #dddddd;
-    /*box-shadow: -5px 5px 10px #dddddd;*/
+    box-shadow: -5px 5px 10px #dddddd;
     padding: 3px;
     margin-bottom: 5px;
     margin-top:5px;
@@ -463,6 +463,17 @@ button.ColVis_Button {
 
 #plotOptionsContainer tr td:first-child{
     text-align: right;
+}
+
+#graphArea .alert {
+    position: absolute;
+    width: calc(100% - 310px);
+    opacity:0.9;
+}
+
+#graphContainer .label{
+    font-size: 100%;
+    font-weight: normal;
 }
 
 #legendContainer{

@@ -99,7 +99,26 @@ var TsaApplication = (function(self){
         });
 
         $("#btnSetPlotOptions").click(function() {
-            self.VisualizationController.plotSeries();
+            var dateFirst = $('#dpd1')
+            var dateLast = $('#dpd2');
+
+            $("#graphArea").find(".alert").remove();
+
+            var a = new Date(dateFirst.val());
+            var b = new Date(dateLast.val())
+            if(a < b){
+                self.VisualizationController.plotSeries();  // Dates do not overlap, proceed
+            }
+            else{
+                // Dates overlap, display an error.
+
+                $("#graphArea").prepend(
+                    '<div class="alert alert-danger alert-dismissable">\
+                      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
+                      <strong>No oh!</strong> Dates cannot overlap. \
+                    </div>'
+                );
+            }
         });
     }
 

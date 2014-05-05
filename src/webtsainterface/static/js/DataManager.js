@@ -59,6 +59,7 @@ TsaApplication.DataManager = (function (self) {
 
                 $.ajax(series.getdataurl).done(function(data){
                     var values = $(data).find('values').children('value');
+                    series.dataset.noDataValue = +$(data).find('noDataValue').text();
                     values.each(function(index, value) {
                         value = $(value);
                         var seriesData = {};
