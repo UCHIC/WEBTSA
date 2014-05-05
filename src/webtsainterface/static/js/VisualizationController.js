@@ -47,7 +47,6 @@ TsaApplication.VisualizationController = (function (self) {
         self.currentPlot();
 
 
-
         /*$("#dpd1").datepicker('setValue', _.min(
             _(self.plottedSeries)
                 .pluck('begindatetime')
@@ -67,54 +66,91 @@ TsaApplication.VisualizationController = (function (self) {
         self.plotSeries();
     }, 500));
 
+    function calcSummaryStatistics(data){
+        var summary = [];
 
-    function drawMultiseries() {
-        var varnames = _(self.plottedSeries).pluck('variablename');
-        var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
+        for (var i = 0; i < data.length; i++){
+             summary[i] = {
+                maximum:-Infinity,
+                minimum:Infinity,
+                arithmeticMean: 0,
+                geometricSum:0,
+                geometricMean:0,
+                deviationSum:0,
+                standardDeviation:0,
+                coefficientOfVariation:0,
+                count: 0,
+                sum: 0
+            };
+        }
 
-        var datasets = _(self.plottedSeries).pluck('dataset');
-        var noDataValues = _(datasets).pluck('noDataValue');
-        var data = _(datasets).flatten();
+        for (var i = 0; i < data.length; i++){
+            for (var j=0; j < data[i].length; j++){
+                var dv = parseFloat(data[i][j].value);
+                // update max value
+                if (summary[i].maximum < dv){
+                    summary[i].maximum = dv.toFixed(2);
+                }
 
-        // first we need to corerce the data into the right formats
-        var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
-        var axisMargin = 60;
+                // update min value
+                if (summary[i].minimum > dv){
+                    summary[i].minimum = dv.toFixed(2);
+                }
 
-        var margin = {top: 20, right: 10 + (Math.floor(varnames.length / 2)) * axisMargin, bottom: 60, left: (Math.ceil(varnames.length / 2)) * axisMargin},
-            width = $("#graphContainer").width() - margin.left - margin.right,
-            height = $("#graphContainer").height() - margin.top - margin.bottom;
+                // update count
+                summary[i].count++;
 
-        // even: f(n) = n * 10
-        // odd: f(n) = width - (n-1) * 10
-        var axisProperties = [
-            {xTranslate: 0, orient: "left", textdistance: -50},
-            {xTranslate: width, orient: "right", textdistance: 50},
-            {xTranslate: -65, orient: "left", textdistance: -50},
-            {xTranslate: width + 65, orient: "right", textdistance: 50},
-            {xTranslate: -130, orient: "left", textdistance: -50}
-        ];
+                // update sum
+                summary[i].sum += dv;
 
+                // update geometric sum (we'll use it to calculate the geometric mean)
+                if (dv != 0)
+                    summary[i].geometricSum += Math.log(Math.abs(dv));
+
+            }
+
+            summary[i].arithmeticMean = (summary[i].sum / summary[i].count).toFixed(2);
+            summary[i].geometricMean = (Math.pow(2, (summary[i].geometricSum / summary[i].count))).toFixed(2);
+
+            for (var j = 0; j < data[i].length; j++){
+                var dv = data[i][j].value;
+                summary[i].deviationSum += Math.pow(dv - summary[i].arithmeticMean, 2);
+            }
+            summary[i].standardDeviation = (Math.pow(summary[i].deviationSum / summary[i].count, (1 / 2))).toFixed(2);
+            summary[i].coefficientOfVariation = (summary[i].standardDeviation / summary[i].arithmeticMean).toFixed(2);
+
+        }
+
+        return summary;
+    }
+
+    function getDatasetsAfterFilters(){
         var minDate = new Date(8640000000000000);
         var maxDate = new Date(-8640000000000000);
+        var datasets = _(self.plottedSeries).pluck('dataset');
+        var noDataValues = _(datasets).pluck('noDataValue');
+        var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
+        // -------------- FILTERS BEGIN --------------------------
+        // Filter no-data value
+        for (var i = 0; i < datasets.length;i++){
+            datasets[i] = datasets[i].filter(function (d) {
+                return (d.value != noDataValues[i]);
+            });
+        }
 
-        for (var i = 0; i < data.length; i++) {
-            var parsedDate = parseDate(data[i]['date']);
-            if (minDate.valueOf() > parsedDate.valueOf()) {
-                minDate = parsedDate;
-            }
-            if (maxDate.valueOf() < parsedDate.valueOf()) {
-                maxDate = parsedDate;
+        for (var i = 0; i < datasets.length; i++) {
+            for (var j = 0; j < datasets[i].length; j++){
+                var parsedDate = parseDate(datasets[i][j]['date']);
+                if (minDate.valueOf() > parsedDate.valueOf()) {
+                    minDate = parsedDate;
+                }
+                if (maxDate.valueOf() < parsedDate.valueOf()) {
+                    maxDate = parsedDate;
+                }
             }
         }
 
-        data = data.map(function (d) {
-            return {
-                seriesID: +d.seriesID,
-                date: parseDate(d['date']),
-                val: +d['value'] };
-        });
-
-        // Update minimum and maximum dates
+        // Update minimum and maximum dates on the date pickers
         var dateFirst = $('#dpd1').datepicker({
             onRender: function (date) {
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';
@@ -146,11 +182,6 @@ TsaApplication.VisualizationController = (function (self) {
         var nowTemp = new Date();
         var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
-        // Filter no-data value
-        data = data.filter(function (d) {
-           return (d.val != noDataValues[d.seriesID]);
-        })
-
         // If no dates are set, display the whole thing
         if (dateFirst.date.valueOf() == now.valueOf() && dateLast.date.valueOf() == now.valueOf()) {
             dateFirst.date = minDate;
@@ -158,9 +189,60 @@ TsaApplication.VisualizationController = (function (self) {
         }
 
         // Filter by dates if specified
-        data = data.filter(function (d) {
-            return (d.date.valueOf() >= dateFirst.date.valueOf() && d.date.valueOf() <= dateLast.date.valueOf());
-        })
+        for (var i = 0; i < datasets.length; i++){
+            datasets[i] = datasets[i].filter(function (d) {
+                return (parseDate(d.date).valueOf() >= dateFirst.date.valueOf() && parseDate(d.date).valueOf() <= dateLast.date.valueOf());
+            });
+        }
+
+        return datasets;
+        // -------------- FILTERS END --------------------------
+    }
+
+    function setSummaryStatistics(summary){
+        // Load statistics for the first dataset by default
+        $("#statisticsTable tbody").empty();
+        $("#statisticsTable tbody").append(
+            '<tr><td>Arithmetic Mean</td><td>' + summary.arithmeticMean + '</td></tr>\
+                    <tr><td>Geometric Mean</td><td>'+ summary.geometricMean + '</td></tr>\
+                    <tr><td>Maximum</td><td>' + summary.maximum + '</td></tr>\
+                    <tr><td>Minimum</td><td>' + summary.minimum + '</td></tr>\
+                    <tr><td>Standard Deviation</td><td>' + summary.standardDeviation + '</td></tr>\
+                    <tr><td>Coefficient of Variation</td><td>'+ summary.coefficientOfVariation +'</td></tr>  '
+        );
+    }
+
+    function drawMultiseries() {
+        var varnames = _(self.plottedSeries).pluck('variablename');
+        var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
+        var datasets = getDatasetsAfterFilters();
+
+        var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
+        var axisMargin = 60;
+        var margin = {top: 20, right: 10 + (Math.floor(varnames.length / 2)) * axisMargin, bottom: 60, left: (Math.ceil(varnames.length / 2)) * axisMargin},
+            width = $("#graphContainer").width() - margin.left - margin.right,
+            height = $("#graphContainer").height() - margin.top - margin.bottom;
+        // even: f(n) = n * 10
+        // odd: f(n) = width - (n-1) * 10
+        var axisProperties = [
+            {xTranslate: 0, orient: "left", textdistance: -50},
+            {xTranslate: width, orient: "right", textdistance: 50},
+            {xTranslate: -65, orient: "left", textdistance: -50},
+            {xTranslate: width + 65, orient: "right", textdistance: 50},
+            {xTranslate: -130, orient: "left", textdistance: -50}
+        ];
+        var data = _(datasets).flatten();
+
+        var summary = calcSummaryStatistics(datasets);
+
+
+
+        data = data.map(function (d) {
+            return {
+                seriesID: +d.seriesID,
+                date: parseDate(d['date']),
+                val: +d['value'] };
+        });
 
         // then we need to nest the data on seriesID since we want to only draw one
         // line per seriesID
@@ -214,7 +296,6 @@ TsaApplication.VisualizationController = (function (self) {
 
         // This loop builds and draws each time series
         for (var i = 0; i < data.length; i++) {
-
             y[i] = d3.scale.linear()
                 .domain([d3.min(data, function (d) {
                     if (d.key == i) {
@@ -312,87 +393,33 @@ TsaApplication.VisualizationController = (function (self) {
             }
         );
 
-        var arithmeticMean = calcArithmeticMean(data);
-        var max = calcMax(data);
-        var min = calcMin(data);
-
+        setSummaryStatistics(summary[0]);
         $('#legendContainer span').click(function () {
             var that = this;
             var id = that.getAttribute("data-id");
             var path = d3.select("#path" + that.getAttribute("data-id") + " path");
             path.each(pathClickHandler);
-            this.setAttribute("font-weight", "bold");
 
-            // Set summary statistics here
+            this.style.fontWeight = "bold";
+
+            // Set summary statistics
             $("#statisticsTable tbody").empty();
             $("#statisticsTable tbody").append(
-                '<tr><td>Arithmetic Mean</td><td>' + arithmeticMean[id] + '</td></tr>\
-                        <tr><td>Geometric Mean</td><td>0.00</td></tr>\
-                        <tr><td>Maximum</td><td>' + max[id] + '</td></tr>\
-                        <tr><td>Minimum</td><td>' + min[id] + '</td></tr>\
-                        <tr><td>Standard Deviation</td><td>0.00</td></tr>\
-                        <tr><td>Coefficient of Variation</td><td>0.00</td></tr>  '
+                '<tr><td>Arithmetic Mean</td><td>' + summary[id].arithmeticMean + '</td></tr>\
+                        <tr><td>Geometric Mean</td><td>'+ summary[id].geometricMean + '</td></tr>\
+                        <tr><td>Maximum</td><td>' + summary[id].maximum + '</td></tr>\
+                        <tr><td>Minimum</td><td>' + summary[id].minimum + '</td></tr>\
+                        <tr><td>Standard Deviation</td><td>' + summary[id].standardDeviation + '</td></tr>\
+                        <tr><td>Coefficient of Variation</td><td>'+ summary[id].coefficientOfVariation +'</td></tr>  '
             );
-
         });
-
-
-    }
-
-    function calcMax(data){
-        var max = [];
-        for (var i =0; i < data.length; i++){
-            var maxVal = 0;
-            for (var j=0; j < data[i].values.length; j++){
-                if (maxVal < data[i].values[j].val){
-                    maxVal = data[i].values[j].val;
-                }
-            }
-            max[i] = maxVal;
-        }
-        return max;
-    }
-
-    function calcMin(data){
-        var min = [];
-        for (var i =0; i < data.length; i++){
-            var minVal = Infinity;
-            for (var j=0; j < data[i].values.length; j++){
-                if (minVal > data[i].values[j].val){
-                    minVal = data[i].values[j].val;
-                }
-            }
-            min[i] = minVal;
-        }
-        return min;
-    }
-
-    function calcArithmeticMean(data){
-        sum = [];
-        count = [];
-
-        for(var i = 0; i < data.length; i++){
-            sum[i] = 0;
-            count[i] = 0;
-        }
-        for (var i = 0; i < data.length; i++){
-            for(var j = 0; j < data[i].values.length; j++){
-                sum[data[i].values[j].seriesID] += data[i].values[j].val;
-                count[i] += 1;
-            }
-        }
-        for (var i = 0; i < sum.length; i++){
-            sum[i] = (sum[i] / count [i]).toFixed(2);
-        }
-        return sum;
     }
 
     function drawHistogram() {
         /* Initialize Histogram*/
         var varnames = _.pluck(self.plottedSeries, 'variablename');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
-        var datasets = _(self.plottedSeries).pluck('dataset');
-        var noDataValues = _(datasets).pluck('noDataValue');
+        var datasets = getDatasetsAfterFilters();
 
         var values = _(datasets).map(function(dataset) {
             return _.pluck(dataset, 'value');
@@ -406,12 +433,7 @@ TsaApplication.VisualizationController = (function (self) {
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.bottom - margin.top;
 
-         // Filter no-data value
-        for (var i = 0; i < values.length;i++){
-            values[i] = values[i].filter(function (d) {
-                return (d != noDataValues[i]);
-            })
-        }
+
 
         // A formatter for counts.
         for (var i = 0; i < numOfDatasets; i++) {

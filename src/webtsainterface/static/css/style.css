@@ -175,6 +175,10 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     padding: 0px 15px;
 }
 
+#leftPanel li:hover{
+    background:#ddd;
+}
+
 #leftPanel .panel, .row{
     border-radius:0px !important;
     margin:1px 1px !important;

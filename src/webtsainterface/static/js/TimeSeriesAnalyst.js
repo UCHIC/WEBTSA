@@ -111,7 +111,6 @@ var TsaApplication = (function(self){
             }
             else{
                 // Dates overlap, display an error.
-
                 $("#graphArea").prepend(
                     '<div class="alert alert-danger alert-dismissable">\
                       <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
