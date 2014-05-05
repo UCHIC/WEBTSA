@@ -382,7 +382,7 @@ TsaApplication.VisualizationController = (function (self) {
             }
         }
         for (var i = 0; i < sum.length; i++){
-            sum[i] = sum[i] / count [i];
+            sum[i] = (sum[i] / count [i]).toFixed(2);
         }
         return sum;
     }

@@ -438,7 +438,7 @@ button.ColVis_Button {
     padding-top: 5px;
 }
 
-#panel-right {
+#panel-right{
     height:-moz-calc(100% - 20px);
     height:-webkit-calc(100% - 20px);
     height: calc(100% - 20px);
@@ -446,7 +446,6 @@ button.ColVis_Button {
     float:right;
     margin-right: 3px;
     margin-top:3px;
-    display:none;
 }
 
 #panelRight .panel{
