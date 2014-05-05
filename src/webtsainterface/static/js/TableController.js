@@ -61,11 +61,11 @@ TsaApplication.TableController = (function(self) {
 
         TsaApplication.UiHelper.customizeTableStyle();
 
-        window.addEventListener('resize', function() {
+        $(window).on('resize', function() {
             var oSettings = self.dataseriesTable.fnSettings();
             oSettings.oScroll.sY = ($('div#datasetsContent').height() - tableOffsetY);
             self.dataseriesTable.fnDraw();
-        }, false);
+        });
 
         $('.dataTables_scrollBody').on('scroll', function() {
             self.dataseriesTable.find("tr").find("td:not(:first)").click(function(event) {

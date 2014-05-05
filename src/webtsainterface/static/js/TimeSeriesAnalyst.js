@@ -17,40 +17,40 @@ var TsaApplication = (function(self){
     }
 
     function bindEvents() {
-        document.addEventListener("facetsloaded", function()  {
+        $(document).on('facetsloaded', function() {
             self.UiHelper.renderFacets($("#leftPanel"));
         });
 
-        document.addEventListener("dataloaded", function() {
+        $(document).on('dataloaded', function() {
             self.UiHelper.renderFilterItems();
             self.TableController.initializeTable();
         });
 
-        document.addEventListener('datafiltered', function() {
+        $(document).on('datafiltered', function() {
             //update map markers and dataseries table.
             self.UiHelper.updateSeriesCount();
             self.MapController.updateSitesMarkers();
             self.TableController.updateDataseries();
         });
 
-        document.addEventListener('sitesloaded', function() {
+        $(document).on('sitesloaded', function() {
             self.MapController.loadMarkers();
         });
 
-        document.addEventListener('plotdataloading', function() {
+        $(document).on('plotdataloading', function() {
             self.UiHelper.startPlotAnimation();
         });
 
-        document.addEventListener('plotdataready', function() {
+        $(document).on('plotdataready', function() {
             self.UiHelper.endPlotAnimation();
             self.VisualizationController.plotSeries();
         });
 
-        document.addEventListener('plotstarted', function() {
+        $(document).on('plotstarted', function() {
             self.UiHelper.startPlotAnimation();
         });
 
-        document.addEventListener('plotfinished', function() {
+        $(document).on('plotfinished', function() {
             self.UiHelper.endPlotAnimation();
         });
 
