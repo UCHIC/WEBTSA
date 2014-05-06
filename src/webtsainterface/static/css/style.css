@@ -246,6 +246,10 @@ table.dataTable {
     margin-bottom: 0px !important;
 }
 
+#statisticsTable tbody tr td:nth-child(2){
+    text-align: right;
+}
+
 .dataTables_filter input[type="search"] {
     width: 350px;
     margin-top: 22px;
@@ -452,7 +456,7 @@ button.ColVis_Button {
     margin-top:3px;
 }
 
-#panelRight .panel{
+#panel-right .panel{
     border:1px solid #dddddd;
     box-shadow: -5px 5px 10px #dddddd;
     padding: 3px;
@@ -460,7 +464,7 @@ button.ColVis_Button {
     margin-top:5px;
 }
 
-#panelRight .panel-heading{
+#panel-right .panel-heading{
     width:100%;
 }
 

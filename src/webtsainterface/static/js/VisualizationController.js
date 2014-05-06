@@ -62,6 +62,11 @@ TsaApplication.VisualizationController = (function (self) {
         $("#panelRight").show();
     };
 
+    // Adds commas to numbers in thousand intervals
+    self.numberWithCommas = function (x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
     $(window).resize(_.debounce(function(){
         self.plotSeries();
     }, 500));
@@ -119,7 +124,17 @@ TsaApplication.VisualizationController = (function (self) {
             summary[i].standardDeviation = (Math.pow(summary[i].deviationSum / summary[i].count, (1 / 2))).toFixed(2);
             summary[i].coefficientOfVariation = (summary[i].standardDeviation / summary[i].arithmeticMean).toFixed(2);
 
+            // Add commas
+            summary[i].arithmeticMean = self.numberWithCommas(summary[i].arithmeticMean);
+            summary[i].geometricMean = self.numberWithCommas(summary[i].geometricMean);
+            summary[i].maximum = self.numberWithCommas(summary[i].maximum);
+            summary[i].minimum = self.numberWithCommas(summary[i].minimum);
+            summary[i].standardDeviation = self.numberWithCommas(summary[i].standardDeviation);
+            summary[i].coefficientOfVariation = self.numberWithCommas(summary[i].coefficientOfVariation);
+
         }
+
+
 
         return summary;
     }
@@ -366,19 +381,25 @@ TsaApplication.VisualizationController = (function (self) {
             .attr("id", function (d) {
                 return "path" + d.key;
             })
+            .attr("data-id", function (d) {
+                return d.key;
+            })
             .attr("class", "seriesID");
 
         function pathClickHandler (d){
-             if(d3.select(this).style("stroke-width") == "2.5px"){
-                   d3.select(this)
-                    .style("stroke-width", 1.5);
-                }
-                else{
-                    svg.selectAll(".line")
-                    .style("stroke-width", 1.5)
-                    d3.select(this)
-                    .style("stroke-width", 2.5);
-                }
+            if(d3.select(this).style("stroke-width") == "2.5px"){
+                d3.select(this)
+                   .style("stroke-width", 1.5);
+            }
+            else{
+                svg.selectAll(".line").style("stroke-width", 1.5)
+                d3.select(this).style("stroke-width", 2.5);
+            }
+
+            $('#legendContainer span').css({"font-weight":"normal"});
+
+            $('#legendContainer span[data-id="'+ this.parentElement.getAttribute("data-id") +'"]')[0].style.fontWeight = "bold";
+            setSummaryStatistics(summary[this.parentElement.getAttribute("data-id")]);
         }
 
         seriesID.append("path")
@@ -394,24 +415,32 @@ TsaApplication.VisualizationController = (function (self) {
         );
 
         setSummaryStatistics(summary[0]);
+        // Make the first row bold
+        $('#legendContainer span').css({"font-weight":"normal"});
+        $('#legendContainer span[data-id="0"]')[0].style.fontWeight = "bold";
+
+        // Highlight the first path
+        var path = d3.select("#path0 > g");
+            path.each(pathClickHandler);
+
         $('#legendContainer span').click(function () {
             var that = this;
             var id = that.getAttribute("data-id");
-            var path = d3.select("#path" + that.getAttribute("data-id") + " path");
-            path.each(pathClickHandler);
+            if (that.getAttribute("style") == "font-weight: bold;"){
+                var path = d3.select("#path" + that.getAttribute("data-id") + " path");
+                path.each(pathClickHandler);
+            }
 
-            this.style.fontWeight = "bold";
+            if (that.getAttribute("style") == "font-weight: normal;"){
+                $('#legendContainer span').css({"font-weight":"normal"});
+                this.style.fontWeight = "bold";
 
-            // Set summary statistics
-            $("#statisticsTable tbody").empty();
-            $("#statisticsTable tbody").append(
-                '<tr><td>Arithmetic Mean</td><td>' + summary[id].arithmeticMean + '</td></tr>\
-                        <tr><td>Geometric Mean</td><td>'+ summary[id].geometricMean + '</td></tr>\
-                        <tr><td>Maximum</td><td>' + summary[id].maximum + '</td></tr>\
-                        <tr><td>Minimum</td><td>' + summary[id].minimum + '</td></tr>\
-                        <tr><td>Standard Deviation</td><td>' + summary[id].standardDeviation + '</td></tr>\
-                        <tr><td>Coefficient of Variation</td><td>'+ summary[id].coefficientOfVariation +'</td></tr>  '
-            );
+                svg.selectAll(".line")
+                    .style("stroke-width", 1.5)
+
+                // Set summary statistics
+                setSummaryStatistics(summary[id]);
+            }
         });
     }
 
