@@ -4,7 +4,7 @@
 
 TsaApplication.DataManager = (function (self) {
     var dataLoader = { loadedData: 0, dataToLoad: ['facets', 'dataseries', 'sites'] };
-
+    var pb = document.getElementById("progressBar");
     //data
     self.dataseries = [];
     self.facets = [];
@@ -18,8 +18,11 @@ TsaApplication.DataManager = (function (self) {
 
     self.loadData = function() {
         dataLoader.watch("loadedData", function(id, oldval, newval) {
+            var pb = document.getElementById("progressBar");
+            pb.setAttribute("style", "width:" + ((newval * 33) + 1) +"%");
             if (newval === dataLoader.dataToLoad.length) {
                 $(document).trigger(dataLoaded);
+                $("#loadingScreen").delay(500).fadeOut(); // delay to see the bar reach 100%
             }
             return newval;
         });
@@ -45,8 +48,6 @@ TsaApplication.DataManager = (function (self) {
             $(document).trigger(facetsLoaded);
         });
     };
-
-
 
     function extendDataseries() {
         self.dataseries.forEach(function(series) {

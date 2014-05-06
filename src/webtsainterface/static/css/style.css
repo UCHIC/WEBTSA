@@ -193,12 +193,13 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     overflow-y:auto;
 }
 
-.row {
+.row{
     margin-right: 0px;
     margin-left: 0px;
     height: -moz-calc(100% - 51px);
     height: -webkit-calc(100% - 51px);
     height: calc(100% - 51px);
+    overflow: hidden;
 }
 
 .navbar{
@@ -522,10 +523,8 @@ button.ColVis_Button {
 #graphArea .ring{
   position: absolute;
   display:none;
-  top:0;
-  bottom: 0;
-  left:0;
-  right:0;
+  top: calc((100% - 80px)/2);
+  left: calc((100% - 300px)/2);
   margin:auto;
   width: 80px;
   height: 80px;
@@ -546,4 +545,38 @@ button.ColVis_Button {
 {
     from {transform: rotate(0deg);}
     to {transform: rotate(360deg)}
+}
+
+#loadingScreen{
+    background:#292929;
+    position:absolute;
+    height: calc(100% - 50px);
+    width:100%;
+    z-index:999;
+}
+
+.progress{
+    position:absolute;
+    margin-bottom: 0px;
+    width: 350px;
+    height:25px;
+    top:calc((100% - 20px) / 2);
+    left:calc((100% - 350px) / 2);
+    background-color: #1a1a1a;
+    height: 30px;
+    padding: 5px;
+    width: 350px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px #000 inset, 0 1px 0 #444;
+}
+
+#progressBar{
+    width: 350px;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
+}
+/* ------------- */
+
+.progress-bar span {
+
 }

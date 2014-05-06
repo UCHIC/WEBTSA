@@ -2,11 +2,15 @@ var TsaApplication = (function(self){
     self.initialParameters = {};
 
     self.initializeApplication = function() {
+
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
         self.UiHelper.loadView(selectedView);
         bindEvents();
         self.DataManager.loadData();
+        /*var pb = document.getElementById("progressBar");
+        pb.setAttribute("style", "width:100%");*/
+
     };
 
 

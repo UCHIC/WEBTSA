@@ -122,7 +122,7 @@ TsaApplication.VisualizationController = (function (self) {
                 summary[i].deviationSum += Math.pow(dv - summary[i].arithmeticMean, 2);
             }
             summary[i].standardDeviation = (Math.pow(summary[i].deviationSum / summary[i].count, (1 / 2))).toFixed(2);
-            summary[i].coefficientOfVariation = (summary[i].standardDeviation / summary[i].arithmeticMean).toFixed(2);
+            summary[i].coefficientOfVariation = ((summary[i].standardDeviation / summary[i].arithmeticMean) * 100).toFixed(2) + "%";
 
             // Add commas
             summary[i].arithmeticMean = self.numberWithCommas(summary[i].arithmeticMean);
@@ -130,12 +130,8 @@ TsaApplication.VisualizationController = (function (self) {
             summary[i].maximum = self.numberWithCommas(summary[i].maximum);
             summary[i].minimum = self.numberWithCommas(summary[i].minimum);
             summary[i].standardDeviation = self.numberWithCommas(summary[i].standardDeviation);
-            summary[i].coefficientOfVariation = self.numberWithCommas(summary[i].coefficientOfVariation);
 
         }
-
-
-
         return summary;
     }
 
@@ -215,7 +211,6 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     function setSummaryStatistics(summary){
-        // Load statistics for the first dataset by default
         $("#statisticsTable tbody").empty();
         $("#statisticsTable tbody").append(
             '<tr><td>Arithmetic Mean</td><td>' + summary.arithmeticMean + '</td></tr>\
@@ -250,8 +245,7 @@ TsaApplication.VisualizationController = (function (self) {
 
         var summary = calcSummaryStatistics(datasets);
 
-
-
+        // Restructure the data to use it in a time series
         data = data.map(function (d) {
             return {
                 seriesID: +d.seriesID,
