@@ -72,7 +72,11 @@ TsaApplication.VisualizationController = (function (self) {
     }, 500));
 
 
-
+    d3.selection.prototype.moveToFront = function() {
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
     function calcSummaryStatistics(data){
         var summary = [];
 
@@ -229,17 +233,19 @@ TsaApplication.VisualizationController = (function (self) {
 
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
         var axisMargin = 60;
-        var margin = {top: 20, right: 10 + (Math.floor(varnames.length / 2)) * axisMargin, bottom: 60, left: (Math.ceil(varnames.length / 2)) * axisMargin},
+        var margin = {top: 20, right: 20 + (Math.floor(varnames.length / 2)) * axisMargin, bottom: 60, left: (Math.ceil(varnames.length / 2)) * axisMargin},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom;
         // even: f(n) = n * 10
         // odd: f(n) = width - (n-1) * 10
+
+        var textDistance = 50;
         var axisProperties = [
-            {xTranslate: 0, orient: "left", textdistance: -50},
-            {xTranslate: width, orient: "right", textdistance: 50},
-            {xTranslate: -65, orient: "left", textdistance: -50},
-            {xTranslate: width + 65, orient: "right", textdistance: 50},
-            {xTranslate: -130, orient: "left", textdistance: -50}
+            {xTranslate: 0, orient: "left", textdistance: -textDistance},
+            {xTranslate: width, orient: "right", textdistance: textDistance},
+            {xTranslate: -65, orient: "left", textdistance: -textDistance},
+            {xTranslate: width + 65, orient: "right", textdistance: textDistance},
+            {xTranslate: -130, orient: "left", textdistance: -textDistance}
         ];
         var data = _(datasets).flatten();
 
@@ -323,6 +329,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             yAxis[i] = d3.svg.axis()
                 .scale(y[i])
+                .tickFormat(d3.format(".2s"))
                 .orient(axisProperties[i].orient);
 
             lines[i] = d3.svg.line()
@@ -352,7 +359,7 @@ TsaApplication.VisualizationController = (function (self) {
                 '<li class="list-group-item" data-id="' + i + '">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
                     '<font color=' + color(i) + '> ■ '  + '</font><span>' + varnames[i] +
-                    '</span></li>');
+                    '</span><button class="close">&times;</button></li>');
         }
 
         $('#legendContainer input[type="checkbox"]').click(function () {
@@ -388,6 +395,7 @@ TsaApplication.VisualizationController = (function (self) {
             else{
                 svg.selectAll(".line").style("stroke-width", 1.5)
                 d3.select(this).style("stroke-width", 2.5);
+                d3.select(this.parentElement).moveToFront();
             }
 
             $('#legendContainer .list-group-item').css({"font-weight":"normal"});
@@ -418,7 +426,7 @@ TsaApplication.VisualizationController = (function (self) {
             path.each(pathClickHandler);
 
         $('#legendContainer .list-group-item').click(function (e) {
-            if ( e.target.nodeName.toLowerCase() == 'input' ) {
+            if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
                 return;
             }
 
@@ -456,23 +464,21 @@ TsaApplication.VisualizationController = (function (self) {
         var numOfTicks = 20;                // Number of divisions for columns
         var colors = d3.scale.category10();
 
-        var margin = {top: 10, right: 30, bottom: 60, left: 80},
+        var margin = {top: 8, right: 30, bottom: 60, left: 80},
             width = $("#graphContainer").width() - margin.left - margin.right,
-            height = $("#graphContainer").height() - margin.bottom - margin.top;
-
-
+            height = $("#graphContainer").height();
 
         // A formatter for counts.
         for (var i = 0; i < numOfDatasets; i++) {
             var formatCount = d3.format(",.0f");
-            var graphHeight = $("#graphContainer").height() / numOfDatasets - margin.bottom;
+            var graphHeight = ($("#graphContainer").height() / numOfDatasets) - margin.bottom - margin.top;
             var domainMin = Math.min.apply(Math, values[i]);
             var domainMax = Math.max.apply(Math, values[i]);
 
              $("#legendContainer ul").append(
             '<li class="list-group-item">' +
                 '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-                '</li>');
+                '<button class="close">&times;</button></li>');
 
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
@@ -496,13 +502,14 @@ TsaApplication.VisualizationController = (function (self) {
                 //.tickSize(-width, 0, 0)
                 //.orient("right")
                 .scale(y)
+                .tickFormat(d3.format("s"))
                 .orient("left");
 
             var svg = d3.select("#graphContainer").append("svg")
                 .attr("width", width + margin.left + margin.right)
-                .attr("height", graphHeight + margin.bottom)
+                .attr("height", graphHeight + margin.bottom + margin.top)
                 .append("g")
-                .attr("transform", "translate(" + margin.left + ",0)");
+                .attr("transform", "translate(" + margin.left + ","+margin.top +")");
 
             var bar = svg.selectAll(".bar")
                 .data(data)

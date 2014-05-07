@@ -118,21 +118,27 @@ var TsaApplication = (function(self){
                 $("#graphArea").prepend(
                     '<div class="alert alert-danger alert-dismissable">\
                       <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
-                      <strong>No oh!</strong> Dates cannot overlap. \
+                      <strong></strong> Dates cannot overlap. \
                     </div>'
                 );
             }
         });
         $("#btnCollapseToggle").click(function() {
             dir = !dir;
-            r = dir? -280 : 0;
+            var slideDistance = 295;
+            r = dir? -slideDistance : 0;
             $("#panel-right").stop().animate({right: r+'px'}, 0);
-            if (!dir)
-                //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);
-                $("#graphContainer").width($("#graphContainer").width() - 280);
-            else
-                //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);
-                $("#graphContainer").width($("#graphContainer").width() + 280);
+            $("#btnCollapseToggle span").removeClass();
+            if (!dir){
+                //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);    // animation
+                $("#graphContainer").width($("#graphContainer").width() - slideDistance);                     // no animation
+                $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-right");
+            }
+            else{
+                //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);    // animation
+                $("#graphContainer").width($("#graphContainer").width() + slideDistance);                     // no animation
+                $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
+            }
             self.VisualizationController.plotSeries();
         });
     }
