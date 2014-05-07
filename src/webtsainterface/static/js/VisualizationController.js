@@ -71,6 +71,8 @@ TsaApplication.VisualizationController = (function (self) {
         self.plotSeries();
     }, 500));
 
+
+
     function calcSummaryStatistics(data){
         var summary = [];
 
@@ -111,7 +113,6 @@ TsaApplication.VisualizationController = (function (self) {
                 // update geometric sum (we'll use it to calculate the geometric mean)
                 if (dv != 0)
                     summary[i].geometricSum += Math.log(Math.abs(dv));
-
             }
 
             summary[i].arithmeticMean = (summary[i].sum / summary[i].count).toFixed(2);
@@ -141,7 +142,7 @@ TsaApplication.VisualizationController = (function (self) {
         var datasets = _(self.plottedSeries).pluck('dataset');
         var noDataValues = _(datasets).pluck('noDataValue');
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
-        // -------------- FILTERS BEGIN --------------------------
+
         // Filter no-data value
         for (var i = 0; i < datasets.length;i++){
             datasets[i] = datasets[i].filter(function (d) {
@@ -207,7 +208,6 @@ TsaApplication.VisualizationController = (function (self) {
         }
 
         return datasets;
-        // -------------- FILTERS END --------------------------
     }
 
     function setSummaryStatistics(summary){
@@ -349,9 +349,9 @@ TsaApplication.VisualizationController = (function (self) {
              .text(varnames[i] + " (" +  varUnits[i] + ")");
 
             $("#legendContainer ul").append(
-                '<li class="list-group-item">' +
+                '<li class="list-group-item" data-id="' + i + '">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
-                    '<font color=' + color(i) + '> ■ '  + '</font><span data-id="' + i + '">' + varnames[i] +
+                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varnames[i] +
                     '</span></li>');
         }
 
@@ -390,9 +390,9 @@ TsaApplication.VisualizationController = (function (self) {
                 d3.select(this).style("stroke-width", 2.5);
             }
 
-            $('#legendContainer span').css({"font-weight":"normal"});
+            $('#legendContainer .list-group-item').css({"font-weight":"normal"});
 
-            $('#legendContainer span[data-id="'+ this.parentElement.getAttribute("data-id") +'"]')[0].style.fontWeight = "bold";
+            $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]')[0].style.fontWeight = "bold";
             setSummaryStatistics(summary[this.parentElement.getAttribute("data-id")]);
         }
 
@@ -410,14 +410,18 @@ TsaApplication.VisualizationController = (function (self) {
 
         setSummaryStatistics(summary[0]);
         // Make the first row bold
-        $('#legendContainer span').css({"font-weight":"normal"});
-        $('#legendContainer span[data-id="0"]')[0].style.fontWeight = "bold";
+        $('#legendContainer .list-group-item').css({"font-weight":"normal"});
+        $('#legendContainer .list-group-item[data-id="0"]')[0].style.fontWeight = "bold";
 
         // Highlight the first path
         var path = d3.select("#path0 > g");
             path.each(pathClickHandler);
 
-        $('#legendContainer span').click(function () {
+        $('#legendContainer .list-group-item').click(function (e) {
+            if ( e.target.nodeName.toLowerCase() == 'input' ) {
+                return;
+            }
+
             var that = this;
             var id = that.getAttribute("data-id");
             if (that.getAttribute("style") == "font-weight: bold;"){
@@ -426,7 +430,7 @@ TsaApplication.VisualizationController = (function (self) {
             }
 
             if (that.getAttribute("style") == "font-weight: normal;"){
-                $('#legendContainer span').css({"font-weight":"normal"});
+                $('#legendContainer .list-group-item').css({"font-weight":"normal"});
                 this.style.fontWeight = "bold";
 
                 svg.selectAll(".line")

@@ -1,6 +1,6 @@
 var TsaApplication = (function(self){
+    var r =0, dir=false;
     self.initialParameters = {};
-
     self.initializeApplication = function() {
 
         self.initialParameters = getUrlParameters();
@@ -123,11 +123,22 @@ var TsaApplication = (function(self){
                 );
             }
         });
+        $("#btnCollapseToggle").click(function() {
+            dir = !dir;
+            r = dir? -280 : 0;
+            $("#panel-right").stop().animate({right: r+'px'}, 0);
+            if (!dir)
+                //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);
+                $("#graphContainer").width($("#graphContainer").width() - 280);
+            else
+                //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);
+                $("#graphContainer").width($("#graphContainer").width() + 280);
+            self.VisualizationController.plotSeries();
+        });
     }
 
     return self;
 }(TsaApplication || {}));
-
 
 
 $(document).ready(function(){

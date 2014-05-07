@@ -164,7 +164,7 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 }
 
 .CheckBoxLabel{
-        /* Some browsers use different cursor notations*/
+     /* Some browsers use different cursor notations*/
     cursor: pointer; 
     cursor: hand;
 }
@@ -420,15 +420,12 @@ button.ColVis_Button {
     margin-left: 15px;
 }
 
-
 .datepicker{
     text-align: center;
 }
 
 #visualizationContent{
-    height:-moz-calc(100% - 45);
-    height:-webkit-calc(100% - 45);
-    height:calc(100% - 45);
+
     width:100%;
     overflow:hidden;
 }
@@ -447,31 +444,73 @@ button.ColVis_Button {
     padding-top: 5px;
 }
 
+#panel-right ul li{
+    padding: 3px 15px;
+}
+
 #panel-right{
-    height:-moz-calc(100% - 20px);
-    height:-webkit-calc(100% - 20px);
-    height: calc(100% - 20px);
+    background: white;
+    position:absolute;
+    right:0px;
+    height:auto;
     width: 295px;
     float:right;
     margin-right: 3px;
     margin-top:3px;
+    margin-bottom: 5px;
+    border: 1px solid #aaa;
+    padding: 5px;
+    padding-bottom: 0px;
+    border-radius: 3px;
+    box-shadow: -5px 5px 10px #dddddd;
 }
 
 #panel-right .panel{
-    border:1px solid #dddddd;
-    box-shadow: -5px 5px 10px #dddddd;
-    padding: 3px;
+    min-height: 80px;
+    border:1px solid #aaa;
+    border-radius:4px 4px 0px 0px;
+    padding-bottom: 3px;
     margin-bottom: 5px;
-    margin-top:5px;
 }
+
 
 #panel-right .panel-heading{
     width:100%;
+    background: #ddd;
 }
 
-#panelRight ul li{
-    padding: 3px 15px;
+#panel-right .glyphicon{
+    top:0px;
 }
+
+#btnCollapseToggle{
+    float: left;
+    margin-left: -26px;
+    margin-top: 6px;
+    position: absolute;
+    width: 10px;
+    border:1px solid #aaa;
+    border-right:0px;
+    border-radius:4px 0px 0px 4px;
+}
+
+
+#summaryContainer{
+
+}
+
+
+#btnCollapseToggle:active, #btnCollapseToggle:focus{
+    outline:0px !important;
+    -webkit-appearance:none;
+}
+
+#btnCollapseToggle span{
+    margin-left:-5px;
+}
+
+
+
 
 #plotOptionsContainer td{
     border-top:0px;
@@ -483,6 +522,10 @@ button.ColVis_Button {
     text-align: right;
 }
 
+#plotOptionsContainer input{
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
 #graphArea .alert {
     position: absolute;
     width: calc(100% - 310px);
@@ -559,24 +602,17 @@ button.ColVis_Button {
     position:absolute;
     margin-bottom: 0px;
     width: 350px;
-    height:25px;
+    height:30px;
     top:calc((100% - 20px) / 2);
     left:calc((100% - 350px) / 2);
-    background-color: #1a1a1a;
-    height: 30px;
     padding: 5px;
-    width: 350px;
-    border-radius: 5px;
+    background-color: #1a1a1a;
     box-shadow: 0 1px 5px #000 inset, 0 1px 0 #444;
 }
 
 #progressBar{
-    width: 350px;
     border-radius: 3px;
     box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
 }
-/* ------------- */
 
-.progress-bar span {
 
-}

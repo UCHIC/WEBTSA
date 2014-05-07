@@ -4,7 +4,6 @@
 
 TsaApplication.DataManager = (function (self) {
     var dataLoader = { loadedData: 0, dataToLoad: ['facets', 'dataseries', 'sites'] };
-    var pb = document.getElementById("progressBar");
     //data
     self.dataseries = [];
     self.facets = [];
