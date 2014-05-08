@@ -1,8 +1,3 @@
-/**
- * Created by mauriel on 3/14/14.
- */
-(function() {
-
 // Inspired by http://informationandvisualization.de/blog/box-plot
 d3.box = function() {
   var width = 1,
@@ -155,7 +150,7 @@ d3.box = function() {
           .remove();
 
       // Update outliers.
-      /*var outlier = g.selectAll("circle.outlier")
+      var outlier = g.selectAll("circle.outlier")
           .data(outlierIndices, Number);
 
       outlier.enter().insert("circle", "text")
@@ -178,7 +173,7 @@ d3.box = function() {
           .duration(duration)
           .attr("cy", function(i) { return x1(d[i]); })
           .style("opacity", 1e-6)
-          .remove();*/
+          .remove();
 
       // Compute the tick format.
       var format = tickFormat || x1.tickFormat(8);
@@ -301,4 +296,3 @@ function boxQuartiles(d) {
   ];
 }
 
-})();

@@ -91,6 +91,7 @@
 
 svg.box{
     float:left;
+    width:auto;
 }
 
 .left{
@@ -106,16 +107,26 @@ svg.box{
 .box circle {
   fill: #fff;
   stroke: #000;
-  stroke-width: 1px;
+  stroke-width: 2px;
 }
+
+.box rect{
+    fill: #7abcff;
+}
+
+.box text{
+    font-size:15px;
+}
+
 
 .box .center {
   stroke-dasharray: 3,3;
 }
 
 .box .outlier {
-  fill: none;
-  stroke: #ccc;
+  fill: white;
+  stroke: #999;
+  stroke-width: 1px;
 }
 
 
@@ -188,10 +199,13 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     padding:0px;
     height:100%;
     border-right: 1px solid #dddddd;
-    overflow:auto;
+    overflow-x:hidden;
+    overflow-y:auto;
 }
+
 .col-sm-3{
     overflow-y:auto;
+    overflow-x:hidden;
 }
 
 .row{
@@ -200,7 +214,6 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     height: -moz-calc(100% - 51px);
     height: -webkit-calc(100% - 51px);
     height: calc(100% - 51px);
-    overflow: auto;
 }
 
 .navbar{
@@ -486,7 +499,11 @@ button.ColVis_Button {
 }
 
 #panel-right .glyphicon{
-    top:0px;
+    top: 0px;
+}
+
+#btnCollapseToggle .glyphicon{
+    top: 2px;
 }
 
 #btnCollapseToggle{

@@ -71,12 +71,13 @@ TsaApplication.VisualizationController = (function (self) {
         self.plotSeries();
     }, 500));
 
-
+    // Moves an svg element to the last position of its container so it is rendered last and appears in front
     d3.selection.prototype.moveToFront = function() {
       return this.each(function(){
         this.parentNode.appendChild(this);
       });
     };
+
     function calcSummaryStatistics(data){
         var summary = [];
 
@@ -140,6 +141,18 @@ TsaApplication.VisualizationController = (function (self) {
         return summary;
     }
 
+    function setSummaryStatistics(summary){
+        $("#statisticsTable tbody").empty();
+        $("#statisticsTable tbody").append(
+            '<tr><td>Arithmetic Mean</td><td>' + summary.arithmeticMean + '</td></tr>\
+                    <tr><td>Geometric Mean</td><td>'+ summary.geometricMean + '</td></tr>\
+                    <tr><td>Maximum</td><td>' + summary.maximum + '</td></tr>\
+                    <tr><td>Minimum</td><td>' + summary.minimum + '</td></tr>\
+                    <tr><td>Standard Deviation</td><td>' + summary.standardDeviation + '</td></tr>\
+                    <tr><td>Coefficient of Variation</td><td>'+ summary.coefficientOfVariation +'</td></tr>  '
+        );
+    }
+
     function getDatasetsAfterFilters(){
         var minDate = new Date(8640000000000000);
         var maxDate = new Date(-8640000000000000);
@@ -169,24 +182,26 @@ TsaApplication.VisualizationController = (function (self) {
         // Update minimum and maximum dates on the date pickers
         var dateFirst = $('#dpd1').datepicker({
             onRender: function (date) {
-                return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';
+
+                return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
         }).on('click', function(){
             dateLast.hide();
         })
             .on('changeDate',function (ev) {
-            if (ev.date.valueOf() < dateLast.date.valueOf()) {
+            /*if (ev.date.valueOf() < dateLast.date.valueOf()) {
                 var newDate = new Date(ev.date)
                 newDate.setDate(newDate.getDate() + 1);
                 dateLast.setValue(newDate);
-            }
+            }*/
             dateFirst.hide();
             $('#dpd2')[0].focus();
         }).data('datepicker');
 
         var dateLast = $('#dpd2').datepicker({
             onRender: function (date) {
-                return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';
+
+                return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
         }).on('click', function(){
             dateFirst.hide();
@@ -201,7 +216,10 @@ TsaApplication.VisualizationController = (function (self) {
         // If no dates are set, display the whole thing
         if (dateFirst.date.valueOf() == now.valueOf() && dateLast.date.valueOf() == now.valueOf()) {
             dateFirst.date = minDate;
+            dateFirst.setValue(minDate);
+
             dateLast.date = maxDate;
+            dateLast.setValue(maxDate);
         }
 
         // Filter by dates if specified
@@ -212,18 +230,6 @@ TsaApplication.VisualizationController = (function (self) {
         }
 
         return datasets;
-    }
-
-    function setSummaryStatistics(summary){
-        $("#statisticsTable tbody").empty();
-        $("#statisticsTable tbody").append(
-            '<tr><td>Arithmetic Mean</td><td>' + summary.arithmeticMean + '</td></tr>\
-                    <tr><td>Geometric Mean</td><td>'+ summary.geometricMean + '</td></tr>\
-                    <tr><td>Maximum</td><td>' + summary.maximum + '</td></tr>\
-                    <tr><td>Minimum</td><td>' + summary.minimum + '</td></tr>\
-                    <tr><td>Standard Deviation</td><td>' + summary.standardDeviation + '</td></tr>\
-                    <tr><td>Coefficient of Variation</td><td>'+ summary.coefficientOfVariation +'</td></tr>  '
-        );
     }
 
     function drawMultiseries() {
@@ -468,10 +474,11 @@ TsaApplication.VisualizationController = (function (self) {
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height();
 
+        var graphHeight = ($("#graphContainer").height() / numOfDatasets) - margin.bottom - margin.top;
         // A formatter for counts.
         for (var i = 0; i < numOfDatasets; i++) {
             var formatCount = d3.format(",.0f");
-            var graphHeight = ($("#graphContainer").height() / numOfDatasets) - margin.bottom - margin.top;
+
             var domainMin = Math.min.apply(Math, values[i]);
             var domainMax = Math.max.apply(Math, values[i]);
 
@@ -579,23 +586,28 @@ TsaApplication.VisualizationController = (function (self) {
 
     function drawBoxPlot(){
         var varnames = _.pluck(self.plottedSeries, 'variablename');
-        var observations = _(_(self.plottedSeries).pluck('dataset')).map(function(dataset) {
+        var observations = getDatasetsAfterFilters().map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
+        var numOfDatasets = observations.length;
+
+        var boxContainerWidth = 150;
+
+        var m = ($("#graphContainer").width() - (numOfDatasets * boxContainerWidth)) / (numOfDatasets + 1);
+
+        // properties for the box plots
+        var margin = {top: 10, right: m, bottom: 20, left: m},
+            width = 30,
+            height = $("#graphContainer").height()  - margin.top - margin.bottom;
 
         var colors = d3.scale.category10();
+        var data = [];
         for (var i = 0; i < observations.length; i++){
-
-            var margin = {top: 10, right: 50, bottom: 20, left: 50},
-            width = 120  - margin.left - margin.right,
-            height = 500  - margin.top - margin.bottom;
-
-             $("#legendContainer ul").append(
-            '<li class="list-group-item"><label class="checkbox">' +
+           $("#legendContainer ul").append(
+            '<li class="list-group-item">' +
                 '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-                '</label></li>');
+                '<button class="close">&times;</button></li>');
 
-            var data = [];
             data[0] = observations[i];
             var min = Infinity,
                 max = -Infinity;
@@ -617,16 +629,20 @@ TsaApplication.VisualizationController = (function (self) {
 
             chart.domain([min, max]);
 
-              var svg = d3.select("#graphContainer").selectAll("svg")
-                  .data(data)
-                .enter().append("svg")
-                  .attr("class", "box")
-                  .attr("width", width + margin.left + margin.right)
-                  .attr("height", height + margin.bottom + margin.top)
-                .append("g")
-                  .attr("transform", "translate(" + (margin.left + i * width) + "," + margin.top + ")")
-                  .call(chart);
-         }
+            var svg = d3.select("#graphContainer").append("svg")
+              .data(data)
+              .attr("class", "box")
+              .attr("width", boxContainerWidth)
+              .attr("height", height + margin.bottom + margin.top)
+            .append("g")
+                .attr("transform", "translate(" + ((boxContainerWidth - 30) / 2) + "," + margin.top + ")")
+              .call(chart);
+
+            $("svg").css("margin-left", margin.left + "px")
+        }
+
+
+
 
         // Returns a function to compute the interquartile range.
         function iqr(k) {
