@@ -105,13 +105,13 @@ svg.box{
 .box line,
 .box rect,
 .box circle {
-  fill: #fff;
+  /*fill: #fff;*/
   stroke: #000;
   stroke-width: 2px;
 }
 
 .box rect{
-    fill: #7abcff;
+    /*fill: #7abcff;*/
 }
 
 .box text{
@@ -551,8 +551,9 @@ button.ColVis_Button {
 }
 #graphArea .alert {
     position: absolute;
-    width: calc(100% - 310px);
+    width: calc(100% - 322px);
     opacity:0.9;
+    text-align: center;
 }
 
 
