@@ -1,16 +1,13 @@
 var TsaApplication = (function(self){
     var r =0, dir=false;
+
     self.initialParameters = {};
     self.initializeApplication = function() {
-
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
         self.UiHelper.loadView(selectedView);
         bindEvents();
         self.DataManager.loadData();
-        /*var pb = document.getElementById("progressBar");
-        pb.setAttribute("style", "width:100%");*/
-
     };
 
 
@@ -21,6 +18,8 @@ var TsaApplication = (function(self){
     }
 
     function bindEvents() {
+        var renderTable = _.once(self.TableController.reDrawTable);
+
         $(document).on('facetsloaded', function() {
             self.UiHelper.renderFacets($("#leftPanel"));
         });
@@ -63,8 +62,12 @@ var TsaApplication = (function(self){
             google.maps.event.trigger(self.MapController.map, 'resize');
         });
 
-        $('a[href="#mapContent"]').on('shown', function() {
+        $(document).on('shown.bs.tab', 'a[href="#mapContent"]', function() {
             google.maps.event.trigger(self.MapController.map, 'resize');
+        });
+
+        $(document).on('shown.bs.tab', 'a[href="#datasetsContent"]', function() {
+            renderTable();
         });
 
         $("#btnAddToPlot").click(function() {

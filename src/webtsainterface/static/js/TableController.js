@@ -62,19 +62,22 @@ TsaApplication.TableController = (function(self) {
         TsaApplication.UiHelper.customizeTableStyle();
 
         $(window).on('resize', function() {
-            var oSettings = self.dataseriesTable.fnSettings();
-            oSettings.oScroll.sY = ($('div#datasetsContent').height() - tableOffsetY);
-            self.dataseriesTable.fnDraw();
+            self.reDrawTable();
         });
 
         $('.dataTables_scrollBody').on('scroll', function() {
-            self.dataseriesTable.find("tr").find("td:not(:first)").click(function(event) {
-                var row = $(this).parent("tr").get(0);
-                var series = self.dataseriesTable.fnGetData(row);
-                TsaApplication.UiHelper.showDataseriesDialog(series);
-            });
+            bindRows();
         });
 
+        bindRows();
+    };
+
+
+
+    self.reDrawTable = function() {
+        var oSettings = self.dataseriesTable.fnSettings();
+        oSettings.oScroll.sY = ($('div#datasetsContent').height() - tableOffsetY);
+        self.dataseriesTable.fnDraw();
     };
 
     self.updateDataseries = function() {
@@ -82,6 +85,14 @@ TsaApplication.TableController = (function(self) {
         self.dataseriesTable.fnClearTable();
         self.dataseriesTable.fnAddData(TsaApplication.Search.filteredDataseries);
     };
+
+    function bindRows() {
+        self.dataseriesTable.find("tr").find("td:not(:first)").click(function(event) {
+            var row = $(this).parent("tr").get(0);
+            var series = self.dataseriesTable.fnGetData(row);
+            TsaApplication.UiHelper.showDataseriesDialog(series);
+        });
+    }
 
     return self;
 }(TsaApplication.TableController || {}));
