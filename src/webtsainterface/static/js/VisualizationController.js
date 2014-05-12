@@ -109,7 +109,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             // Coefficient of Variation
             var variation = summary[i].standardDeviation / summary[i].arithmeticMean;
-            if (variation = Infinity || variation = -Infinity){variation = null;}
+            if (variation == Infinity || variation == -Infinity){variation = null;}
             summary[i].coefficientOfVariation = ((summary[i].standardDeviation / summary[i].arithmeticMean) * 100).toFixed(2) + "%";
 
             // Add commas
@@ -317,40 +317,56 @@ TsaApplication.VisualizationController = (function (self) {
                 });
 
              // ----------------------- OPTIMIZATION BEGINS -----------------------
-            var minDistance = 5;
-            var date = data[i]["values"][0].date;
-            var val = parseFloat(data[i]["values"][0].val);
+            // if number of points > 2
+            /*var date1 = data[i]["values"][0].date;
+            var val1 = parseFloat(data[i]["values"][0].val);
             var dataCopy = [];
 
-            dataCopy.push({val: val, date: date,seriesID:i })
+            dataCopy.push({val: val1, date: date1,seriesID:i })
             var points = [];
-            points.push({x:x(date), y:y[i](val)});  // push in the first point
+            points.push({x:x(date1), y:y[i](val1)});  // push in the first point
 
-            for (var j = 1; j < data[i]["values"].length; j++){
-                var date2 = data[i]["values"][j].date;
-                var val2 = data[i]["values"][j].val;
-
-                var point1 = {x:x(date), y:y[i](val)};
+            for (var j = 2; j < data[i]["values"].length - 1; j++){
+                // Current point
+                var date2 = data[i]["values"][j-1].date;
+                var val2 = parseFloat(data[i]["values"][j-1].val);
                 var point2 = {x:x(date2), y:y[i](val2)};
 
-                // var distance = d3.min(points, function (d) {return Math.sqrt(Math.pow((point2.x - d.x), 2) + Math.pow((point2.y - d.y), 2));});
-                var distance = Math.sqrt(Math.pow((point2.x - point1.x), 2) + Math.pow((point2.y - point1.y), 2));
+                // Last inserted
+                var point1 = {x:points[points.length-1].x - point2.x, y:points[points.length-1].y-point2.y};
 
-                if (distance > minDistance){
+                // Next point
+                var date3 = data[i]["values"][j].date;
+                var val3 = data[i]["values"][j].val;
+                var point3 = {x:(x(date3)- point2.x), y:(y[i](val3) - point2.y)};
+
+                var dotProduct = (point1.x * point3.x + point1.y * point3.y);
+                var divisor = ((Math.sqrt(Math.pow(point1.x, 2) + Math.pow(point1.y, 2)))*(Math.sqrt(Math.pow(point3.x, 2) + Math.pow(point3.y, 2))));
+
+                // Angle between two vectors
+                var angle = Math.acos(dotProduct/divisor);
+
+                if (angle > 1 || angle <0){
                     dataCopy.push({val: val2, date: date2, seriesID:i});
                     points.push(point2);
-                    val = val2;
-                    date = date2;
                 }
             }
-            data[i]["values"] = dataCopy;
+
+            // insert last value
+            date1 = data[i]["values"][data[i]["values"].length-1].date;
+            val1 = parseFloat(data[i]["values"][data[i]["values"].length-1].val);
+
+            dataCopy.push({val: val1, date: date1,seriesID:i })
+            data[i]["values"] = dataCopy;   // Replace with new and optimized array
+
+            // Show message with number of data points
             $("#graphArea .alert").remove();
             $("#graphArea").prepend(
                 '<div class="alert alert-info alert-dismissable">\
                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
                   <strong></strong>' + "Number of data points is: " + dataCopy.length +
                 '</div>'
-            );
+            );*/
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
 
