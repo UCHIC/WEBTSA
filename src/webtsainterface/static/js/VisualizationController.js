@@ -318,9 +318,10 @@ TsaApplication.VisualizationController = (function (self) {
 
              // ----------------------- OPTIMIZATION BEGINS -----------------------
             // if number of points > 2
-            /*var date1 = data[i]["values"][0].date;
+            var date1 = data[i]["values"][0].date;
             var val1 = parseFloat(data[i]["values"][0].val);
             var dataCopy = [];
+            var marginOfError = 2; // The margin of error in degree units
 
             dataCopy.push({val: val1, date: date1,seriesID:i })
             var points = [];
@@ -344,9 +345,9 @@ TsaApplication.VisualizationController = (function (self) {
                 var divisor = ((Math.sqrt(Math.pow(point1.x, 2) + Math.pow(point1.y, 2)))*(Math.sqrt(Math.pow(point3.x, 2) + Math.pow(point3.y, 2))));
 
                 // Angle between two vectors
-                var angle = Math.acos(dotProduct/divisor);
+                var angle = Math.acos(dotProduct/divisor)* (180/Math.PI);
 
-                if (angle > 1 || angle <0){
+                if (!(angle > 180 - marginOfError && angle < 180 + marginOfError)){
                     dataCopy.push({val: val2, date: date2, seriesID:i});
                     points.push(point2);
                 }
@@ -364,9 +365,9 @@ TsaApplication.VisualizationController = (function (self) {
             $("#graphArea").prepend(
                 '<div class="alert alert-info alert-dismissable">\
                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
-                  <strong></strong>' + "Number of data points is: " + dataCopy.length +
+                  <strong></strong>' + "Number of data points: " + dataCopy.length +
                 '</div>'
-            );*/
+            );
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
 
