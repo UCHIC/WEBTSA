@@ -1,0 +1,1 @@
+from WEBTSA.settings.base import *

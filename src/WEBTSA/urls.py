@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
@@ -6,7 +7,7 @@ from tastypie.api import Api
 from webtsaservices.api import DataSeriesResource, SitesResource, SourcesDataServicesResource, \
     VariableCategoriesResource, VariablesResource, QualityControlLevelsResource, SearchFacetsResource
 
-from webtsainterface.views import TsaView
+from webtsainterface.views import TsaView, DebugView
 
 
 admin.autodiscover()
@@ -20,8 +21,11 @@ v1_api.register(VariablesResource())
 v1_api.register(QualityControlLevelsResource())
 v1_api.register(SearchFacetsResource())
 
+BASE_URL = settings.SITE_URL[1:]
+
 urlpatterns = patterns('',
-    url(r'^$', TsaView.as_view(), name='tsa-application'),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include(v1_api.urls)),
+    url(r'^' + BASE_URL + '$', TsaView.as_view(), name='tsa-application'),
+    url(r'^' + BASE_URL + 'admin/', include(admin.site.urls)),
+    url(r'^' + BASE_URL + 'api/', include(v1_api.urls)),
+	url(r'^' + BASE_URL + 'debug$', DebugView.as_view(), name='tsa-debug')
 )
