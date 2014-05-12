@@ -8,6 +8,9 @@ TsaApplication.UiHelper = (function (self) {
     var defaultContentElementId = '#mapContent';
 
     self.loadView = function(view) {
+        if ($('#' + view + 'Tab').hasClass('active')) {
+            return;
+        }
         var contentElement = view + 'Content';
         //contentElement = (contentElement.length == 0)? $(defaultContentElementId): contentElement;
         $(".nav-tabs").find("a[href='#" + contentElement + "']").click();

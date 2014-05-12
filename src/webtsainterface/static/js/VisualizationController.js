@@ -221,6 +221,7 @@ TsaApplication.VisualizationController = (function (self) {
             {xTranslate: width + 65, orient: "right", textdistance: textDistance},
             {xTranslate: -130, orient: "left", textdistance: -textDistance}
         ];
+
         var summary = calcSummaryStatistics(datasets);
         var data = _(datasets).flatten();
 
@@ -379,9 +380,10 @@ TsaApplication.VisualizationController = (function (self) {
             .append("text")
              .attr("transform", "rotate(-90)")
              .attr("y", axisProperties[i].textdistance)
-             .attr("x", 5)
-             .attr("dy", ".71em")
              .style("text-anchor", "end")
+             .attr("x", -height/2)
+             .attr("dy", ".71em")
+
              .text(varnames[i] + " (" +  varUnits[i] + ")");
 
             $("#legendContainer ul").append(

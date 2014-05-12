@@ -51,6 +51,7 @@ var TsaApplication = (function(self){
         });
 
         $(document).on('plotstarted', function() {
+            self.UiHelper.loadView('visualization');
             self.UiHelper.startPlotAnimation();
         });
 
