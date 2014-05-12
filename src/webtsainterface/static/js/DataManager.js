@@ -26,25 +26,25 @@ TsaApplication.DataManager = (function (self) {
             return newval;
         });
 
-        $.getJSON("/api/v1/dataseries").done(function(data) {
+		$.getJSON(window.location.pathname + "api/v1/facets?limit=0").done(function(data) {
+            self.facets = data.objects;
+            extendFacets();
+            dataLoader.loadedData++;
+            $(document).trigger(facetsLoaded);
+        });
+		
+		$.getJSON(window.location.pathname + "api/v1/sites?limit=0").done(function(data) {
+            self.sites = data.objects;
+            dataLoader.loadedData++;
+            $(document).trigger(sitesLoaded);
+        });
+		
+        $.getJSON(window.location.pathname + "api/v1/dataseries?limit=0").done(function(data) {
             self.dataseries = data.objects;
             extendDataseries();
             extendFilters();
             dataLoader.loadedData++;
             $(document).trigger(dataseriesLoaded);
-        });
-
-        $.getJSON("/api/v1/sites").done(function(data) {
-            self.sites = data.objects;
-            dataLoader.loadedData++;
-            $(document).trigger(sitesLoaded);
-        });
-
-        $.getJSON("/api/v1/facets").done(function(data) {
-            self.facets = data.objects;
-            extendFacets();
-            dataLoader.loadedData++;
-            $(document).trigger(facetsLoaded);
         });
     };
 
