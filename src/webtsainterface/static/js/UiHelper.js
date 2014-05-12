@@ -99,7 +99,8 @@ TsaApplication.UiHelper = (function (self) {
 
     self.showDataseriesDialog = function(series) {
         var dialog = $('#InfoDialog');
-        var plottedSeriesCount = TsaApplication.VisualizationController.plottedSeries.length;
+        var plottedSeries = TsaApplication.VisualizationController.plottedSeries;
+        var isAlreadyPlotted = _(_(plottedSeries).pluck('seriesid')).contains(series.seriesid);
 
         dialog.get(0).dataset['series'] = series.seriesid;
         dialog.find("#series-active-info").text((series.isactive? "Active": "Not Active"));
@@ -109,7 +110,8 @@ TsaApplication.UiHelper = (function (self) {
             }
         });
 
-        dialog.find("#btnAddToPlot").attr('disabled', (plottedSeriesCount >= 5));
+        dialog.find("#btnPlotDataset").attr('disabled', (isAlreadyPlotted));
+        dialog.find("#btnAddToPlot").attr('disabled', (plottedSeries.length >= 5 || isAlreadyPlotted));
         dialog.modal('show');
     }
 

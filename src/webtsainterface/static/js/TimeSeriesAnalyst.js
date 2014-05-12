@@ -41,6 +41,7 @@ var TsaApplication = (function(self){
         });
 
         $(document).on('plotdataloading', function() {
+            self.UiHelper.loadView('visualization');
             self.UiHelper.startPlotAnimation();
         });
 
@@ -76,7 +77,6 @@ var TsaApplication = (function(self){
             var method = self.VisualizationController.plottingMethods.addPlot;
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
             self.VisualizationController.prepareSeries(series, method);
-            self.UiHelper.loadView('visualization');
             dialog.modal('hide');
         });
 
@@ -86,7 +86,6 @@ var TsaApplication = (function(self){
             var method = self.VisualizationController.plottingMethods.newPlot;
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
             self.VisualizationController.prepareSeries(series, method);
-            self.UiHelper.loadView('visualization');
             dialog.modal('hide');
         });
 

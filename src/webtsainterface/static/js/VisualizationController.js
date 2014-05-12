@@ -15,7 +15,7 @@ TsaApplication.VisualizationController = (function (self) {
 
     self.prepareSeries = function(series, method) {
         if (method === self.plottingMethods.addPlot && self.plottedSeries.length >= 5) {
-            //TODO: TsaApplication.UiHelper.showMessage('tiene que quitar un series');
+            //TODO: TsaApplication.UiHelper.showMessage('manin tiene que quitar un series');
             return;
         } else if (method === self.plottingMethods.newPlot) {
             self.plottedSeries.length = 0;
