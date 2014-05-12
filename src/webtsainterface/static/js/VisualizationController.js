@@ -318,7 +318,7 @@ TsaApplication.VisualizationController = (function (self) {
 
              // ----------------------- OPTIMIZATION BEGINS -----------------------
             // if number of points > 2
-            /*var date1 = data[i]["values"][0].date;
+           /* var date1 = data[i]["values"][0].date;
             var val1 = parseFloat(data[i]["values"][0].val);
             var dataCopy = [];
 
@@ -345,7 +345,7 @@ TsaApplication.VisualizationController = (function (self) {
 
                 // Angle between two vectors
                 var angle = Math.acos(dotProduct/divisor);
-
+                if (angle > 10){console.log(angle);}
                 if (angle > 1 || angle <0){
                     dataCopy.push({val: val2, date: date2, seriesID:i});
                     points.push(point2);
