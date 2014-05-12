@@ -110,7 +110,6 @@ TsaApplication.UiHelper = (function (self) {
             }
         });
 
-        dialog.find("#btnPlotDataset").attr('disabled', (isAlreadyPlotted));
         dialog.find("#btnAddToPlot").attr('disabled', (plottedSeries.length >= 5 || isAlreadyPlotted));
         dialog.modal('show');
     }
