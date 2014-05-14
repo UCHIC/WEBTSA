@@ -719,8 +719,8 @@ TsaApplication.VisualizationController = (function (self) {
                 .attr("class", "bar")
                 .attr("transform", function (d) {
                     return "translate(" + x(d.x) + "," + y(d.y) + ")";
-                })
-                .on("mouseover", function (d) {
+                });
+                /*.on("mouseover", function (d) {
                    d3.select(this).append("text")
                     .attr("dy", ".75em")
                     .attr("y", 2)
@@ -733,7 +733,7 @@ TsaApplication.VisualizationController = (function (self) {
 
                 .on("mouseout", function (d) {
                    d3.select(this).select("text").remove();
-                });
+                });*/
 
             // TODO: IMPLEMENT DIV
                 /*.on("mouseover", function(d) {
@@ -755,6 +755,13 @@ TsaApplication.VisualizationController = (function (self) {
                 .attr("height", function (d) {
                         return graphHeight - y(d.y);
                 });
+
+            bar.append("text")
+                .attr("dy", ".75em")
+                .attr("y", 6)
+                .attr("x", x(data[0].dx + domainMin) / 2)
+                .attr("text-anchor", "middle")
+                .text(function(d) { return formatCount(d.y); });
 
             svg.append("g")
                 .attr("class", "x axis")

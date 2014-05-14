@@ -178,7 +178,7 @@ svg.box{
 }
 
 .bar text {
-  fill: #000;
+  fill: #fff;
 }
 
 line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
