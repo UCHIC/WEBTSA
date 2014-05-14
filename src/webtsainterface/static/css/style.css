@@ -518,10 +518,9 @@ button.ColVis_Button {
 }
 
 #panel-right-container{
-    width: calc(100% - 30px);
     overflow-y: scroll;
     overflow-x: hidden;
-    height: 100%;
+    height: calc(100% - 10px);
     position: absolute;
     margin: 5px;
     padding-bottom: 5px;
@@ -549,7 +548,7 @@ button.ColVis_Button {
 
 #btnCollapseToggle{
     float: left;
-    margin-left: -40px;
+    margin-left: -21px;
     margin-top: 6px;
     position: absolute;
     width: 10px;
@@ -558,7 +557,6 @@ button.ColVis_Button {
     border-radius:4px 0px 0px 4px;
 }
 
-
 #btnCollapseToggle:active, #btnCollapseToggle:focus, .close:active, .close:focus{
     outline:0px !important;
     -webkit-appearance:none;
@@ -566,6 +564,11 @@ button.ColVis_Button {
 
 #btnCollapseToggle span{
     margin-left:-5px;
+}
+
+#dateIntervals{
+    margin-left: 20px;
+    margin-top: 5px;
 }
 
 

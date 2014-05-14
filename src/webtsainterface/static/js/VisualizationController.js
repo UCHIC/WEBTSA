@@ -172,7 +172,6 @@ TsaApplication.VisualizationController = (function (self) {
         var noDataValues = _(datasets).pluck('noDataValue');
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
 
-
         for (var i = 0; i < datasets.length; i++) {
             // Filter no-data value
             datasets[i] = datasets[i].filter(function (d) {
@@ -216,13 +215,35 @@ TsaApplication.VisualizationController = (function (self) {
 
         // If no dates are set, display the last month
         if (dateFirst.date.valueOf() == now.valueOf() && dateLast.date.valueOf() == now.valueOf()) {
-
             dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
             dateFirst.setValue(maxDate);
 
             dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
             dateLast.setValue(maxDate);
         }
+
+        // Update click events for the date interval buttons
+        $("#btnLastWeek").click(function() {
+            dateFirst.date = maxDate.setDate(maxDate.getDate() - 7);
+            dateFirst.setValue(maxDate);
+
+            dateLast.date = maxDate.setDate(maxDate.getDate() + 7);
+            dateLast.setValue(maxDate);
+        });
+        $("#btnLastMonth").click(function() {
+            dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
+            dateFirst.setValue(maxDate);
+
+            dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
+            dateLast.setValue(maxDate);
+        });
+        $("#btnAll").click(function() {
+            dateFirst.date = minDate;
+            dateFirst.setValue(minDate);
+
+            dateLast.date = maxDate;
+            dateLast.setValue(maxDate);
+        });
 
         // Filter by dates if specified
         for (var i = 0; i < datasets.length; i++){
@@ -245,7 +266,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom,
-            margin2 = {top: height + 70, right: 10, bottom: 20, left: 40},
+            margin2 = {top: height + 70, right: margin.right, bottom: 20, left: margin.left},
             height2 = 100;
 
         var textDistance = 50;
@@ -358,12 +379,6 @@ TsaApplication.VisualizationController = (function (self) {
             //.attr("width", width  - margin.left - margin.right)
             .attr("transform", "translate(0," + (height2) + ")")
             .call(xAxis2)
-        .append("text")
-          .style("text-anchor", "end")
-          .attr("x", width/2)
-          .attr("y", 35)
-          .text("Date");
-
 
         // This loop builds and draws each time series
         for (var i = 0; i < data.length; i++) {
