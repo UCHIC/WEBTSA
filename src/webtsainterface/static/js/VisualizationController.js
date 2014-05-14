@@ -186,11 +186,13 @@ TsaApplication.VisualizationController = (function (self) {
                     maxDate = parsedDate;
                 }
             }
+
         }
 
         // Update minimum and maximum dates on the date pickers
+
         var dateFirst = $('#dpd1').datepicker({
-            onRender: function (date) {
+            onRender: function (date){
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
         }).on('click', function(){
@@ -650,8 +652,6 @@ TsaApplication.VisualizationController = (function (self) {
         }
     }
 
-
-
     function drawHistogram() {
         /* Initialize Histogram*/
         var varnames = _.pluck(self.plottedSeries, 'variablename');
@@ -836,6 +836,7 @@ TsaApplication.VisualizationController = (function (self) {
               .call(chart);
 
             $("svg").css("margin-left", margin.left + "px")
+            $("svg[data-id='" + i + "'] rect").css("fill", colors(i))
         }
 
 
