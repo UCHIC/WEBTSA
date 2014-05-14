@@ -80,7 +80,13 @@ TsaApplication.VisualizationController = (function (self) {
 
     function calcSummaryStatistics(data){
         var summary = [];
+        var sortedValues = data.map(function(value) {
+            return _.pluck(value, 'value');
+        });
         for (var i = 0; i < data.length; i++){
+
+
+
             summary[i] = {
                 maximum:-Infinity,
                 minimum:Infinity,
@@ -89,8 +95,30 @@ TsaApplication.VisualizationController = (function (self) {
                 geometricMean:0,
                 deviationSum:0,
                 standardDeviation:0,
-                coefficientOfVariation:0
+                observations:0,
+                coefficientOfVariation:0,
+                quantile10:0,
+                quantile25:0,
+                median:0,
+                quantile75:0,
+                quantile90:0
             };
+
+            sortedValues[i] = sortedValues[0].map(function(value){
+                return parseFloat(value);
+            });
+
+            sortedValues[i].sort();
+
+            // Quantiles
+            summary[i].quantile10 = d3.quantile(sortedValues[i],.1);
+            summary[i].quantile25 = d3.quantile(sortedValues[i],.25);
+            summary[i].median = d3.quantile(sortedValues[i],.5);
+            summary[i].quantile75 = d3.quantile(sortedValues[i],.75);
+            summary[i].quantile90 = d3.quantile(sortedValues[i],.9);
+
+            // Number of observations
+            summary[i].observations = data[i].length;
 
             // Maximum and Minimum
             summary[i].maximum = d3.max(data[i], function (d) {return d.value;});
@@ -115,6 +143,7 @@ TsaApplication.VisualizationController = (function (self) {
             // Add commas
             summary[i].arithmeticMean = self.numberWithCommas(summary[i].arithmeticMean);
             summary[i].geometricMean = self.numberWithCommas(summary[i].geometricMean);
+            summary[i].observations = self.numberWithCommas(summary[i].observations);
         }
         return summary;
     }
@@ -127,7 +156,12 @@ TsaApplication.VisualizationController = (function (self) {
                     <tr><td>Maximum</td><td>' + summary.maximum + '</td></tr>\
                     <tr><td>Minimum</td><td>' + summary.minimum + '</td></tr>\
                     <tr><td>Standard Deviation</td><td>' + summary.standardDeviation + '</td></tr>\
-                    <tr><td>Coefficient of Variation</td><td>'+ summary.coefficientOfVariation +'</td></tr>  '
+                    <tr><td>10%</td><td>'+ summary.quantile10 +'</td></tr>\
+                    <tr><td>25%</td><td>'+ summary.quantile25 +'</td></tr>\
+                    <tr><td>Median, 50%</td><td>'+ summary.median +'</td></tr>\
+                    <tr><td>75%</td><td>'+ summary.quantile75 +'</td></tr>\
+                    <tr><td>90%</td><td>'+ summary.quantile90 +'</td></tr>\
+                    <tr><td>Number of Observations</td><td>'+ summary.observations +'</td></tr>'
         );
     }
 
@@ -158,14 +192,13 @@ TsaApplication.VisualizationController = (function (self) {
         // Update minimum and maximum dates on the date pickers
         var dateFirst = $('#dpd1').datepicker({
             onRender: function (date) {
-
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
         }).on('click', function(){
             dateLast.hide();
         }).on('changeDate',function (ev) {
             dateFirst.hide();
-            $('#dpd2')[0].focus();
+            //$('#dpd2')[0].focus();
         }).data('datepicker');
 
         var dateLast = $('#dpd2').datepicker({
@@ -207,13 +240,17 @@ TsaApplication.VisualizationController = (function (self) {
 
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
         var axisMargin = 60;
-        var margin = {top: 20, right: 20 + (Math.floor(varnames.length / 2)) * axisMargin, bottom: 60, left: (Math.ceil(varnames.length / 2)) * axisMargin},
+        var margin = {top: 20, right: 20 + (Math.floor(varnames.length / 2)) * axisMargin, bottom: 200, left: (Math.ceil(varnames.length / 2)) * axisMargin},
+
             width = $("#graphContainer").width() - margin.left - margin.right,
-            height = $("#graphContainer").height() - margin.top - margin.bottom;
-        // even: f(n) = n * 10
-        // odd: f(n) = width - (n-1) * 10
+            height = $("#graphContainer").height() - margin.top - margin.bottom,
+            margin2 = {top: height + 70, right: 10, bottom: 20, left: 40},
+            height2 = 100;
 
         var textDistance = 50;
+        // Properties for the five vertical axises.
+        // even: f(n) = n * 10
+        // odd: f(n) = width - (n-1) * 10
         var axisProperties = [
             {xTranslate: 0, orient: "left", textdistance: -textDistance},
             {xTranslate: width, orient: "right", textdistance: textDistance},
@@ -253,26 +290,58 @@ TsaApplication.VisualizationController = (function (self) {
             .range([0, width])
             .nice(d3.time.day);
 
+        var x2 = d3.time.scale()
+            .domain([d3.min(data, function (d) {
+                return d3.min(d.values, function (d) {
+                    return d.date;
+                });
+            }),
+                d3.max(data, function (d) {
+                    return d3.max(d.values, function (d) {
+                        return d.date;
+                    });
+                })])
+            .range([0, width])
+            .nice(d3.time.day);
+
         var color = d3.scale.category10()
             .domain(d3.keys(data[0]).filter(function (key) {
                 return key === "seriesID";
             }));
 
         var y = new Array(data.length);
+        var y2 = new Array(data.length);
         var yAxis = new Array(data.length);
         var lines = new Array(data.length);
+        var lines2 = new Array(data.length);
 
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
 
+        var xAxis2 = d3.svg.axis()
+            .scale(x2)
+            .orient("bottom");
+
         var svg = d3.select("#graphContainer").append("svg")
             .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("height", height + margin.top + margin.bottom);
 
-        svg.append("g")
+        svg.append("defs").append("clipPath")
+            .attr("id", "clip")
+          .append("rect")
+            .attr("width", width)
+            .attr("height", height);
+        var focus = svg.append("g")
+                .attr("class", "focus")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var context = svg.append("g")
+        .attr("class", "context")
+        .attr("height", 100)
+        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+        focus.append("g")
             .attr("class", "x axis")
             //.attr("width", width  - margin.left - margin.right)
             .attr("transform", "translate(0," + (height) + ")")
@@ -281,11 +350,25 @@ TsaApplication.VisualizationController = (function (self) {
           .style("text-anchor", "end")
           .attr("x", width/2)
           .attr("y", 35)
-          .text("Date");;
+          .text("Date");
+
+        context.append("g")
+            .attr("class", "x axis")
+            //.attr("width", width  - margin.left - margin.right)
+            .attr("transform", "translate(0," + (height2) + ")")
+            .call(xAxis2)
+        .append("text")
+          .style("text-anchor", "end")
+          .attr("x", width/2)
+          .attr("y", 35)
+          .text("Date");
+
+        var brush = d3.svg.brush()
+        .x(x2)
+        .on("brush", brushed);
 
         // This loop builds and draws each time series
         for (var i = 0; i < data.length; i++) {
-
             y[i] = d3.scale.linear()
                 .domain([d3.min(data, function (d) {
                     if (d.key == i) {
@@ -301,11 +384,27 @@ TsaApplication.VisualizationController = (function (self) {
                     }
                 })])
                 .range([height, 0]);
+            y2[i] = d3.scale.linear()
+                .domain([d3.min(data, function (d) {
+                    if (d.key == i) {
+                        return d3.min(d.values, function (d) {
+                            return d.val;
+                        });
+                    }
+                }), d3.max(data, function (d) {
+                    if (d.key == i) {
+                        return d3.max(d.values, function (d) {
+                            return d.val;
+                        });
+                    }
+                })])
+                .range([height2, 0]);
 
             yAxis[i] = d3.svg.axis()
                 .scale(y[i])
-                .tickFormat(d3.format(".2f"))
+                .tickFormat(d3.format(".2s"))
                 .orient(axisProperties[i].orient);
+
 
             lines[i] = d3.svg.line()
                 //.interpolate("basis")
@@ -315,6 +414,16 @@ TsaApplication.VisualizationController = (function (self) {
                 .y(
                 function (d) {
                     return y[d.seriesID](d.val);
+                });
+
+            lines2[i] = d3.svg.line()
+                //.interpolate("basis")
+                .x(function (d) {
+                    return x2(d.date);
+                })
+                .y(
+                function (d) {
+                    return y2[d.seriesID](d.val);
                 });
 
              // ----------------------- OPTIMIZATION BEGINS -----------------------
@@ -362,17 +471,16 @@ TsaApplication.VisualizationController = (function (self) {
             data[i]["values"] = dataCopy;   // Replace with new and optimized array
 
             // Show message with number of data points
-            $("#graphArea .alert").remove();
+           /* $("#graphArea .alert").remove();
             $("#graphArea").prepend(
                 '<div class="alert alert-info alert-dismissable">\
                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
                   <strong></strong>' + "Number of data points: " + dataCopy.length +
                 '</div>'
-            );
+            );*/
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
-
-            svg.append("g")
+            focus.append("g")
                 .attr("class", "y axis")
                 .style("fill", color(i))
                 .attr("transform", "translate(" + axisProperties[i].xTranslate + " ,0)")
@@ -383,7 +491,6 @@ TsaApplication.VisualizationController = (function (self) {
              .style("text-anchor", "end")
              .attr("x", -height/2)
              .attr("dy", ".71em")
-
              .text(varnames[i] + " (" +  varUnits[i] + ")");
 
             $("#legendContainer ul").append(
@@ -392,6 +499,13 @@ TsaApplication.VisualizationController = (function (self) {
                     '<font color=' + color(i) + '> ■ '  + '</font><span>' + varnames[i] +
                     '</span><button class="close">&times;</button></li>');
         }
+
+        context.append("g")
+          .attr("class", "x brush")
+          .call(brush)
+        .selectAll("rect")
+          .attr("y", -6)
+          .attr("height", height2+7);
 
         $('#legendContainer input[type="checkbox"]').click(function () {
             var that = this;
@@ -405,7 +519,20 @@ TsaApplication.VisualizationController = (function (self) {
             }
         });
 
-        var seriesID = svg.selectAll(".seriesID")
+        var seriesID = focus.selectAll(".seriesID")
+            .data(data, function (d) {
+                return d.key;
+            })
+            .enter().append("g")
+            .attr("id", function (d) {
+                return "path" + d.key;
+            })
+            .attr("data-id", function (d) {
+                return d.key;
+            })
+            .attr("class", "seriesID");
+
+        var seriesID2 = context.selectAll(".seriesID")
             .data(data, function (d) {
                 return d.key;
             })
@@ -449,6 +576,17 @@ TsaApplication.VisualizationController = (function (self) {
             }
         );
 
+        seriesID2.append("path")
+            .attr("class", "line")
+            .style("stroke-width", 1.5)
+            .attr("d", function (d) {
+                return lines2[d.key](d.values);
+            })
+            .style("stroke", function (d) {
+                return color(d.key);
+            }
+        );
+
         // Set the first summary statistics by default
         setSummaryStatistics(summary[0]);
         // Make the first row bold
@@ -482,7 +620,17 @@ TsaApplication.VisualizationController = (function (self) {
                 setSummaryStatistics(summary[id]);
             }
         });
+
+        function brushed() {
+          x.domain(brush.empty() ? x2.domain() : brush.extent());
+          focus.selectAll(".seriesID")
+            .selectAll("path")
+            .attr("d", function(d) {return lines[d.key](d.values); });
+          focus.select(".x.axis").call(xAxis);
+        }
     }
+
+
 
     function drawHistogram() {
         /* Initialize Histogram*/

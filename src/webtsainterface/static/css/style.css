@@ -5,6 +5,30 @@
     padding: 0px;
 }
 
+
+/* --------------test -----------------------*/
+
+.seriesID {
+  fill: steelblue;
+  clip-path: url(#clip);
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .5;
+  shape-rendering: crispEdges;
+}
+
+
+/* --------------test -----------------------*/
+
 .clearfix:after {
     visibility: hidden;
     display: block;
@@ -211,18 +235,36 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 .row{
     margin-right: 0px;
     margin-left: 0px;
-    height: -moz-calc(100% - 51px);
-    height: -webkit-calc(100% - 51px);
-    height: calc(100% - 51px);
+    height: -moz-calc(100% - 71px);
+    height: -webkit-calc(100% - 71px);
+    height: calc(100% - 71px);
 }
 
 .navbar{
     margin-bottom:0px;
-    height: 50px;
+    height: 70px;
+}
+
+.navbar .container{
+    position:absolute;
+}
+
+.navbar-brand img{
+    max-height: 50px;
+}
+
+.navbar-brand{
+    float: left;
+    padding: 10px 15px;
+    font-size: 20px;
 }
 
 .nav-tabs{
     margin-top:0px;
+}
+
+.nav-tabs > li{
+    font-size: 18px;
 }
 
 #btnExportData{
@@ -230,9 +272,9 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 }
 
 .tab-content{
-    height: -moz-calc(100% - 44px);
-    height: -webkit-calc(100% - 44px);
-    height:calc(100% - 44px);
+    height: -moz-calc(100% - 47px);
+    height: -webkit-calc(100% - 47px);
+    height:calc(100% - 47px);
 }
 
 .tab-pane{
@@ -614,7 +656,9 @@ button.ColVis_Button {
 #loadingScreen{
     background:#292929;
     position:absolute;
-    height: calc(100% - 50px);
+    height: -moz-calc(100% - 71px);
+    height: -webkit-calc(100% - 71px);
+    height: calc(100% - 71px);
     width:100%;
     z-index:999;
 }
