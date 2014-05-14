@@ -31,7 +31,7 @@ class SourcesDataService(models.Model):
     servicename = models.CharField(db_column='ServiceName', max_length=255)
     servicedescription = models.CharField(db_column='ServiceDescription', max_length=500)
     serviceurl = models.CharField(db_column='ServiceURL', max_length=500)
-    sourcenetworkname = models.CharField(db_column='SourceNetworkName', max_length=255)
+    sourcenetworkname = models.CharField(db_column='SourceNetworkName', max_length=255, null=True, blank=True)
 
     class Meta:
         managed = False
@@ -46,8 +46,8 @@ class DataSeries(models.Model):
     sitename = models.CharField(db_column='SiteName', max_length=500)
     latitude = models.FloatField(db_column='Latitude')
     longitude = models.FloatField(db_column='Longitude')
-    state = models.CharField(db_column='State', max_length=50, blank=True)
-    county = models.CharField(db_column='County', max_length=50, blank=True)
+    state = models.CharField(db_column='State', max_length=50, null=True, blank=True)
+    county = models.CharField(db_column='County', max_length=50, null=True, blank=True)
     sitetype = models.CharField(db_column='SiteType', max_length=50)
     variablecode = models.CharField(db_column='VariableCode', max_length=50)
     variablename = models.CharField(db_column='VariableName', max_length=255)
@@ -65,7 +65,7 @@ class DataSeries(models.Model):
     timesupportunitsabbreviation = models.CharField(db_column='TimeSupportUnitsAbbreviation', max_length=50)
     qualitycontrollevelcode = models.CharField(db_column='QualityControlLevelCode', max_length=50)
     qualitycontrolleveldefinition = models.CharField(db_column='QualityControlLevelDefinition', max_length=500)
-    qualitycontrollevelexplanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500, blank=True)
+    qualitycontrollevelexplanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500, null=True, blank=True)
     sourceorganization = models.CharField(db_column='SourceOrganization', max_length=255)
     sourcedescription = models.CharField(db_column='SourceDescription', max_length=500)
     begindatetime = models.DateTimeField(db_column='BeginDateTime')
@@ -88,8 +88,8 @@ class Site(models.Model):
     sitename = models.CharField(db_column='SiteName', max_length=500)
     latitude = models.FloatField(db_column='Latitude')
     longitude = models.FloatField(db_column='Longitude')
-    state = models.CharField(db_column='State', max_length=50)
-    county = models.CharField(db_column='County', max_length=50)
+    state = models.CharField(db_column='State', max_length=50, null=True, blank=True)
+    county = models.CharField(db_column='County', max_length=50, null=True, blank=True)
     sitetype = models.CharField(db_column='SiteType', max_length=50)
 
     class Meta:
@@ -117,7 +117,7 @@ class Variable(models.Model):
 class QualityControlLevel(models.Model):
     code = models.CharField(db_column='QualityControlLevelCode', max_length=50)
     definition = models.CharField(db_column='QualityControlLevelDefinition', max_length=500)
-    explanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500)
+    explanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500, null=True, blank=True)
 
     class Meta:
         managed = False
