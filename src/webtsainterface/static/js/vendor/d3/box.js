@@ -170,9 +170,9 @@ d3.box = function() {
           .style("opacity", 1);
 
       outlier.exit().transition()
-          .duration(duration)
+          /*.duration(duration)
           .attr("cy", function(i) { return x1(d[i]); })
-          .style("opacity", 1e-6)
+          .style("opacity", 1e-6)*/
           .remove();
 
       // Compute the tick format.

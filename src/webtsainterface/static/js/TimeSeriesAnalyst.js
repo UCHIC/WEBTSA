@@ -82,6 +82,7 @@ var TsaApplication = (function(self){
         });
 
         $("#btnPlotDataset").click(function() {
+            self.VisualizationController.svgs = [];
             var dialog = $("#InfoDialog");
             var id = +dialog.get(0).dataset['series'];
             var method = self.VisualizationController.plottingMethods.newPlot;

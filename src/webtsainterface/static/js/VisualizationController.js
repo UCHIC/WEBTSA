@@ -7,6 +7,7 @@ TsaApplication.VisualizationController = (function (self) {
     self.plotTypes = { histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot };
     self.currentPlot = self.plotTypes.multiseries;
     self.plottedSeries = [];
+    self.boxWhiskerSvgs = [];
 
     var plotDataReady = jQuery.Event("plotdataready");
     var plotDataLoading = jQuery.Event("plotdataloading");
@@ -41,11 +42,7 @@ TsaApplication.VisualizationController = (function (self) {
 
         $(document).trigger(plotStarted);
 
-        $("#graphContainer").empty();
-        $("#legendContainer").find("ul").empty();
-
         self.currentPlot();
-
 
         /*$("#dpd1").datepicker('setValue', _.min(
             _(self.plottedSeries)
@@ -59,8 +56,12 @@ TsaApplication.VisualizationController = (function (self) {
         );*/
 
         $(document).trigger(plotFinished);
-        $("#panelRight").show();
     };
+
+    self.clearGraph = function(){
+        $("#graphContainer").empty();
+        $("#legendContainer").find("ul").empty();
+    }
 
     // Adds commas to numbers in thousand intervals
     self.numberWithCommas = function (x) {
@@ -257,6 +258,7 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     function drawMultiseries() {
+        self.clearGraph();
         var varnames = _(self.plottedSeries).pluck('variablename');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
@@ -566,9 +568,6 @@ TsaApplication.VisualizationController = (function (self) {
           .attr("y", -6)
           .attr("height", height2+7);
 
-
-
-
         function pathClickHandler (d){
             if(d3.select(this).style("stroke-width") == "2.5px"){
                 d3.select(this)
@@ -653,7 +652,7 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     function drawHistogram() {
-        /* Initialize Histogram*/
+        self.clearGraph();
         var varnames = _.pluck(self.plottedSeries, 'variablename');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
@@ -724,7 +723,7 @@ TsaApplication.VisualizationController = (function (self) {
                 .on("mouseover", function (d) {
                    d3.select(this).append("text")
                     .attr("dy", ".75em")
-                    .attr("y", 0)
+                    .attr("y", 2)
                     .attr("x", x(data[0].dx + domainMin) / 2)
                     .attr("text-anchor", "middle")
                     .text(function (d) {
@@ -782,7 +781,9 @@ TsaApplication.VisualizationController = (function (self) {
 
     function drawBoxPlot(){
         var varnames = _.pluck(self.plottedSeries, 'variablename');
-        var observations = getDatasetsAfterFilters().map(function(dataset) {
+        var observations = getDatasetsAfterFilters()
+        var summary = calcSummaryStatistics(observations);
+        observations = observations.map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
         var numOfDatasets = observations.length;
@@ -798,12 +799,17 @@ TsaApplication.VisualizationController = (function (self) {
 
         var colors = d3.scale.category10();
         var data = [];
-        for (var i = 0; i < observations.length; i++){
-           $("#legendContainer ul").append(
-            '<li class="list-group-item">' +
-                '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-                '<button class="close">&times;</button></li>');
+        var charts = [];
 
+        if(self.boxWhiskerSvgs.length == 0){
+            self.clearGraph();
+        }
+        if($(".focus").length > 0 || $(".bar").length){
+            self.clearGraph();
+            self.boxWhiskerSvgs = [];
+        }
+
+        for (var i = 0; i < observations.length; i++){
             data[0] = observations[i];
             var min = Infinity,
                 max = -Infinity;
@@ -818,27 +824,58 @@ TsaApplication.VisualizationController = (function (self) {
                 }
             }
 
-            var chart = d3.box()
+            charts[i] = d3.box()
                 .whiskers(iqr(1.5))
                 .width(width)
                 .height(height);
 
-            chart.domain([min, max]);
+            charts[i].domain([min, max]);
+            if (self.boxWhiskerSvgs[i] != null){
+                charts[i].domain([min, max]);
+                self.boxWhiskerSvgs[i].datum(data[0]).call(charts[i].duration(1000));
+            }
+            else{
+                 self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
+                  .data(data)
+                  .attr("class", "box")
+                    .attr("data-id", i)
+                  .attr("width", boxContainerWidth)
+                  .attr("height", height + margin.bottom + margin.top)
+                .append("g")
+                    .attr("transform", "translate(" + ((boxContainerWidth - 30) / 2) + "," + margin.top + ")")
+                  .call(charts[i]);
 
-            var svg = d3.select("#graphContainer").append("svg")
-              .data(data)
-              .attr("class", "box")
-                .attr("data-id", i)
-              .attr("width", boxContainerWidth)
-              .attr("height", height + margin.bottom + margin.top)
-            .append("g")
-                .attr("transform", "translate(" + ((boxContainerWidth - 30) / 2) + "," + margin.top + ")")
-              .call(chart);
-
-            $("svg").css("margin-left", margin.left + "px")
-            $("svg[data-id='" + i + "'] rect").css("fill", colors(i))
+                $("#legendContainer ul").append(
+                    '<li class="list-group-item" data-id="' + i + '">' +
+                    '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
+                    '<button class="close">&times;</button></li>');
+            }
+            $("svg").css("margin-left", margin.left + "px");
+            $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
         }
 
+        // Set the first summary statistics by default
+        setSummaryStatistics(summary[0]);
+        // Make the first row bold
+        $('#legendContainer .list-group-item').css({"font-weight":"normal"});
+        $('#legendContainer .list-group-item[data-id="0"]')[0].style.fontWeight = "bold";
+
+
+        $('#legendContainer .list-group-item').click(function (e) {
+           if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
+               return;
+           }
+           var that = this;
+
+           var id = that.getAttribute("data-id");
+           if (that.getAttribute("style") == "font-weight: normal;"){
+                $('#legendContainer .list-group-item').css({"font-weight":"normal"});
+                this.style.fontWeight = "bold";
+
+                // Set summary statistics
+                setSummaryStatistics(summary[id]);
+            }
+        });
 
 
 
