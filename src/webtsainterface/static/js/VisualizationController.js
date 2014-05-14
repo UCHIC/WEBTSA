@@ -214,12 +214,13 @@ TsaApplication.VisualizationController = (function (self) {
         var nowTemp = new Date();
         var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
-        // If no dates are set, display the whole thing
+        // If no dates are set, display the last month
         if (dateFirst.date.valueOf() == now.valueOf() && dateLast.date.valueOf() == now.valueOf()) {
-            dateFirst.date = minDate;
-            dateFirst.setValue(minDate);
 
-            dateLast.date = maxDate;
+            dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
+            dateFirst.setValue(maxDate);
+
+            dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
             dateLast.setValue(maxDate);
         }
 
@@ -363,9 +364,6 @@ TsaApplication.VisualizationController = (function (self) {
           .attr("y", 35)
           .text("Date");
 
-        var brush = d3.svg.brush()
-        .x(x2)
-        .on("brush", brushed);
 
         // This loop builds and draws each time series
         for (var i = 0; i < data.length; i++) {
@@ -500,12 +498,8 @@ TsaApplication.VisualizationController = (function (self) {
                     '</span><button class="close">&times;</button></li>');
         }
 
-        context.append("g")
-          .attr("class", "x brush")
-          .call(brush)
-        .selectAll("rect")
-          .attr("y", -6)
-          .attr("height", height2+7);
+
+
 
         $('#legendContainer input[type="checkbox"]').click(function () {
             var that = this;
@@ -544,6 +538,19 @@ TsaApplication.VisualizationController = (function (self) {
                 return d.key;
             })
             .attr("class", "seriesID");
+
+         var brush = d3.svg.brush()
+        .x(x2)
+        .on("brush", brushed);
+
+        context.append("g")
+          .attr("class", "x brush")
+          .call(brush)
+        .selectAll("rect")
+          .attr("y", -6)
+          .attr("height", height2+7);
+
+
 
 
         function pathClickHandler (d){

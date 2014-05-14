@@ -8,40 +8,44 @@
            <button id="btnCollapseToggle" type="button" class="btn btn-default btn-sm">
               <span class="glyphicon glyphicon-chevron-right"></span>
            </button>
-           <div id="legendContainer" class="panel panel-default ">
+           <div id="panel-right-container">
+               <div id="legendContainer" class="panel panel-default ">
                <div class="panel-heading glyphicon glyphicon-th-list"> Legend</div>
                 <ul class="list-group"></ul>
-           </div>
-           <div id="plotOptionsContainer" class="panel panel-default ">
-               <div class="panel-heading glyphicon glyphicon-th-list"> Plot Options</div>
-               <table class="table">
-                    <tbody>
-                        <tr><td>Begin Date</td><td><input id="dpd1" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>
-                        <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>
-                        <tr><td>Visualization</td><td>
-                          <div class="btn-group">
-                              <button id="visualizationDropDown" class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
-                                Time Series <span class="caret"></span>
-                              </button>
-                              <ul class="dropdown-menu">
-                                  <li><a href="#" id="btnTimeSeries">Time Series</a></li>
-                                  <li><a href="#" id="btnHistogram">Histogram</a></li>
-                                  <li><a href="#" id="btnBoxAndWhisker">Box and Whisker</a></li>
-                              </ul>
-                          </div>
-                        </td></tr>
-                    <tr><td></td><td><button id ="btnSetPlotOptions" type="button" class="btn btn-primary"> Plot</button></td></tr>
-                    </tbody>
-               </table>
-           </div>
-           <div id="summaryContainer" class="panel panel-default">
-               <div class="panel-heading  glyphicon glyphicon-list-alt"> Summary Statistics</div>
-               <table class="table" id="statisticsTable">
-                    <tbody>
+               </div>
+               <div id="plotOptionsContainer" class="panel panel-default ">
+                   <div class="panel-heading glyphicon glyphicon-th-list"> Plot Options</div>
+                   <table class="table">
+                        <tbody>
+                            <tr><td>Begin Date</td><td><input id="dpd1" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>
+                            <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>
+                            <tr><td>Visualization</td><td>
+                              <div class="btn-group">
+                                  <button id="visualizationDropDown" class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+                                    Time Series <span class="caret"></span>
+                                  </button>
+                                  <ul class="dropdown-menu">
+                                      <li><a href="#" id="btnTimeSeries">Time Series</a></li>
+                                      <li><a href="#" id="btnHistogram">Histogram</a></li>
+                                      <li><a href="#" id="btnBoxAndWhisker">Box and Whisker</a></li>
+                                  </ul>
+                              </div>
+                            </td></tr>
+                        <tr><td></td><td><button id ="btnSetPlotOptions" type="button" class="btn btn-primary"> Plot</button></td></tr>
+                        </tbody>
+                   </table>
+               </div>
+               <div id="summaryContainer" class="panel panel-default">
+                   <div class="panel-heading  glyphicon glyphicon-list-alt"> Summary Statistics</div>
+                   <table class="table" id="statisticsTable">
+                        <tbody>
 
-                    </tbody>
-               </table>
+                        </tbody>
+                   </table>
+               </div>
            </div>
+
+
 
        </div>
    </div>

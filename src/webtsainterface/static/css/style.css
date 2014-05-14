@@ -263,9 +263,6 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     margin-top:0px;
 }
 
-.nav-tabs > li{
-    font-size: 18px;
-}
 
 #btnExportData{
     margin-right:26px;
@@ -481,7 +478,6 @@ button.ColVis_Button {
 }
 
 #visualizationContent{
-
     width:100%;
     overflow:hidden;
 }
@@ -511,19 +507,25 @@ button.ColVis_Button {
 
 #panel-right{
     background: white;
-    position:absolute;
-    right:0px;
-    height:auto;
-    width: 295px;
-    float:right;
-    margin-right: 3px;
-    margin-top:3px;
-    margin-bottom: 5px;
+    position: absolute;
+    right: 0px;
+    width: 307px;
+    height: calc(100% - 60px);
+    float: right;
     border: 1px solid #aaa;
-    padding: 5px;
-    padding-bottom: 0px;
     border-radius: 3px;
     box-shadow: -5px 5px 10px #dddddd;
+}
+
+#panel-right-container{
+    width: calc(100% - 30px);
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 100%;
+    position: absolute;
+    margin: 5px;
+    padding-bottom: 5px;
+    padding-right: 5px;
 }
 
 #panel-right .panel{
@@ -540,28 +542,20 @@ button.ColVis_Button {
     background: #ddd;
 }
 
-#panel-right .glyphicon{
-    top: 0px;
-}
-
 #btnCollapseToggle .glyphicon{
     top: 2px;
+    top: 0px;
 }
 
 #btnCollapseToggle{
     float: left;
-    margin-left: -26px;
+    margin-left: -40px;
     margin-top: 6px;
     position: absolute;
     width: 10px;
     border:1px solid #aaa;
     border-right:0px;
     border-radius:4px 0px 0px 4px;
-}
-
-
-#summaryContainer{
-
 }
 
 
@@ -573,8 +567,6 @@ button.ColVis_Button {
 #btnCollapseToggle span{
     margin-left:-5px;
 }
-
-
 
 
 #plotOptionsContainer td{
