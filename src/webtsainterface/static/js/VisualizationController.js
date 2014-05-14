@@ -251,7 +251,6 @@ TsaApplication.VisualizationController = (function (self) {
                 return (parseDate(d.date).valueOf() >= dateFirst.date.valueOf() && parseDate(d.date).valueOf() <= dateLast.date.valueOf());
             });
         }
-
         return datasets;
     }
 
