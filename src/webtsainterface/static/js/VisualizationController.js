@@ -560,7 +560,6 @@ TsaApplication.VisualizationController = (function (self) {
             $('#legendContainer .list-group-item').css({"font-weight":"normal"});
 
             $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]')[0].style.fontWeight = "bold";
-
             setSummaryStatistics(summary[this.parentElement.getAttribute("data-id")]);
         }
 
