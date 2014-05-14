@@ -67,7 +67,7 @@ class DataSeries(models.Model):
     qualitycontrolleveldefinition = models.CharField(db_column='QualityControlLevelDefinition', max_length=500)
     qualitycontrollevelexplanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500, blank=True)
     sourceorganization = models.CharField(db_column='SourceOrganization', max_length=255)
-    souredescription = models.CharField(db_column='SoureDescription', max_length=500)
+    sourcedescription = models.CharField(db_column='SourceDescription', max_length=500)
     begindatetime = models.DateTimeField(db_column='BeginDateTime')
     enddatetime = models.DateTimeField(db_column='EndDateTime')
     utcoffset = models.IntegerField(db_column='UTCOffset')
