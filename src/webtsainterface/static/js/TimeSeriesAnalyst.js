@@ -87,8 +87,17 @@ var TsaApplication = (function(self){
             var id = +dialog.get(0).dataset['series'];
             var method = self.VisualizationController.plottingMethods.newPlot;
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
+
+            // Reset the date intervals
+            /*var nowTemp = new Date();
+            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+            self.VisualizationController.dateFirst.date.valueOf() == now.valueOf();
+            self.VisualizationController.dateLast.date.valueOf() == now.valueOf();*/
             self.VisualizationController.prepareSeries(series, method);
+
             dialog.modal('hide');
+
+
         });
 
         $("#btnTimeSeries").click(function() {
@@ -129,7 +138,7 @@ var TsaApplication = (function(self){
         });
         $("#btnCollapseToggle").click(function() {
             dir = !dir;
-            var slideDistance = 295;
+            var slideDistance = 307;
             r = dir? -slideDistance : 0;
             $("#panel-right").stop().animate({right: r+'px'}, 0);
             $("#btnCollapseToggle span").removeClass();

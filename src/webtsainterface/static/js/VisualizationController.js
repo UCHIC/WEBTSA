@@ -8,6 +8,8 @@ TsaApplication.VisualizationController = (function (self) {
     self.currentPlot = self.plotTypes.multiseries;
     self.plottedSeries = [];
     self.boxWhiskerSvgs = [];
+    self.dateFirst = $('#dpd1').datepicker();
+    self.dateLast = $('#dpd2').datepicker();
 
     var plotDataReady = jQuery.Event("plotdataready");
     var plotDataLoading = jQuery.Event("plotdataloading");
@@ -85,9 +87,6 @@ TsaApplication.VisualizationController = (function (self) {
             return _.pluck(value, 'value');
         });
         for (var i = 0; i < data.length; i++){
-
-
-
             summary[i] = {
                 maximum:-Infinity,
                 minimum:Infinity,
@@ -105,7 +104,7 @@ TsaApplication.VisualizationController = (function (self) {
                 quantile90:0
             };
 
-            sortedValues[i] = sortedValues[0].map(function(value){
+            sortedValues[i] = sortedValues[i].map(function(value){
                 return parseFloat(value);
             });
 
@@ -187,71 +186,69 @@ TsaApplication.VisualizationController = (function (self) {
                     maxDate = parsedDate;
                 }
             }
-
         }
 
         // Update minimum and maximum dates on the date pickers
-
-        var dateFirst = $('#dpd1').datepicker({
+         self.dateFirst = $('#dpd1').datepicker({
             onRender: function (date){
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
         }).on('click', function(){
-            dateLast.hide();
+            self.dateLast.hide();
         }).on('changeDate',function (ev) {
-            dateFirst.hide();
+            self.dateFirst.hide();
             //$('#dpd2')[0].focus();
         }).data('datepicker');
 
-        var dateLast = $('#dpd2').datepicker({
+        self.dateLast = $('#dpd2').datepicker({
             onRender: function (date) {
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
         }).on('click', function(){
-            dateFirst.hide();
+            self.dateFirst.hide();
         }).on('changeDate',function (ev) {
-            dateLast.hide();
+            self.dateLast.hide();
         }).data('datepicker');
 
         var nowTemp = new Date();
         var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
         // If no dates are set, display the last month
-        if (dateFirst.date.valueOf() == now.valueOf() && dateLast.date.valueOf() == now.valueOf()) {
-            dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
-            dateFirst.setValue(maxDate);
+        if (self.dateFirst.date.valueOf() == now.valueOf() && self.dateLast.date.valueOf() == now.valueOf()) {
+            self.dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
+            self.dateFirst.setValue(maxDate);
 
-            dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
-            dateLast.setValue(maxDate);
+            self.dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
+            self.dateLast.setValue(maxDate);
         }
 
         // Update click events for the date interval buttons
         $("#btnLastWeek").click(function() {
-            dateFirst.date = maxDate.setDate(maxDate.getDate() - 7);
-            dateFirst.setValue(maxDate);
+            self.dateFirst.date = maxDate.setDate(maxDate.getDate() - 7);
+            self.dateFirst.setValue(maxDate);
 
-            dateLast.date = maxDate.setDate(maxDate.getDate() + 7);
-            dateLast.setValue(maxDate);
+            self.dateLast.date = maxDate.setDate(maxDate.getDate() + 7);
+            self.dateLast.setValue(maxDate);
         });
         $("#btnLastMonth").click(function() {
-            dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
-            dateFirst.setValue(maxDate);
+            self.dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
+            self.dateFirst.setValue(maxDate);
 
-            dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
-            dateLast.setValue(maxDate);
+            self.dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
+            self.dateLast.setValue(maxDate);
         });
         $("#btnAll").click(function() {
-            dateFirst.date = minDate;
-            dateFirst.setValue(minDate);
+            self.dateFirst.date = minDate;
+            self.dateFirst.setValue(minDate);
 
-            dateLast.date = maxDate;
-            dateLast.setValue(maxDate);
+            self.dateLast.date = maxDate;
+            self.dateLast.setValue(maxDate);
         });
 
         // Filter by dates if specified
         for (var i = 0; i < datasets.length; i++){
             datasets[i] = datasets[i].filter(function (d) {
-                return (parseDate(d.date).valueOf() >= dateFirst.date.valueOf() && parseDate(d.date).valueOf() <= dateLast.date.valueOf());
+                return (parseDate(d.date).valueOf() >= self.dateFirst.date.valueOf() && parseDate(d.date).valueOf() <= self.dateLast.date.valueOf());
             });
         }
         return datasets;
@@ -418,9 +415,8 @@ TsaApplication.VisualizationController = (function (self) {
 
             yAxis[i] = d3.svg.axis()
                 .scale(y[i])
-                .tickFormat(d3.format(".2s"))
+                .tickFormat(d3.format(".2f"))
                 .orient(axisProperties[i].orient);
-
 
             lines[i] = d3.svg.line()
                 //.interpolate("basis")
@@ -788,21 +784,23 @@ TsaApplication.VisualizationController = (function (self) {
 
     function drawBoxPlot(){
         var varnames = _.pluck(self.plottedSeries, 'variablename');
+        var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var observations = getDatasetsAfterFilters()
         var summary = calcSummaryStatistics(observations);
+
         observations = observations.map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
-        var numOfDatasets = observations.length;
+        var numOfDatasets = Math.min(observations.length, 3);
 
-        var boxContainerWidth = 150;
+        var boxContainerWidth = 200;
 
         var m = ($("#graphContainer").width() - (numOfDatasets * boxContainerWidth)) / (numOfDatasets + 1);
 
         // properties for the box plots
         var margin = {top: 10, right: m, bottom: 20, left: m},
             width = 30,
-            height = $("#graphContainer").height()  - margin.top - margin.bottom;
+            height = ($("#graphContainer").height()) / Math.ceil(varnames.length / 3) - margin.top - margin.bottom;
 
         var colors = d3.scale.category10();
         var data = [];
@@ -831,6 +829,15 @@ TsaApplication.VisualizationController = (function (self) {
                 }
             }
 
+            // The y-axis
+            var y = d3.scale.linear()
+                .domain([min, max])
+                .range([height, 0]);
+
+            var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
             charts[i] = d3.box()
                 .whiskers(iqr(1.5))
                 .width(width)
@@ -840,6 +847,9 @@ TsaApplication.VisualizationController = (function (self) {
             if (self.boxWhiskerSvgs[i] != null){
                 charts[i].domain([min, max]);
                 self.boxWhiskerSvgs[i].datum(data[0]).call(charts[i].duration(1000));
+                self.boxWhiskerSvgs[i].select("g").call(yAxis);
+                self.boxWhiskerSvgs[i].attr("height", height);
+                self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top)
             }
             else{
                  self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
@@ -849,8 +859,22 @@ TsaApplication.VisualizationController = (function (self) {
                   .attr("width", boxContainerWidth)
                   .attr("height", height + margin.bottom + margin.top)
                 .append("g")
-                    .attr("transform", "translate(" + ((boxContainerWidth - 30) / 2) + "," + margin.top + ")")
+                    .attr("transform", "translate(" + ((boxContainerWidth) / 2) + "," + margin.top + ")")
                   .call(charts[i]);
+
+                // draw y axis
+                self.boxWhiskerSvgs[i].append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 25) + "," + (0) + ")")
+                .call(yAxis)
+                .append("text") // and text1
+                  .attr("transform", "rotate(-90)")
+                  .attr("y", 6)
+                  .attr("x", -10)
+                  .attr("dy", ".71em")
+                  .style("text-anchor", "end")
+                  .style("font-size", "16px")
+                  .text(varnames[i] + " (" + varUnits[i] + ")");
 
                 $("#legendContainer ul").append(
                     '<li class="list-group-item" data-id="' + i + '">' +

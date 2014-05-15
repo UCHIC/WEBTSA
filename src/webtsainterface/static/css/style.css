@@ -167,6 +167,13 @@ svg.box{
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
 
+button span{
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.428571429;
+    color: #333333;
+}
+
 
 .bar rect {
   fill: steelblue;
@@ -264,8 +271,9 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 }
 
 
-#btnExportData{
-    margin-right:26px;
+#btnExport{
+    width:auto;
+    float:right;
 }
 
 .tab-content{
@@ -543,7 +551,7 @@ button.ColVis_Button {
 
 #btnCollapseToggle .glyphicon{
     top: 2px;
-    top: 0px;
+    right:2px;
 }
 
 #btnCollapseToggle{
@@ -572,6 +580,10 @@ button.ColVis_Button {
 }
 
 
+.container-title{
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+}
 #plotOptionsContainer td{
     border-top:0px;
     vertical-align: middle;
@@ -580,6 +592,10 @@ button.ColVis_Button {
 
 #plotOptionsContainer tr td:first-child{
     text-align: right;
+}
+
+#visualizationDropDown, #plotOptionsContainer .btn-group{
+    width:100%;
 }
 
 #plotOptionsContainer input{
