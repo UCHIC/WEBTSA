@@ -237,11 +237,11 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 .col-sm-3{
     overflow-y:auto;
     overflow-x:hidden;
-    width: 400px;
+    width: 300px;
 }
 
 .col-sm-9{
-    width: calc(100% - 400px);
+    width: calc(100% - 300px);
 }
 
 .row{
