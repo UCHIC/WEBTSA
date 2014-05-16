@@ -221,6 +221,10 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     background:#ddd;
 }
 
+.highlight{
+    background:#C1F9FC;
+}
+
 #leftPanel .panel, .row{
     border-radius:0px !important;
     margin:1px 1px !important;
@@ -421,11 +425,9 @@ div.ColVis_catcher {
 	z-index: 1101;
 }
 
-
 .disabled {
 	color: #999;
 }
-
 
 button.ColVis_Button {
 	text-align: left;
@@ -435,15 +437,12 @@ button.ColVis_Button {
     max-height: 20%;
 }
 
-
-
 #btnExportData{
     float:right;
     display:inline;
     margin-top: 1px;
     margin-right: 20px;
 }
-
 
 #txtSearch{
     width:30%;
@@ -589,7 +588,6 @@ button.ColVis_Button {
     margin-top: 5px;
 }
 
-
 .container-title{
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
@@ -612,6 +610,7 @@ button.ColVis_Button {
     border-bottom: 1px solid #ddd;
     border-right: 1px solid #ddd;
 }
+
 #graphArea .alert {
     position: absolute;
     width: -webkit-calc(100% - 322px);
@@ -620,8 +619,6 @@ button.ColVis_Button {
     opacity:0.9;
     text-align: center;
 }
-
-
 
 #legendContainer{
   margin-bottom: 4px;
@@ -634,6 +631,9 @@ button.ColVis_Button {
     font-size: 22px;
     line-height: 1;
 }
+
+
+
 /* Spinner icon */
 .ring{
   margin:auto;
@@ -702,5 +702,3 @@ button.ColVis_Button {
     border-radius: 3px;
     box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
 }
-
-

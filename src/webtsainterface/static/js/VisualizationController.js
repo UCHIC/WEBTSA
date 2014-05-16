@@ -92,6 +92,7 @@ TsaApplication.VisualizationController = (function (self) {
     self.clearGraph = function(){
         $("#graphContainer").empty();
         $("#legendContainer").find("ul").empty();
+        $("#statisticsTable tbody").empty();
     }
 
     // Adds commas to numbers in thousand intervals
@@ -140,11 +141,11 @@ TsaApplication.VisualizationController = (function (self) {
             sortedValues[i].sort();
 
             // Quantiles
-            summary[i].quantile10 = d3.quantile(sortedValues[i],.1);
-            summary[i].quantile25 = d3.quantile(sortedValues[i],.25);
-            summary[i].median = d3.quantile(sortedValues[i],.5);
-            summary[i].quantile75 = d3.quantile(sortedValues[i],.75);
-            summary[i].quantile90 = d3.quantile(sortedValues[i],.9);
+            summary[i].quantile10 = d3.quantile(sortedValues[i],.1).toFixed(2);
+            summary[i].quantile25 = d3.quantile(sortedValues[i],.25).toFixed(2);
+            summary[i].median = d3.quantile(sortedValues[i],.5).toFixed(2);
+            summary[i].quantile75 = d3.quantile(sortedValues[i],.75).toFixed(2);
+            summary[i].quantile90 = d3.quantile(sortedValues[i],.9).toFixed(2);
 
             // Number of observations
             summary[i].observations = data[i].length;
@@ -173,6 +174,11 @@ TsaApplication.VisualizationController = (function (self) {
             summary[i].arithmeticMean = self.numberWithCommas(summary[i].arithmeticMean);
             summary[i].geometricMean = self.numberWithCommas(summary[i].geometricMean);
             summary[i].observations = self.numberWithCommas(summary[i].observations);
+            summary[i].quantile10 = self.numberWithCommas(summary[i].quantile10);
+            summary[i].quantile25 = self.numberWithCommas(summary[i].quantile25);
+            summary[i].median = self.numberWithCommas(summary[i].median);
+            summary[i].quantile75 = self.numberWithCommas(summary[i].quantile75);
+            summary[i].quantile90 = self.numberWithCommas(summary[i].quantile90);
         }
         return summary;
     }
@@ -556,9 +562,6 @@ TsaApplication.VisualizationController = (function (self) {
                     '</span><button class="close">&times;</button></li>');
         }
 
-
-
-
         $('#legendContainer input[type="checkbox"]').click(function () {
             var that = this;
             var path = $("#path" + that.getAttribute("data-id"));
@@ -619,11 +622,13 @@ TsaApplication.VisualizationController = (function (self) {
                 d3.select(this.parentElement).moveToFront();
             }
 
-            $('#legendContainer .list-group-item').css({"font-weight":"normal"});
+             $('#legendContainer .list-group-item').removeClass("highlight");
 
-            $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]')[0].style.fontWeight = "bold";
+            $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]').addClass("highlight");
             setSummaryStatistics(summary[this.parentElement.getAttribute("data-id")]);
         }
+
+
 
         seriesID.append("path")
             .attr("class", "line")
@@ -651,8 +656,8 @@ TsaApplication.VisualizationController = (function (self) {
         // Set the first summary statistics by default
         setSummaryStatistics(summary[0]);
         // Make the first row bold
-        $('#legendContainer .list-group-item').css({"font-weight":"normal"});
-        $('#legendContainer .list-group-item[data-id="0"]')[0].style.fontWeight = "bold";
+        $('#legendContainer .list-group-item').removeClass("highlight");
+        $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
 
         // Highlight the first path
         var path = d3.select("#path0 > g");
@@ -665,14 +670,15 @@ TsaApplication.VisualizationController = (function (self) {
 
             var that = this;
             var id = that.getAttribute("data-id");
-            if (that.getAttribute("style") == "font-weight: bold;"){
+
+            if (that.className != "list-group-item"){
                 var path = d3.select("#path" + that.getAttribute("data-id") + " path");
                 path.each(pathClickHandler);
             }
 
-            if (that.getAttribute("style") == "font-weight: normal;"){
-                $('#legendContainer .list-group-item').css({"font-weight":"normal"});
-                this.style.fontWeight = "bold";
+            if (that.className == "list-group-item"){
+                $('#legendContainer .list-group-item').removeClass("highlight");
+                this.className="list-group-item highlight"
 
                 svg.selectAll(".line")
                     .style("stroke-width", 1.5)
@@ -696,6 +702,7 @@ TsaApplication.VisualizationController = (function (self) {
         var varnames = _.pluck(self.plottedSeries, 'variablename');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
+        var summary = calcSummaryStatistics(datasets);
 
         var values = _(datasets).map(function(dataset) {
             return _.pluck(dataset, 'value');
@@ -717,10 +724,10 @@ TsaApplication.VisualizationController = (function (self) {
             var domainMin = Math.min.apply(Math, values[i]);
             var domainMax = Math.max.apply(Math, values[i]);
 
-             $("#legendContainer ul").append(
-            '<li class="list-group-item">' +
-                '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-                '<button class="close">&times;</button></li>');
+            $("#legendContainer ul").append(
+            '<li class="list-group-item" data-id="' + i + '">' +
+                '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
+                '</span><button class="close">&times;</button></li>');
 
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
@@ -744,7 +751,6 @@ TsaApplication.VisualizationController = (function (self) {
                 //.tickSize(-width, 0, 0)
                 //.orient("right")
                 .scale(y)
-                .tickFormat(d3.format("s"))
                 .orient("left");
 
             var svg = d3.select("#graphContainer").append("svg")
@@ -824,6 +830,29 @@ TsaApplication.VisualizationController = (function (self) {
               .attr("y", -50)
               .text("Data points");
         }
+
+        // Set the first summary statistics by default
+        setSummaryStatistics(summary[0]);
+        // Highlight the first row
+        $('#legendContainer .list-group-item').removeClass("highlight");
+        $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
+
+
+        $('#legendContainer .list-group-item').click(function (e) {
+           if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
+               return;
+           }
+           var that = this;
+
+           var id = that.getAttribute("data-id");
+           if (that.className == "list-group-item"){
+                $('#legendContainer .list-group-item').removeClass("highlight");
+                this.className="list-group-item highlight"
+
+                // Set summary statistics
+                setSummaryStatistics(summary[id]);
+            }
+        });
     }
 
     function drawBoxPlot(){
@@ -922,8 +951,9 @@ TsaApplication.VisualizationController = (function (self) {
 
                 $("#legendContainer ul").append(
                     '<li class="list-group-item" data-id="' + i + '">' +
-                    '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font>' + varnames[i] +
-                    '<button class="close">&times;</button></li>');
+                    '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
+                    '</span><button class="close">&times;</button></li>');
+
             }
             $("svg").css("margin-left", margin.left + "px");
             $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
@@ -931,9 +961,9 @@ TsaApplication.VisualizationController = (function (self) {
 
         // Set the first summary statistics by default
         setSummaryStatistics(summary[0]);
-        // Make the first row bold
-        $('#legendContainer .list-group-item').css({"font-weight":"normal"});
-        $('#legendContainer .list-group-item[data-id="0"]')[0].style.fontWeight = "bold";
+        // Highlight the first row
+        $('#legendContainer .list-group-item').removeClass("highlight");
+        $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
 
 
         $('#legendContainer .list-group-item').click(function (e) {
@@ -943,9 +973,9 @@ TsaApplication.VisualizationController = (function (self) {
            var that = this;
 
            var id = that.getAttribute("data-id");
-           if (that.getAttribute("style") == "font-weight: normal;"){
-                $('#legendContainer .list-group-item').css({"font-weight":"normal"});
-                this.style.fontWeight = "bold";
+           if (that.className == "list-group-item"){
+                $('#legendContainer .list-group-item').removeClass("highlight");
+                this.className="list-group-item highlight"
 
                 // Set summary statistics
                 setSummaryStatistics(summary[id]);
