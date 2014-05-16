@@ -53,7 +53,9 @@ TsaApplication.DataManager = (function (self) {
             series.dataset = [];
             series.loadDataset = function(callback) {
                 if (series.dataset.length !== 0) {
-                    callback();
+                    if (callback) {
+                        callback();
+                    }
                     return;
                 }
 
@@ -63,13 +65,16 @@ TsaApplication.DataManager = (function (self) {
                     values.each(function(index, value) {
                         value = $(value);
                         var seriesData = {};
-                        seriesData.seriesID = TsaApplication.VisualizationController.plottedSeries.length - 1;
                         seriesData.date = value.attr('dateTime');
                         seriesData.value = value.text();
                         seriesData.variable = series.variablename;
                         series.dataset.push(seriesData);
                     });})
-                    .done(function(){ callback(); }
+                    .done(function(){
+                        if (callback) {
+                            callback();
+                        }
+                    }
                 );
             };
         });

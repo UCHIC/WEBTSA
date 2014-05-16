@@ -2,6 +2,7 @@ var TsaApplication = (function(self){
     var r =0, dir=false;
 
     self.initialParameters = {};
+
     self.initializeApplication = function() {
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
@@ -41,22 +42,23 @@ var TsaApplication = (function(self){
         });
 
         $(document).on('plotdataloading', function() {
-            self.UiHelper.loadView('visualization');
             self.UiHelper.startPlotAnimation();
         });
 
         $(document).on('plotdataready', function() {
             self.UiHelper.endPlotAnimation();
-            self.VisualizationController.plotSeries();
+            if (self.VisualizationController.doPlot) {
+                self.VisualizationController.plotSeries();
+            }
         });
 
         $(document).on('plotstarted', function() {
-            self.UiHelper.loadView('visualization');
             self.UiHelper.startPlotAnimation();
         });
 
         $(document).on('plotfinished', function() {
             self.UiHelper.endPlotAnimation();
+            //TODO: if active tab is not visualization, clear plot, then move plottedSeries to unplottedSeries so it redraws when tab is shown next time.
         });
 
         google.maps.event.addDomListener(window, "load", function() {
@@ -72,13 +74,31 @@ var TsaApplication = (function(self){
             renderTable();
         });
 
+        $(document).on('shown.bs.tab', 'a[href="#visualizationContent"]', function() {
+            if (self.VisualizationController.unplottedSeries.length || self.VisualizationController.shouldPlot) {
+                self.VisualizationController.plotSeries();
+            }
+            self.VisualizationController.doPlot = true;
+        });
+
         $("#btnAddToPlot").click(function() {
             var dialog = $("#InfoDialog");
             var id = +dialog.get(0).dataset['series'];
             var method = self.VisualizationController.plottingMethods.addPlot;
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
-            self.VisualizationController.prepareSeries(series, method);
+
             dialog.modal('hide');
+            self.UiHelper.loadView('visualization');
+
+            self.VisualizationController.doPlot = true;
+            self.VisualizationController.prepareSeries(series, method);
+
+            var api = self.TableController.dataseriesTable.api();
+            api.$('tr').each(function(row) {
+                if (api.row(row).data().seriesid === id) {
+                    $(this).find("input[type='checkbox']").get(0).checked = true;
+                }
+            });
         });
 
         $("#btnPlotDataset").click(function() {
@@ -95,9 +115,17 @@ var TsaApplication = (function(self){
             self.VisualizationController.clearGraph();
             self.VisualizationController.boxWhiskerSvgs = [];
 
+            dialog.modal('hide');
+            self.UiHelper.loadView('visualization');
+
+            self.VisualizationController.doPlot = true;
             self.VisualizationController.prepareSeries(series, method);
 
-            dialog.modal('hide');
+            var api = self.TableController.dataseriesTable.api();
+            api.$('tr').each(function(row) {
+                var checkbox = $(this).find("input[type='checkbox']").get(0);
+                checkbox.checked = (api.row(row).data().seriesid === id);
+            });
         });
 
         $("#btnTimeSeries").click(function() {
@@ -125,8 +153,7 @@ var TsaApplication = (function(self){
             var b = new Date(dateLast.val())
             if(a < b){
                 self.VisualizationController.plotSeries();  // Dates do not overlap, proceed
-            }
-            else{
+            } else {
                 // Dates overlap, display an error.
                 $("#graphArea").prepend(
                     '<div class="alert alert-danger alert-dismissable">\

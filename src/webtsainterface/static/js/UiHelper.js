@@ -16,6 +16,10 @@ TsaApplication.UiHelper = (function (self) {
         $(".nav-tabs").find("a[href='#" + contentElement + "']").click();
     };
 
+    self.getActiveView = function() {
+        return $(".nav-tabs .active").attr("id").replace("Tab", "");
+    };
+
     self.facetsTemplate = _.template("<div class='panel panel-default'>\
         <div class='panel-heading'>\
             <h4 class='panel-title'>\
@@ -113,7 +117,8 @@ TsaApplication.UiHelper = (function (self) {
             }
         });
 
-        dialog.find("#btnAddToPlot").attr('disabled', (plottedSeries.length >= 5 || isAlreadyPlotted));
+        dialog.find("#btnAddToPlot").attr('disabled',
+            !TsaApplication.VisualizationController.canPlot() || isAlreadyPlotted);
         dialog.modal('show');
     }
 
@@ -140,10 +145,13 @@ TsaApplication.UiHelper = (function (self) {
 
     self.customizeTableStyle = function() {
         $('.ColVis_MasterButton').removeClass('ColVis_Button').addClass('btn btn-default glyphicon');
+
+        $('#tableButtons').detach().prependTo('#datasetsTable_wrapper');
+
         if ($.support.placeholder) {
             var filter = $('#datasetsTable_filter');
-            var txtSearch = filter.find('input[type="text"]').detach();
-            txtSearch.attr({placeholder: 'Search', type: 'search', results: 5});
+            var txtSearch = filter.find('input[type="search"]').detach();
+            txtSearch.attr({placeholder: 'Search', results: 5});
             filter.empty().append(txtSearch);
         }
     };

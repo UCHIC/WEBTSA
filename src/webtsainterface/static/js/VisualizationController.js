@@ -6,7 +6,14 @@ TsaApplication.VisualizationController = (function (self) {
     self.plottingMethods = { addPlot: {}, newPlot: {} };
     self.plotTypes = { histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot };
     self.currentPlot = self.plotTypes.multiseries;
+
+    self.plotLimit = 5;
+
+    self.doPlot = true;
+    self.shouldPlot = false;
     self.plottedSeries = [];
+    self.unplottedSeries = [];
+
     self.boxWhiskerSvgs = [];
     self.dateFirst;
     self.dateLast;
@@ -15,6 +22,10 @@ TsaApplication.VisualizationController = (function (self) {
     var plotDataLoading = jQuery.Event("plotdataloading");
     var plotStarted = jQuery.Event("plotstarted");
     var plotFinished = jQuery.Event("plotfinished");
+
+    self.canPlot = function() {
+        return self.plottedSeries.length + self.unplottedSeries.length < self.plotLimit;
+    };
 
     self.initializeDatePickers = function(){
            var nowTemp = new Date();
@@ -46,47 +57,69 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     self.prepareSeries = function(series, method) {
-        if (method === self.plottingMethods.addPlot && self.plottedSeries.length >= 5) {
-            //TODO: TsaApplication.UiHelper.showMessage('manin tiene que quitar un series');
+        if (method === self.plottingMethods.addPlot &&
+          self.plottedSeries.length + self.unplottedSeries.length >= self.plotLimit) {
             return;
         } else if (method === self.plottingMethods.newPlot) {
             self.plottedSeries.length = 0;
+            self.unplottedSeries.length = 0;
         } //TODO: also check if method is not a plotting method and return.
 
-        var loadedData = 0;
-        self.plottedSeries.push(series);
         $(document).trigger(plotDataLoading);
-
-        self.plottedSeries.forEach(function(dataseries) {
-            dataseries.loadDataset(function() {
-                if (++loadedData >= self.plottedSeries.length) {
-                    $(document).trigger(plotDataReady);
-                }
-            });
+        series.loadDataset(function() {
+            self.unplottedSeries.push(series);
+            $(document).trigger(plotDataReady);
         });
     };
 
+    function assignSeriesId() {
+        self.plottedSeries.forEach(function(series, index) {
+            series.dataset.forEach(function(data) {
+                data.seriesID = index;
+            });
+        });
+    }
+
     self.plotSeries = function() {
-        if (self.plottedSeries.length === 0) {
+        var shouldPlot = true;
+        if (self.unplottedSeries.length + self.plottedSeries.length === 0) {
+            self.clearGraph();
             return;
         }
 
         $(document).trigger(plotStarted);
+        self.unplottedSeries.forEach(function(series) {
+            if (series.dataset.length === 0) {
+                shouldPlot = false;
+            }
+        });
 
-        self.currentPlot();
+        if (shouldPlot) {
+            self.plottedSeries = _(self.plottedSeries).union(self.unplottedSeries);
+            self.unplottedSeries.length = 0;
+            assignSeriesId();
+            self.currentPlot();
+        }
 
-        /*$("#dpd1").datepicker('setValue', _.min(
-            _(self.plottedSeries)
-                .pluck('begindatetime')
-                .map(function(date){return new Date(date)}))
-        );
-        $("#dpd2").datepicker('setValue', _.max(
-            _(self.plottedSeries)
-                .pluck('enddatetime')
-                .map(function(date){return new Date(date)}))
-        );*/
-
+        self.doPlot = true;
         $(document).trigger(plotFinished);
+    };
+    
+    self.unplotSeries = function(seriesid) {
+        self.plottedSeries = _(self.plottedSeries).reject(function(plotted) {
+            return plotted.seriesid === seriesid;
+        });
+
+        self.unplottedSeries = _(self.unplottedSeries).reject(function(unplotted) {
+            return unplotted.seriesid === seriesid;
+        });
+
+        if (TsaApplication.UiHelper.getActiveView() !== 'visualization') {
+            self.shouldPlot = true;
+            return;
+        }
+
+        self.plotSeries(); //TODO: remove it from the plot without re-plotting.
     };
 
     self.clearGraph = function(){
@@ -559,10 +592,13 @@ TsaApplication.VisualizationController = (function (self) {
                 '<li class="list-group-item" data-id="' + i + '">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
                     '<font color=' + color(i) + '> ■ '  + '</font><span>' + varnames[i] +
-                    '</span><button class="close">&times;</button></li>');
+                    '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
         }
 
-        $('#legendContainer input[type="checkbox"]').click(function () {
+
+
+
+        $('#legendContainer input[type="checkbox"]').click(function() {
             var that = this;
             var path = $("#path" + that.getAttribute("data-id"));
 
@@ -572,6 +608,11 @@ TsaApplication.VisualizationController = (function (self) {
             else {
                 path.hide();
             }
+        });
+
+        $('#legendContainer').find('button.close').click(function() {
+            var id = +this.dataset['seriesid'];
+            self.unplotSeries(id);
         });
 
         var seriesID = focus.selectAll(".seriesID")
