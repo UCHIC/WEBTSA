@@ -262,12 +262,12 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 }
 
 .navbar-brand img{
-    max-height: 50px;
+    max-height: 70px;
 }
 
 .navbar-brand{
     float: left;
-    padding: 10px 15px;
+    padding: 0px 15px;
     font-size: 20px;
 }
 
