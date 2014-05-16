@@ -93,6 +93,7 @@ var TsaApplication = (function(self){
 
             // Clear the graph
             self.VisualizationController.clearGraph();
+            self.VisualizationController.boxWhiskerSvgs = [];
 
             self.VisualizationController.prepareSeries(series, method);
 
