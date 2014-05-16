@@ -8,13 +8,42 @@ TsaApplication.VisualizationController = (function (self) {
     self.currentPlot = self.plotTypes.multiseries;
     self.plottedSeries = [];
     self.boxWhiskerSvgs = [];
-    self.dateFirst = $('#dpd1').datepicker();
-    self.dateLast = $('#dpd2').datepicker();
+    self.dateFirst;
+    self.dateLast;
 
     var plotDataReady = jQuery.Event("plotdataready");
     var plotDataLoading = jQuery.Event("plotdataloading");
     var plotStarted = jQuery.Event("plotstarted");
     var plotFinished = jQuery.Event("plotfinished");
+
+    self.initializeDatePickers = function(){
+           var nowTemp = new Date();
+            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+
+             self.dateFirst = $('#dpd1').datepicker({
+                onRender: function (date){
+                    return true;
+                }
+            }).on('click', function(){
+                self.dateLast.hide();
+            }).on('changeDate',function (ev) {
+                self.dateFirst.hide();
+                //$('#dpd2')[0].focus();
+            }).data('datepicker');
+
+            self.dateLast = $('#dpd2').datepicker({
+                onRender: function (date) {
+                    return true;
+                }
+            }).on('click', function(){
+                self.dateFirst.hide();
+            }).on('changeDate',function (ev) {
+                self.dateLast.hide();
+            }).data('datepicker');
+
+            self.dateFirst.setValue(now);
+            self.dateLast.setValue(now);
+    }
 
     self.prepareSeries = function(series, method) {
         if (method === self.plottingMethods.addPlot && self.plottedSeries.length >= 5) {
@@ -274,11 +303,11 @@ TsaApplication.VisualizationController = (function (self) {
         // even: f(n) = n * 10
         // odd: f(n) = width - (n-1) * 10
         var axisProperties = [
-            {xTranslate: 0, orient: "left", textdistance: -textDistance},
-            {xTranslate: width, orient: "right", textdistance: textDistance},
-            {xTranslate: -65, orient: "left", textdistance: -textDistance},
-            {xTranslate: width + 65, orient: "right", textdistance: textDistance},
-            {xTranslate: -130, orient: "left", textdistance: -textDistance}
+            {xTranslate: 0, orient: "left", textdistance: -1},
+            {xTranslate: width, orient: "right", textdistance: 1},
+            {xTranslate: -65, orient: "left", textdistance: -1},
+            {xTranslate: width + 65, orient: "right", textdistance: 1},
+            {xTranslate: -130, orient: "left", textdistance: -1}
         ];
 
         var summary = calcSummaryStatistics(datasets);
@@ -415,7 +444,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             yAxis[i] = d3.svg.axis()
                 .scale(y[i])
-                .tickFormat(d3.format(".2f"))
+                //.tickFormat(d3.format(".2f"))
                 .orient(axisProperties[i].orient);
 
             lines[i] = d3.svg.line()
@@ -492,18 +521,33 @@ TsaApplication.VisualizationController = (function (self) {
             );*/
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
-            focus.append("g")
+            var text = focus.append("g")
                 .attr("class", "y axis")
+                .attr("data-id", i)
                 .style("fill", color(i))
                 .attr("transform", "translate(" + axisProperties[i].xTranslate + " ,0)")
                 .call(yAxis[i])
             .append("text")
              .attr("transform", "rotate(-90)")
-             .attr("y", axisProperties[i].textdistance)
+             .attr("y", ($(".y.axis[data-id='" + i +"'] .tick text").width() + 22) * axisProperties[i].textdistance)
              .style("text-anchor", "end")
-             .attr("x", -height/2)
              .attr("dy", ".71em")
              .text(varnames[i] + " (" +  varUnits[i] + ")");
+
+            var axisHeight = $(".y.axis[data-id=" + 0 +"]")[0].getBBox().height;
+            var textHeight = $(".y.axis[data-id='" + i +"'] > text").width();
+            text.attr("x", -(axisHeight - textHeight)/2);
+
+            // Update the axis properties
+            if ( i == 0)
+                axisProperties[2].xTranslate = - $(".y.axis[data-id=" + 0 +"]")[0].getBBox().width - 10;
+
+            if (i == 1)
+                axisProperties[3].xTranslate = axisProperties[1].xTranslate + $(".y.axis[data-id=" + 1 +"]")[0].getBBox().width + 10;
+
+            if (i == 2)
+                axisProperties[4].xTranslate = axisProperties[2].xTranslate - $(".y.axis[data-id=" + 2 +"]")[0].getBBox().width - 10;
+
 
             $("#legendContainer ul").append(
                 '<li class="list-group-item" data-id="' + i + '">' +
@@ -793,9 +837,9 @@ TsaApplication.VisualizationController = (function (self) {
         });
         var numOfDatasets = Math.min(observations.length, 3);
 
-        var boxContainerWidth = 200;
+        var boxContainerWidth = $("#graphContainer").width()/3;
 
-        var m = ($("#graphContainer").width() - (numOfDatasets * boxContainerWidth)) / (numOfDatasets + 1);
+        var m = 0;
 
         // properties for the box plots
         var margin = {top: 10, right: m, bottom: 20, left: m},
@@ -865,7 +909,7 @@ TsaApplication.VisualizationController = (function (self) {
                 // draw y axis
                 self.boxWhiskerSvgs[i].append("g")
                 .attr("class", "y axis")
-                .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 25) + "," + (0) + ")")
+                .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")")
                 .call(yAxis)
                 .append("text") // and text1
                   .attr("transform", "rotate(-90)")

@@ -89,15 +89,14 @@ var TsaApplication = (function(self){
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
 
             // Reset the date intervals
-            /*var nowTemp = new Date();
-            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
-            self.VisualizationController.dateFirst.date.valueOf() == now.valueOf();
-            self.VisualizationController.dateLast.date.valueOf() == now.valueOf();*/
+            self.VisualizationController.initializeDatePickers();
+
+            // Clear the graph
+            self.VisualizationController.clearGraph();
+
             self.VisualizationController.prepareSeries(series, method);
 
             dialog.modal('hide');
-
-
         });
 
         $("#btnTimeSeries").click(function() {
