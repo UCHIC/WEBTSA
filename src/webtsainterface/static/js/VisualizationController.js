@@ -28,32 +28,15 @@ TsaApplication.VisualizationController = (function (self) {
     };
 
     self.initializeDatePickers = function(){
-           var nowTemp = new Date();
-            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+        // Remove the date pickers
+        $("#plotOptionsContainer tbody tr:first-child").remove();
+        $("#plotOptionsContainer tbody tr:first-child").remove();
 
-             self.dateFirst = $('#dpd1').datepicker({
-                onRender: function (date){
-                    return true;
-                }
-            }).on('click', function(){
-                self.dateLast.hide();
-            }).on('changeDate',function (ev) {
-                self.dateFirst.hide();
-                //$('#dpd2')[0].focus();
-            }).data('datepicker');
-
-            self.dateLast = $('#dpd2').datepicker({
-                onRender: function (date) {
-                    return true;
-                }
-            }).on('click', function(){
-                self.dateFirst.hide();
-            }).on('changeDate',function (ev) {
-                self.dateLast.hide();
-            }).data('datepicker');
-
-            self.dateFirst.setValue(now);
-            self.dateLast.setValue(now);
+        // Add new ones
+        $("#plotOptionsContainer tbody").prepend(
+            '<tr><td>Begin Date</td><td><input id="dpd1" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>\
+            <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>'
+        );
     }
 
     self.prepareSeries = function(series, method) {
@@ -184,14 +167,14 @@ TsaApplication.VisualizationController = (function (self) {
             summary[i].observations = data[i].length;
 
             // Maximum and Minimum
-            summary[i].maximum = d3.max(data[i], function (d) {return d.value;});
-            summary[i].minimum = d3.min(data[i], function (d) {return d.value;});
+            summary[i].maximum = d3.max(data[i], function (d) {return parseFloat(d.value);});
+            summary[i].minimum = d3.min(data[i], function (d) {return parseFloat(d.value);});
 
             // Arithmetic Mean
-            summary[i].arithmeticMean = d3.mean(data[i], function (d) {return d.value;}).toFixed(2);
+            summary[i].arithmeticMean = d3.mean(data[i], function (d) {return parseFloat(d.value);}).toFixed(2);
 
             // Standard Deviation
-            summary[i].deviationSum = d3.sum(data[i], function (d) {return Math.pow(d.value - summary[i].arithmeticMean, 2)}).toFixed(2);
+            summary[i].deviationSum = d3.sum(data[i], function (d) {return Math.pow(parseFloat(d.value) - summary[i].arithmeticMean, 2)}).toFixed(2);
             summary[i].standardDeviation = (Math.pow(summary[i].deviationSum / data[i].length, (1 / 2))).toFixed(2);
 
             // Geometric Mean
@@ -423,12 +406,11 @@ TsaApplication.VisualizationController = (function (self) {
             .attr("width", width)
             .attr("height", height);
         var focus = svg.append("g")
-                .attr("class", "focus")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+             .attr("class", "focus")
+             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var context = svg.append("g")
         .attr("class", "context")
-        .attr("height", 100)
         .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
         focus.append("g")
@@ -444,7 +426,6 @@ TsaApplication.VisualizationController = (function (self) {
 
         context.append("g")
             .attr("class", "x axis")
-            //.attr("width", width  - margin.left - margin.right)
             .attr("transform", "translate(0," + (height2) + ")")
             .call(xAxis2)
 
@@ -595,9 +576,6 @@ TsaApplication.VisualizationController = (function (self) {
                     '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
         }
 
-
-
-
         $('#legendContainer input[type="checkbox"]').click(function() {
             var that = this;
             var path = $("#path" + that.getAttribute("data-id"));
@@ -668,8 +646,6 @@ TsaApplication.VisualizationController = (function (self) {
             $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]').addClass("highlight");
             setSummaryStatistics(summary[this.parentElement.getAttribute("data-id")]);
         }
-
-
 
         seriesID.append("path")
             .attr("class", "line")
@@ -1022,8 +998,6 @@ TsaApplication.VisualizationController = (function (self) {
                 setSummaryStatistics(summary[id]);
             }
         });
-
-
 
         // Returns a function to compute the interquartile range.
         function iqr(k) {

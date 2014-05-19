@@ -133,6 +133,92 @@ var TsaApplication = (function(self){
             });
         });
 
+        $("#btnExport").click(function() {
+                $(".modal-header").find(".alert").remove();
+                $(".modal-header").append(
+                    '<div class="alert alert-info alert-dismissable">\
+                        Compiling file. Please wait... \
+                    </div>'
+                );
+            var dialog = $("#InfoDialog");
+            var id = +dialog.get(0).dataset['series'];
+            var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
+
+            var csvContent = "data:text/csv;charset=utf-8,";
+
+            // Append property names
+            for (var name in series){
+                if(name != "loadDataset" && name != "dataset"){
+                   csvContent += "'" + name.toString() + "'" + ",";
+                }
+            }
+            csvContent = csvContent.slice(0, -1);                           // Delete las comma
+            csvContent += "\n";
+
+            // Append property values
+            for (var name in series){
+                if(name != "loadDataset" && name != "dataset"){             // Ignore those two properties
+                   csvContent += "'" + series[name].toString() + "'" + ",";
+                }
+            }
+            csvContent = csvContent.slice(0, -1);                           // Delete last comma
+            csvContent += "\n";
+
+            // Append dataset values once the dataset is loaded
+            series.loadDataset(function() {
+                // Append property name
+                var lastField;
+                for (var name in series.dataset[0]){
+                    lastField = name;
+                    csvContent += "'" + name + "'" + ",";
+                }
+                csvContent = csvContent.slice(0, -1);                       // Delete last comma
+                csvContent += "\n";
+
+                // Append property values
+                series.dataset.forEach(function(data){
+                    for (var name in data){
+                        csvContent += "'" + data[name] + "'";
+                        if (name != lastField){csvContent += ","}
+                    }
+                    csvContent += "\n";
+                });
+
+                csvContent = csvContent.slice(0, -1);                           // Delete last Enter
+
+                var encodedUri = encodeURI(csvContent);
+//              //window.open(encodedUri, "_self");
+//
+                var link = document.createElement("a");
+                var filename = series.sitecode + " - " + series.variablename + ".csv";
+
+                if(link.download !== undefined) { // feature detection
+                  // Browsers that support HTML5 download attribute
+                  link.setAttribute("href", encodedUri);
+                  link.setAttribute("download", filename);
+                  link.className = "glyphicon glyphicon-file";
+                  link.innerHTML = " <span class='container-title'>" + filename + "</span>";
+                }
+                else if(navigator.msSaveBlob) { // IE 10+
+                  link.addEventListener("click", function(event) {
+
+                  }, false);
+                }
+                else {
+                  // it needs to implement server side export
+                }
+
+                /*link.href = csvContent;
+                //link.setAttribute("href", encodedUri);
+                link.setAttribute("download", filename);
+                link.innerHTML = " <span class='container-title'>" + filename + "</span>";
+                link.className = "glyphicon glyphicon-file";*/
+                // link.click();
+                $(".modal-header").find(".alert").empty();
+                $(".modal-header").find(".alert").append(link);
+            });
+        });
+
         $("#btnTimeSeries").click(function() {
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
             self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.multiseries;
