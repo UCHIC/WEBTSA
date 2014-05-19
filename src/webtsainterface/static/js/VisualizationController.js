@@ -744,7 +744,7 @@ TsaApplication.VisualizationController = (function (self) {
             $("#legendContainer ul").append(
             '<li class="list-group-item" data-id="' + i + '">' +
                 '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                '</span><button class="close">&times;</button></li>');
+                '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
 
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
@@ -952,7 +952,7 @@ TsaApplication.VisualizationController = (function (self) {
                     .attr("transform", "translate(" + ((boxContainerWidth) / 2) + "," + margin.top + ")")
                   .call(charts[i]);
 
-                // draw y axis
+                // Draw y-axis
                 self.boxWhiskerSvgs[i].append("g")
                 .attr("class", "y axis")
                 .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")")
@@ -966,10 +966,11 @@ TsaApplication.VisualizationController = (function (self) {
                   .style("font-size", "16px")
                   .text(varnames[i] + " (" + varUnits[i] + ")");
 
+                // Append legend
                 $("#legendContainer ul").append(
                     '<li class="list-group-item" data-id="' + i + '">' +
                     '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                    '</span><button class="close">&times;</button></li>');
+                    '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
 
             }
             $("svg").css("margin-left", margin.left + "px");
