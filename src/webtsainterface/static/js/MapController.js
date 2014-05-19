@@ -28,11 +28,7 @@ TsaApplication.MapController = (function (self) {
             });
 
             google.maps.event.addListener(marker, 'click', function() {
-                infoWindows.forEach(function(infoWindow) {
-                    infoWindow.close();
-                });
-
-                infoWindows.length = 0;
+                removeInfoWindows();
                 infoWindows.push(markerInfoWindow);
                 markerInfoWindow.open(self.map, marker);
                 $('.btnViewSeries').on('click', function() {
@@ -57,6 +53,7 @@ TsaApplication.MapController = (function (self) {
                 markersManager.repaint();
             }
         }
+        removeInfoWindows();
     };
 
     function loadMarkerManagers() {
@@ -104,6 +101,14 @@ TsaApplication.MapController = (function (self) {
         return marker;
     }
 
+    function removeInfoWindows() {
+        infoWindows.forEach(function(infoWindow) {
+            infoWindow.close();
+        });
+
+        infoWindows.length = 0;
+    }
+
     function getMarkerColorMapping(number) {
         var red = Math.floor(Math.exp(number) * 255 * ((Math.sin(number) + 4))) % 255;
         var green = Math.floor(Math.exp(number) * 255 * ((Math.cos(number) + 4))) % 255;
@@ -113,6 +118,7 @@ TsaApplication.MapController = (function (self) {
             hex: ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)
         };
     }
+
 
 	return self;
 }(TsaApplication.MapController || {}));
