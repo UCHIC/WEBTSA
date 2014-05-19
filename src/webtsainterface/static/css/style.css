@@ -118,6 +118,10 @@ svg.box{
     width:auto;
 }
 
+svg{
+    height:auto;
+}
+
 .left{
     float:left;
 }
@@ -265,7 +269,7 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 .navbar-brand{
     float: left;
     padding: 0px 15px;
-    font-size: 20px;
+
 }
 
 .nav-tabs{
