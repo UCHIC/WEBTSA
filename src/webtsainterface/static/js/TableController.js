@@ -3,6 +3,8 @@
  */
 TsaApplication.TableController = (function(self) {
     self.dataseriesTable = {};
+    self.shouldInitialize = true;
+
     var tableOffsetY = 110;
 
     self.initializeTable = function() {
@@ -81,13 +83,12 @@ TsaApplication.TableController = (function(self) {
             scrollCollapse: true,
             scrollY: ($('div#datasetsContent').height() - tableOffsetY),
             scrollX: '100%',
-            order: [[ 1, "asc" ]],
+            order: [[ 2, "asc" ]],
             columns: [
                 {
                     title: 'Plot', orderable: false, type: 'html',
                     render: renderCheckbox, data: 'seriesid',
                     searchable: true
-
                 },
                 {
                     title: 'Source Network Id',  data: 'sourcedataserviceid',
@@ -156,13 +157,9 @@ TsaApplication.TableController = (function(self) {
         var colvis = new $.fn.dataTable.ColVis(self.dataseriesTable);
         colvis.s.aiExclude = [0, 1, 2];
         $.fn.dataTable.ColVis.fnRebuild();
-        $(colvis.button()).insertAfter('.export');
+        $(colvis.button()).appendTo('#tableButtons');
 
         $(window).on('resize', _.debounce(self.reDrawTable, 500));
-
-        self.dataseriesTable.on('length.dt', function(event){
-            console.log('a');
-        });
 
         TsaApplication.UiHelper.customizeTableStyle();
     };

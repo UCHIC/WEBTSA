@@ -19,14 +19,17 @@ var TsaApplication = (function(self){
     }
 
     function bindEvents() {
-        var renderTable = _.once(self.TableController.reDrawTable);
-
         $(document).on('facetsloaded', function() {
             self.UiHelper.renderFacets($("#leftPanel"));
         });
 
         $(document).on('dataloaded', function() {
             self.UiHelper.renderFilterItems();
+            if (self.UiHelper.getActiveView !== 'datasets') {
+                self.TableController.shouldInitialize = true;
+                return;
+            }
+
             self.TableController.initializeTable();
         });
 
@@ -71,7 +74,9 @@ var TsaApplication = (function(self){
         });
 
         $(document).on('shown.bs.tab', 'a[href="#datasetsContent"]', function() {
-            renderTable();
+            if (self.TableController.shouldInitialize) {
+                self.TableController.initializeTable();
+            }
         });
 
         $(document).on('shown.bs.tab', 'a[href="#visualizationContent"]', function() {
