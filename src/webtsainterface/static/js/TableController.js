@@ -36,7 +36,7 @@ TsaApplication.TableController = (function(self) {
                 { title: 'State', data: 'state', name: 'state', visible: false },
                 { title: 'County', data: 'county', name: 'county', visible: false },
                 { title: 'Site Type', data: 'sitetype', name: 'sitetype', visible: false },
-                { title: 'Variable Code', data: 'variablecode', name: 'variablecode', visible: false },
+                { title: 'Variable Code', data: 'variablecode', name: 'variablecode' },
                 { title: 'Variable Name', data: 'variablename', name: 'variablename' },
                 { title: 'Method', data: 'methoddescription', name: 'methoddescription', visible: false },
                 { title: 'Units', data: 'variableunitsname', name: 'variableunitsname', visible: false },
@@ -58,7 +58,7 @@ TsaApplication.TableController = (function(self) {
                 { title: 'UTC Offset', data: 'utcoffset', name: 'utcoffset', visible: false },
                 { title: 'Number Observations', data: 'numberobservations', name: 'numberobservations' },
                 { title: 'Date Last Updated', data: 'datelastupdated', name: 'datelastupdated' },
-                { title: 'Active', data: 'isactive', name: 'isactive' }
+                { title: 'Active', data: 'isactive', name: 'isactive', visible: false }
             ],
             createdRow: function(row, data, dataIndex) {
                 var tableRow = $(row);
@@ -119,6 +119,12 @@ TsaApplication.TableController = (function(self) {
             column.search(filterRegex, true, false);
         });
         api.draw();
+    };
+
+    self.filterBySite = function(sitecode) {
+        var api = self.dataseriesTable.api();
+        var column = api.column('sitecode:name');
+        column.search(sitecode).draw();
     };
 
     function renderCheckbox(data, type) {
