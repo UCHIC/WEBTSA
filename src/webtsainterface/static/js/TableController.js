@@ -3,76 +3,11 @@
  */
 TsaApplication.TableController = (function(self) {
     self.dataseriesTable = {};
+    self.shouldInitialize = true;
+
     var tableOffsetY = 110;
 
     self.initializeTable = function() {
-
-//        self.dataseriesTable = $('#datasetsTable').DataTable({
-//            "sDom": 'RCfrtiS', "bDestroy": true,
-//            "aaData": TsaApplication.DataManager.dataseries,
-//            "sScrollY": ($('div#datasetsContent').height() - tableOffsetY),
-//            "sScrollX": "100%", "bScrollCollapse": true, "bProcessing": true,
-//            "bFilter": true, "bDeferRender": true, "bAutoWidth": true, "bStateSave": true,
-//            "oColReorder": { "iFixedColumns": 1 }, "oColVis": { "aiExclude": [0, 1], "sAlign": "left" },
-//            "fnStateSave": function (oSettings, oData) {
-//                localStorage.setItem('dt-' + window.location.pathname, JSON.stringify(oData));
-//            },
-//            "fnStateLoad": function () {
-//                return JSON.parse(localStorage.getItem('dt-' + window.location.pathname));
-//            },
-//            "aoColumns": [
-//                {
-//                    "mDataProp": 'seriesid', "bSortable": false, "sType": "html",
-//                    "mRender": renderCheckbox
-//                },
-//                { "sTitle": "Series",  "mDataProp": 'seriesid' },
-//                { "sTitle": "Network",  "mDataProp": 'network' },
-//                { "sTitle": "Site Code", "mDataProp": 'sitecode' },
-//                { "sTitle": "Site Name", "mDataProp": 'sitename', "bVisible": false },
-//                { "sTitle": "Latitude", "mDataProp": 'latitude', "bVisible": false },
-//                { "sTitle": "Longitude", "mDataProp": 'longitude', "bVisible": false },
-//                { "sTitle": "State", "mDataProp": 'state', "bVisible": false },
-//                { "sTitle": "County", "mDataProp": 'county', "bVisible": false },
-//                { "sTitle": "Site Type", "mDataProp": 'sitetype', "bVisible": false },
-//                { "sTitle": "Variable Code", "mDataProp": 'variablecode', "bVisible": false },
-//                { "sTitle": "Variable Name", "mDataProp": 'variablename' },
-//                { "sTitle": "Method", "mDataProp": 'methoddescription', "bVisible": false },
-//                { "sTitle": "Units", "mDataProp": 'variableunitsname', "bVisible": false },
-//                { "sTitle": "Units Type", "mDataProp": 'variableunitstype', "bVisible": false },
-//                { "sTitle": "Units Abreviation", "mDataProp": 'variableunitsabbreviation', "bVisible": false },
-//                { "sTitle": "Sample Medium", "mDataProp": 'samplemedium', "bVisible": false },
-//                { "sTitle": "Value Type", "mDataProp": 'valuetype', "bVisible": false },
-//                { "sTitle": "Data Type", "mDataProp": 'datatype', "bVisible": false },
-//                { "sTitle": "Category", "mDataProp": 'generalcategory', "bVisible": false },
-//                { "sTitle": "Time Support", "mDataProp": 'timesupport', "bVisible": false },
-//                { "sTitle": "Time Support Units Name", "mDataProp": 'timesupportunitsname', "bVisible": false },
-//                { "sTitle": "Time Support Units Type", "mDataProp": 'timesupportunitstype', "bVisible": false },
-//                { "sTitle": "Time Support Units Abbreviation", "mDataProp": 'timesupportunitsabbreviation', "bVisible": false },
-//                { "sTitle": "Quality Control Level", "mDataProp": 'qualitycontrolleveldefinition', "bVisible": false },
-//                { "sTitle": "Source Organization", "mDataProp": 'sourceorganization', "bVisible": false },
-//                { "sTitle": "Source Description", "mDataProp": 'souredescription', "bVisible": false },
-//                { "sTitle": "Begin DateTime", "mDataProp": 'begindatetime', "bVisible": false },
-//                { "sTitle": "End DateTime", "mDataProp": 'enddatetime', "bVisible": false },
-//                { "sTitle": "UTC Offset", "mDataProp": 'utcoffset', "bVisible": false },
-//                { "sTitle": "Number Observations", "mDataProp": 'numberobservations' },
-//                { "sTitle": "Date Last Updated", "mDataProp": 'datelastupdated' },
-//                { "sTitle": "Active", "mDataProp": 'isactive' }
-//            ]
-//        });
-//
-//
-//
-//        $(window).on('resize', function() {
-//            self.reDrawTable();
-//        });
-//
-//        $('.dataTables_scrollBody').on('scroll', function() {
-//            bindRows();
-//        });
-//
-//        bindRows();
-
-
         self.dataseriesTable = $('#datasetsTable').dataTable({
             data: TsaApplication.DataManager.dataseries,
             dom: 'ftiS',
@@ -81,13 +16,12 @@ TsaApplication.TableController = (function(self) {
             scrollCollapse: true,
             scrollY: ($('div#datasetsContent').height() - tableOffsetY),
             scrollX: '100%',
-            order: [[ 1, "asc" ]],
+            order: [[ 2, "asc" ]],
             columns: [
                 {
                     title: 'Plot', orderable: false, type: 'html',
                     render: renderCheckbox, data: 'seriesid',
                     searchable: true
-
                 },
                 {
                     title: 'Source Network Id',  data: 'sourcedataserviceid',
@@ -156,15 +90,12 @@ TsaApplication.TableController = (function(self) {
         var colvis = new $.fn.dataTable.ColVis(self.dataseriesTable);
         colvis.s.aiExclude = [0, 1, 2];
         $.fn.dataTable.ColVis.fnRebuild();
-        $(colvis.button()).insertAfter('.export');
+        $(colvis.button()).appendTo('#tableButtons');
 
         $(window).on('resize', _.debounce(self.reDrawTable, 500));
 
-        self.dataseriesTable.on('length.dt', function(event){
-            console.log('a');
-        });
-
         TsaApplication.UiHelper.customizeTableStyle();
+        self.shouldInitialize = false;
     };
 
     self.reDrawTable = function() {

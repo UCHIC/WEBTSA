@@ -390,6 +390,7 @@ ul.ColVis_collection {
     overflow-y: auto;
     width: auto;
     height: 40%;
+    margin-left: -50px;
 }
 
 ul.ColVis_collection li {

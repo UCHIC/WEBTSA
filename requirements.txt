@@ -1,4 +1,4 @@
-Django==1.6.4
+Django==1.6.5
 django-pyodbc==0.2.4
 django-tastypie==0.11.0
 pyodbc==3.0.7

@@ -57,8 +57,7 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     self.prepareSeries = function(series, method) {
-        if (method === self.plottingMethods.addPlot &&
-          self.plottedSeries.length + self.unplottedSeries.length >= self.plotLimit) {
+        if (method === self.plottingMethods.addPlot && !self.canPlot()) {
             return;
         } else if (method === self.plottingMethods.newPlot) {
             self.plottedSeries.length = 0;
@@ -99,6 +98,7 @@ TsaApplication.VisualizationController = (function (self) {
             self.unplottedSeries.length = 0;
             assignSeriesId();
             self.currentPlot();
+            //TODO: if not in visualization tab, make it redraw the plot.
         }
 
         self.doPlot = true;
