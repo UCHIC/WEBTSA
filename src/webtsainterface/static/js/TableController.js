@@ -41,7 +41,7 @@ TsaApplication.TableController = (function(self) {
                 { title: 'Method', data: 'methoddescription', name: 'methoddescription', visible: false },
                 { title: 'Units', data: 'variableunitsname', name: 'variableunitsname', visible: false },
                 { title: 'Units Type', data: 'variableunitstype', name: 'variableunitstype', visible: false },
-                { title: 'Units Abreviation', data: 'variableunitsabbreviation', name: 'variableunitsabbreviation', visible: false },
+                { title: 'Units Abbreviation', data: 'variableunitsabbreviation', name: 'variableunitsabbreviation', visible: false },
                 { title: 'Sample Medium', data: 'samplemedium', name: 'samplemedium', visible: false },
                 { title: 'Value Type', data: 'valuetype', name: 'valuetype', visible: false },
                 { title: 'Data Type', data: 'datatype', name: 'datatype', visible: false },
