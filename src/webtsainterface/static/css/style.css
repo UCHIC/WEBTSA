@@ -174,14 +174,9 @@ button span{
     color: #333333;
 }
 
-
-.bar rect {
+.bar rect{
   fill: steelblue;
   shape-rendering: crispEdges;
-}
-
-.bar rect:hover {
-    fill:brown;
 }
 
 .bar text {
@@ -189,8 +184,6 @@ button span{
 }
 
 line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
-
-
 
 /* body*/
 
@@ -279,7 +272,6 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     margin-top:0px;
 }
 
-
 #btnExport{
     width:auto;
     float:right;
@@ -302,6 +294,11 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 
 table.dataTable thead th {
     padding-left: 10px;
+}
+
+.modal-header .alert{
+    margin-top: 15px;
+    margin-bottom: 0px;
 }
 
 #datasetsTable td:not(:first-child) {
@@ -598,8 +595,6 @@ button.ColVis_Button {
     opacity:0.9;
     text-align: center;
 }
-
-
 
 #legendContainer{
   margin-bottom: 4px;

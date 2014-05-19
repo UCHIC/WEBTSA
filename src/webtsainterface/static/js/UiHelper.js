@@ -109,6 +109,8 @@ TsaApplication.UiHelper = (function (self) {
         var plottedSeries = TsaApplication.VisualizationController.plottedSeries;
         var isAlreadyPlotted = _(_(plottedSeries).pluck('seriesid')).contains(series.seriesid);
 
+         $(".modal-header").find(".alert").remove();    // Clear previous download links
+
         dialog.get(0).dataset['series'] = series.seriesid;
         dialog.find("#series-active-info").text((series.isactive? "Active": "Not Active"));
         dialog.find(".series-item-value").each(function(index, item) {
