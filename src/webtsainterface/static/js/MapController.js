@@ -6,6 +6,7 @@ TsaApplication.MapController = (function (self) {
     self.map = {};
     var settings = {};
     var markersManagers = {};
+    var infoWindows = [];
 
     self.initializeMap = function() {
         settings = {
@@ -25,7 +26,17 @@ TsaApplication.MapController = (function (self) {
                 sitecode: site.sitecode, sitename: site.sitename, network: site.network, sitetype: site.sitetype,
                 latitude: site.latitude, longitude: site.longitude, state: site.state, county: site.county})
             });
-            google.maps.event.addListener(marker, 'click', function() { markerInfoWindow.open(self.map, marker); });
+
+            google.maps.event.addListener(marker, 'click', function() {
+                removeInfoWindows();
+                infoWindows.push(markerInfoWindow);
+                markerInfoWindow.open(self.map, marker);
+                $('.btnViewSeries').on('click', function() {
+                    TsaApplication.UiHelper.loadView('datasets');
+                    var siteCode = this.dataset['sitecode']
+                    TsaApplication.TableController.filterBySite(siteCode);
+                });
+            });
         });
     };
 
@@ -42,6 +53,7 @@ TsaApplication.MapController = (function (self) {
                 markersManager.repaint();
             }
         }
+        removeInfoWindows();
     };
 
     function loadMarkerManagers() {
@@ -61,11 +73,12 @@ TsaApplication.MapController = (function (self) {
                 fontFamily: '"HelveticaNeue-Light", "Helvetica Neue Light",\
                     "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif'
             }]);
+
             networkMarkersManager.setCalculator(function (markers) {
               return { text: markers.length.toString(), index: 1, title: networks[networkId] };
             });
-            TsaApplication.UiHelper.addColorToClass(cssClass, getMarkerColorMapping(networkId));
 
+            TsaApplication.UiHelper.addColorToClass(cssClass, getMarkerColorMapping(networkId));
             markersManagers[networkId] = networkMarkersManager;
         });
     }
@@ -88,15 +101,24 @@ TsaApplication.MapController = (function (self) {
         return marker;
     }
 
+    function removeInfoWindows() {
+        infoWindows.forEach(function(infoWindow) {
+            infoWindow.close();
+        });
+
+        infoWindows.length = 0;
+    }
+
     function getMarkerColorMapping(number) {
-        var red = Math.floor(Math.exp(number) * 255 * ((Math.sin(number) + 2))) % 255;
-        var green = Math.floor(Math.exp(number) * 255 * ((Math.cos(number) + 2))) % 255;
-        var blue = Math.floor(Math.exp(number) * 255 * ((Math.sin(2 * number) + 2))) % 255;
+        var red = Math.floor(Math.exp(number) * 255 * ((Math.sin(number) + 4))) % 255;
+        var green = Math.floor(Math.exp(number) * 255 * ((Math.cos(number) + 4))) % 255;
+        var blue = Math.floor(Math.exp(number) * 255 * ((Math.sin(2 * number) + 4))) % 255;
         return {
             rgb: { red: red, green: green, blue: blue },
             hex: ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)
         };
     }
+
 
 	return self;
 }(TsaApplication.MapController || {}));

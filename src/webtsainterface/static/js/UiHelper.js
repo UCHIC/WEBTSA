@@ -60,6 +60,7 @@ TsaApplication.UiHelper = (function (self) {
             </div>\
             <div class='clearfix'></div>\
         </div>\
+        <button data-sitecode='<%= sitecode %>' class='btnViewSeries'>View Dataseries</button>\
     </section>");
 
     self.renderFacets = function(parent){
