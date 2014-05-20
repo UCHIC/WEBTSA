@@ -72,6 +72,7 @@ TsaApplication.TableController = (function(self) {
                     var visualization = TsaApplication.VisualizationController;
                     var series = data;
                     if (this.checked) {
+                        console.log('series:' + series.seriesid + ' can plot: ' + visualization.canPlot());
                         if (!visualization.canPlot()) {
                             this.checked = false;
                             return;

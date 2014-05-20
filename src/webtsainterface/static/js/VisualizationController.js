@@ -48,8 +48,9 @@ TsaApplication.VisualizationController = (function (self) {
         } //TODO: also check if method is not a plotting method and return.
 
         $(document).trigger(plotDataLoading);
+        self.unplottedSeries.push(series);
+
         series.loadDataset(function() {
-            self.unplottedSeries.push(series);
             $(document).trigger(plotDataReady);
         });
     };
