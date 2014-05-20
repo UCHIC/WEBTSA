@@ -601,8 +601,9 @@ TsaApplication.VisualizationController = (function (self) {
             $("#legendContainer ul").append(
                 '<li class="list-group-item" data-id="' + i + '">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
+                    '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + color(i) + '> ■ '  + '</font><span>' + varnames[i] +
-                    '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
+                    '</span></li>');
         }
 
         $('#legendContainer input[type="checkbox"]').click(function() {
@@ -773,8 +774,9 @@ TsaApplication.VisualizationController = (function (self) {
 
             $("#legendContainer ul").append(
             '<li class="list-group-item" data-id="' + i + '">' +
+                '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                 '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
+                '</span></li>');
 
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
@@ -999,8 +1001,9 @@ TsaApplication.VisualizationController = (function (self) {
                 // Append legend
                 $("#legendContainer ul").append(
                     '<li class="list-group-item" data-id="' + i + '">' +
+                    '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                    '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
+                    '</span></li>');
 
             }
             $("svg").css("margin-left", margin.left + "px");
