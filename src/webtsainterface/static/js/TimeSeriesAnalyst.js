@@ -219,6 +219,15 @@ var TsaApplication = (function(self){
             });
         });
 
+        function onDateChange() {
+             $("#dateIntervals button").removeClass("active");
+        }
+
+        $('#dpd1').bind('changeDate', onDateChange);
+        $('#dpd2').bind('changeDate', onDateChange);
+        $('#dpd1').bind('input', onDateChange);
+        $('#dpd2').bind('input', onDateChange);
+
         $("#btnTimeSeries").click(function() {
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
             self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.multiseries;

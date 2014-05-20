@@ -612,6 +612,9 @@ button.ColVis_Button {
     line-height: 1;
 }
 
+button.close{
+    margin-left: 3px;
+}
 
 
 /* Spinner icon */

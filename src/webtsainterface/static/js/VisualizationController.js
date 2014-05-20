@@ -117,7 +117,8 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     $(window).resize(_.debounce(function(){
-        self.plotSeries();
+        if ($("#visualizationTab").hasClass("active"))
+            self.plotSeries();
     }, 500));
 
     // Moves an svg element to the last position of its container so it is rendered last and appears in front
@@ -266,6 +267,10 @@ TsaApplication.VisualizationController = (function (self) {
 
         // If no dates are set, display the last month
         if (self.dateFirst.date.valueOf() == now.valueOf() && self.dateLast.date.valueOf() == now.valueOf()) {
+            // Mark the button of last month interval
+            $("#dateIntervals button").removeClass("active");
+            $("#btnLastMonth").addClass("active");
+
             self.dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
             self.dateFirst.setValue(maxDate);
 
@@ -275,6 +280,9 @@ TsaApplication.VisualizationController = (function (self) {
 
         // Update click events for the date interval buttons
         $("#btnLastWeek").click(function() {
+            $("#dateIntervals button").removeClass("active");
+            $(this).addClass("active");
+
             self.dateFirst.date = maxDate.setDate(maxDate.getDate() - 7);
             self.dateFirst.setValue(maxDate);
 
@@ -282,6 +290,9 @@ TsaApplication.VisualizationController = (function (self) {
             self.dateLast.setValue(maxDate);
         });
         $("#btnLastMonth").click(function() {
+            $("#dateIntervals button").removeClass("active");
+            $(this).addClass("active");
+
             self.dateFirst.date = maxDate.setMonth(maxDate.getMonth() - 1);
             self.dateFirst.setValue(maxDate);
 
@@ -289,6 +300,9 @@ TsaApplication.VisualizationController = (function (self) {
             self.dateLast.setValue(maxDate);
         });
         $("#btnAll").click(function() {
+            $("#dateIntervals button").removeClass("active");
+            $(this).addClass("active");
+
             self.dateFirst.date = minDate;
             self.dateFirst.setValue(minDate);
 
@@ -313,14 +327,13 @@ TsaApplication.VisualizationController = (function (self) {
 
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
         var axisMargin = 60;
-        var margin = {top: 20, right: 20 + (Math.floor(varnames.length / 2)) * axisMargin, bottom: 200, left: (Math.ceil(varnames.length / 2)) * axisMargin},
-
+        var margin = {top: 20, right: 20 + (Math.floor(varnames.length / 2)) * axisMargin, bottom:120, left: (Math.ceil(varnames.length / 2)) * axisMargin},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom,
-            margin2 = {top: height + 70, right: margin.right, bottom: 20, left: margin.left},
-            height2 = 100;
+            margin2 = {top: height + 63, right: 20, bottom: 20, left: 20},
+            width2 = $("#graphContainer").width() - margin2.left - margin2.right,
+            height2 = 50;
 
-        var textDistance = 50;
         // Properties for the five vertical axises.
         // even: f(n) = n * 10
         // odd: f(n) = width - (n-1) * 10
@@ -374,7 +387,7 @@ TsaApplication.VisualizationController = (function (self) {
                         return d.date;
                     });
                 })])
-            .range([0, width])
+            .range([0, width2])
             .nice(d3.time.day);
 
         var color = d3.scale.category10()
@@ -390,10 +403,12 @@ TsaApplication.VisualizationController = (function (self) {
 
         var xAxis = d3.svg.axis()
             .scale(x)
+            .ticks(Math.max(1,(width - data.length * 51)/ 60))      // Don't even...
             .orient("bottom");
 
         var xAxis2 = d3.svg.axis()
             .scale(x2)
+            .ticks((width2 - 60) / 60)
             .orient("bottom");
 
         var svg = d3.select("#graphContainer").append("svg")
@@ -541,6 +556,19 @@ TsaApplication.VisualizationController = (function (self) {
             );*/
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
+            // Returns the length of the longest tick
+            function getAxisSeparation(id){
+                var ticks = $(".y.axis[data-id='" + i +"'] .tick text");
+                var max = 0;
+                for (var index = 0; index < ticks.length; index++){
+                    var a = $(ticks[index]);
+                    if (max < a.width()){
+                        max = a.width();
+                    }
+                }
+                return max;
+            }
+
             var text = focus.append("g")
                 .attr("class", "y axis")
                 .attr("data-id", i)
@@ -549,7 +577,8 @@ TsaApplication.VisualizationController = (function (self) {
                 .call(yAxis[i])
             .append("text")
              .attr("transform", "rotate(-90)")
-             .attr("y", ($(".y.axis[data-id='" + i +"'] .tick text").width() + 22) * axisProperties[i].textdistance)
+             // .attr("y", ($(".y.axis[data-id='" + i +"'] .tick text").width() + 22) * axisProperties[i].textdistance)
+             .attr("y", (getAxisSeparation(i) + 22) * axisProperties[i].textdistance)
              .style("text-anchor", "end")
              .attr("dy", ".71em")
              .text(varnames[i] + " (" +  varUnits[i] + ")");
@@ -572,8 +601,9 @@ TsaApplication.VisualizationController = (function (self) {
             $("#legendContainer ul").append(
                 '<li class="list-group-item" data-id="' + i + '">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
+                    '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + color(i) + '> ■ '  + '</font><span>' + varnames[i] +
-                    '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
+                    '</span></li>');
         }
 
         $('#legendContainer input[type="checkbox"]').click(function() {
@@ -593,6 +623,10 @@ TsaApplication.VisualizationController = (function (self) {
             self.unplotSeries(id);
         });
 
+        // Update xAxis ticks
+        var axisSpace = 0;
+
+
         var seriesID = focus.selectAll(".seriesID")
             .data(data, function (d) {
                 return d.key;
@@ -606,18 +640,15 @@ TsaApplication.VisualizationController = (function (self) {
             })
             .attr("class", "seriesID");
 
-        var seriesID2 = context.selectAll(".seriesID")
+        var seriesID2 = context.selectAll(".seriesID2")
             .data(data, function (d) {
                 return d.key;
             })
             .enter().append("g")
-            .attr("id", function (d) {
-                return "path" + d.key;
-            })
             .attr("data-id", function (d) {
                 return d.key;
             })
-            .attr("class", "seriesID");
+            .attr("class", "seriesID2");
 
          var brush = d3.svg.brush()
         .x(x2)
@@ -743,8 +774,9 @@ TsaApplication.VisualizationController = (function (self) {
 
             $("#legendContainer ul").append(
             '<li class="list-group-item" data-id="' + i + '">' +
+                '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                 '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
+                '</span></li>');
 
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
@@ -969,8 +1001,9 @@ TsaApplication.VisualizationController = (function (self) {
                 // Append legend
                 $("#legendContainer ul").append(
                     '<li class="list-group-item" data-id="' + i + '">' +
+                    '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                    '</span><button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button></li>');
+                    '</span></li>');
 
             }
             $("svg").css("margin-left", margin.left + "px");
