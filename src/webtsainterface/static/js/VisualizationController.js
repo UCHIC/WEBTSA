@@ -671,6 +671,7 @@ TsaApplication.VisualizationController = (function (self) {
             }
         });
 
+        // Bind unplot button event
         $('#legendContainer').find('button.close').click(function() {
             var id = +this.dataset['seriesid'];
             self.unplotSeries(id);
@@ -678,7 +679,6 @@ TsaApplication.VisualizationController = (function (self) {
 
         // Update xAxis ticks
         var axisSpace = 0;
-
 
         var seriesID = focus.selectAll(".seriesID")
             .data(data, function (d) {
@@ -834,6 +834,12 @@ TsaApplication.VisualizationController = (function (self) {
                 '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                 '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
                 '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+
+            // Bind unplot button event
+            $('#legendContainer').find('button.close').click(function() {
+                var id = +this.dataset['seriesid'];
+                self.unplotSeries(id);
+            });
 
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
@@ -1107,6 +1113,12 @@ TsaApplication.VisualizationController = (function (self) {
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
                     '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+
+                // Bind unplot button event
+                $('#legendContainer').find('button.close').click(function() {
+                    var id = +this.dataset['seriesid'];
+                    self.unplotSeries(id);
+                });
             }
             $("svg").css("margin-left", margin.left + "px");
             $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
