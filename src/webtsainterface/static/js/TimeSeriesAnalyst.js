@@ -155,64 +155,64 @@ var TsaApplication = (function(self){
 
             // Append Site Information
             csvContent +=   "# Site Information\n" +
-                            "# -----------------\n" +
-                            "# Network:" + series['network'] + "\n" +
-                            "# SiteCode:" + series['sitecode'] + "\n" +
-                            "# SiteName:" + series['sitename'] + "\n" +
-                            "# IsActive:" + series['isactive'] + "\n" +
-                            "# Latitude:" + series['latitude'] + "\n" +
-                            "# Longitude:" + series['longitude'] + "\n" +
-                            //"# Elevation:" + series['elevation'] + "\n" +                       // Not here
-                            //"# VerticalDatum:" + series['verticaldatum'] + "\n" +               // Not here
-                            "# State:" + series['state'] + "\n" +
-                            "# County:" + series['county'] + "\n" +
+                            "# ---------------------------\n" +
+                            "# Network: " + series['network'] + "\n" +
+                            "# SiteCode: " + series['sitecode'] + "\n" +
+                            "# SiteName: " + series['sitename'] + "\n" +
+                            "# IsActive: " + series['isactive'] + "\n" +
+                            "# Latitude: " + series['latitude'] + "\n" +
+                            "# Longitude: " + series['longitude'] + "\n" +
+                            //"# Elevation: " + series['elevation'] + "\n" +                       // Not here
+                            //"# VerticalDatum: " + series['verticaldatum'] + "\n" +               // Not here
+                            "# State: " + series['state'] + "\n" +
+                            "# County: " + series['county'] + "\n" +
                             //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not here
-                            "# SiteType:" + series['sitetype'] + "\n#\n";
+                            "# SiteType: " + series['sitetype'] + "\n#\n";
 
             // Append Variable Information
             csvContent +=   "# Variable Information\n" +
-                            "# -----------------\n" +
-                            "# VariableCode:" + series['variablecode'] + "\n" +
-                            "# VariableName:" + series['variablename'] + "\n" +
-                            "# ValueType:" + series['valuetype'] + "\n" +
-                            "# DataType:" + series['datatype'] + "\n" +
-                            "# GeneralCategory:" + series['generalcategory'] + "\n" +
-                            "# SampleMedium:" + series['samplemedium'] + "\n" +
-                            "# VariableUnitsName:" + series['variableunitsname'] + "\n" +
-                            "# VariableUnitsType:" + series['variableunitstype'] + "\n" +
-                            "# VariableUnitsAbbreviation:" + series['variableunitsabbreviation'] + "\n" +
+                            "# ---------------------------\n" +
+                            "# VariableCode: " + series['variablecode'] + "\n" +
+                            "# VariableName: " + series['variablename'] + "\n" +
+                            "# ValueType: " + series['valuetype'] + "\n" +
+                            "# DataType: " + series['datatype'] + "\n" +
+                            "# GeneralCategory: " + series['generalcategory'] + "\n" +
+                            "# SampleMedium: " + series['samplemedium'] + "\n" +
+                            "# VariableUnitsName: " + series['variableunitsname'] + "\n" +
+                            "# VariableUnitsType: " + series['variableunitstype'] + "\n" +
+                            "# VariableUnitsAbbreviation: " + series['variableunitsabbreviation'] + "\n" +
                             //"# NoDataValue:" + series['county'] + "\n" +                                        // Not here
                             //"# IsRegular:" + series['isregular'] + "\n" +                                       // Not here
-                            "# TimeSupport:" + series['timesupport'] + "\n" +
-                            "# TimeSupportUnitsAbbreviation:" + series['timesupportunitsabbreviation'] + "\n" +
-                            "# TimeSupportUnitsName:" + series['timesupportunitsname'] + "\n" +
-                            "# TimeSupportUnitsType:" + series['timesupportunitstype'] + "\n#\n";
+                            "# TimeSupport: " + series['timesupport'] + "\n" +
+                            "# TimeSupportUnitsAbbreviation: " + series['timesupportunitsabbreviation'] + "\n" +
+                            "# TimeSupportUnitsName: " + series['timesupportunitsname'] + "\n" +
+                            "# TimeSupportUnitsType: " + series['timesupportunitstype'] + "\n#\n";
                             //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not here
 
             // Append Method Information
             csvContent +=   "# Method Information\n" +
-                            "# -----------------\n" +
-                            "# MethodDescription:" + series['methoddescription'] + "\n" +
-                            "# MethodLink:" + series['sitecode'] + "\n#\n";
+                            "# ---------------------------\n" +
+                            "# MethodDescription: " + series['methoddescription'] + "\n" +
+                            "# MethodLink: " + series['sitecode'] + "\n#\n";
 
 
             // Append Series Information
             csvContent +=   "# Series Information\n" +
-                            "# -----------------\n" +
-                            "# BeginDateTime:" + series['begindatetime'] + "\n" +
-                            "# EndDateTime:" + series['enddatetime'] + "\n" +
-                            "# DateLastUpdated:" + series['datelastupdated'] + "\n" +
-                            "# NumberOfObservations:" + series['numberofobservations'] + "\n" +
-                            "# QualityControlLevel:" + series['qualitycontrollevel'] + "\n" +
-                            "# QualityControllLevelDefinition:" + series['qualitycontrolleveldefinition'] + "\n" +
-                            "# QualityControlLevelExplanation:" + series['qualitycontrollevelexplanation'] + "\n" +
-                            "# GetDataUrl:" + series['getdataurl'] + "\n#\n";
+                            "# ---------------------------\n" +
+                            "# BeginDateTime: " + series['begindatetime'] + "\n" +
+                            "# EndDateTime: " + series['enddatetime'] + "\n" +
+                            "# DateLastUpdated: " + series['datelastupdated'] + "\n" +
+                            "# NumberOfObservations: " + series['numberofobservations'] + "\n" +
+                            "# QualityControlLevel: " + series['qualitycontrollevel'] + "\n" +
+                            "# QualityControllLevelDefinition: " + series['qualitycontrolleveldefinition'] + "\n" +
+                            "# QualityControlLevelExplanation: " + series['qualitycontrollevelexplanation'] + "\n" +
+                            "# GetDataUrl: " + series['getdataurl'] + "\n#\n";
 
             // Append Source Information
             csvContent +=   "# Source Information\n" +
-                            "# -----------------\n" +
-                            "# SourceOrganization:" + series['sourceorganization'] + "\n" +
-                            "# SourceDescription:" + series['sourcedescription'] + "\n#\n";
+                            "# ---------------------------\n" +
+                            "# SourceOrganization: " + series['sourceorganization'] + "\n" +
+                            "# SourceDescription: " + series['sourcedescription'] + "\n#\n";
                             //"# ContactName:" + series['contactname'] + "\n" +                   // Not here
                             //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not here
                             //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not here
@@ -221,29 +221,22 @@ var TsaApplication = (function(self){
 
             // Append dataset values once the dataset is loaded
             series.loadDataset(function() {
-                // Append property name
-                var lastField;
-                for (var name in series.dataset[0]){
-                    lastField = name;
-                    csvContent += "'" + name + "'" + ",";
-                }
-                csvContent = csvContent.slice(0, -1);                       // Delete last comma
+                // Append property names
+                csvContent += "DateTime, ";
+                //csvContent += "TimeOffset, ";
+                //csvContent += "DateTimeUTC, ";
+                csvContent += "Value";
+                //csvContent += "SensorCode";
                 csvContent += "\n";
 
                 // Append property values
                 series.dataset.forEach(function(data){
-                    for (var name in data){
-                        csvContent += "'" + data[name] + "'";
-                        if (name != lastField){csvContent += ","}
-                    }
-                    csvContent += "\n";
+                     csvContent += data['date'] + ", " + data['value'] + "\n";
                 });
 
-                csvContent = csvContent.slice(0, -1);                           // Delete last Enter
-
+                // Encode the string to avoid escape characters
                 var encodedUri = encodeURI(csvContent);
-//              //window.open(encodedUri, "_self");
-//
+
                 var link = document.createElement("a");
                 var filename = series.sitecode + " - " + series.variablename + ".csv";
 
@@ -261,6 +254,7 @@ var TsaApplication = (function(self){
                 }
                 else {
                   // it needs to implement server side export
+                  $(".modal-header").find(".alert").append("We're sorry. Your browser does not support HTML5 download.");
                 }
 
                 /*link.href = csvContent;
@@ -270,7 +264,7 @@ var TsaApplication = (function(self){
                 link.className = "glyphicon glyphicon-file";*/
                 // link.click();
                 $(".modal-header").find(".alert").empty();
-                //$(".modal-header").find(".alert").append(link);
+                $(".modal-header").find(".alert").append(link);
             });
         });
 
