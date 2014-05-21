@@ -246,25 +246,20 @@ var TsaApplication = (function(self){
                   link.setAttribute("download", filename);
                   link.className = "glyphicon glyphicon-file";
                   link.innerHTML = " <span class='container-title'>" + filename + "</span>";
+
+                  $(".modal-header").find(".alert").empty();
+                  $(".modal-header").find(".alert").append(link);
                 }
                 else if(navigator.msSaveBlob) { // IE 10+
-                  link.addEventListener("click", function(event) {
+                  $(".modal-header").find(".alert").append("We're sorry. Your browser does not support HTML5 download.");
+                  /*link.addEventListener("click", function(event) {
 
-                  }, false);
+                  }, false);*/
                 }
                 else {
                   // it needs to implement server side export
                   $(".modal-header").find(".alert").append("We're sorry. Your browser does not support HTML5 download.");
                 }
-
-                /*link.href = csvContent;
-                //link.setAttribute("href", encodedUri);
-                link.setAttribute("download", filename);
-                link.innerHTML = " <span class='container-title'>" + filename + "</span>";
-                link.className = "glyphicon glyphicon-file";*/
-                // link.click();
-                $(".modal-header").find(".alert").empty();
-                $(".modal-header").find(".alert").append(link);
             });
         });
 
