@@ -49,6 +49,8 @@ TsaApplication.DataManager = (function (self) {
     };
 
     function extendDataseries() {
+        var dateRegex = /^(\d{4}\-\d\d\-\d\d([tT][\d:]*)?)/;
+
         self.dataseries.forEach(function(series) {
             series.dataset = [];
             series.loadDataset = function(callback) {
@@ -62,12 +64,12 @@ TsaApplication.DataManager = (function (self) {
                 $.ajax({
                     url: series.getdataurl
                 }).done(function(data){
-                    var values = $(data).find('values').children('value');
+                    var values = $(data).find('values').find('value');
                     series.dataset.noDataValue = +$(data).find('noDataValue').text();
                     values.each(function(index, value) {
                         value = $(value);
                         var seriesData = {};
-                        seriesData.date = value.attr('dateTime');
+                        seriesData.date = value.attr('dateTime').match(dateRegex).shift();
                         seriesData.value = value.text();
                         seriesData.variable = series.variablename;
                         series.dataset.push(seriesData);

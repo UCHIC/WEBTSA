@@ -72,6 +72,7 @@ TsaApplication.TableController = (function(self) {
                     var visualization = TsaApplication.VisualizationController;
                     var series = data;
                     if (this.checked) {
+                        console.log('series:' + series.seriesid + ' can plot: ' + visualization.canPlot());
                         if (!visualization.canPlot()) {
                             this.checked = false;
                             return;
@@ -96,6 +97,7 @@ TsaApplication.TableController = (function(self) {
 
         TsaApplication.UiHelper.customizeTableStyle();
         self.shouldInitialize = false;
+        self.updateDataseries();
     };
 
     self.reDrawTable = function() {
@@ -105,6 +107,9 @@ TsaApplication.TableController = (function(self) {
     };
 
     self.updateDataseries = function() {
+        if (self.shouldInitialize) {
+            return;
+        }
         var api = self.dataseriesTable.api();
         TsaApplication.DataManager.facets.forEach(function(facet) {
             var column = api.column(facet.keyfield + ':name');
@@ -120,12 +125,12 @@ TsaApplication.TableController = (function(self) {
         });
         api.draw();
     };
-
-    self.filterBySite = function(sitecode) {
-        var api = self.dataseriesTable.api();
-        var column = api.column('sitecode:name');
-        column.search(sitecode).draw();
-    };
+//
+//    self.filterBySite = function(sitecode) {
+//        var api = self.dataseriesTable.api();
+//        var column = api.column('sitecode:name');
+//        column.search(sitecode).draw();
+//    };
 
     function renderCheckbox(data, type) {
         var visualization = TsaApplication.VisualizationController;
