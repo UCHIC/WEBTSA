@@ -23,6 +23,11 @@ TsaApplication.VisualizationController = (function (self) {
     var plotStarted = jQuery.Event("plotstarted");
     var plotFinished = jQuery.Event("plotfinished");
 
+    $(window).resize(_.debounce(function(){
+        if ($("#visualizationTab").hasClass("active"))
+            self.plotSeries();
+    }, 500));
+
     self.canPlot = function() {
         return self.plottedSeries.length + self.unplottedSeries.length < self.plotLimit;
     };
@@ -37,7 +42,7 @@ TsaApplication.VisualizationController = (function (self) {
             '<tr><td>Begin Date</td><td><input id="dpd1" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>\
             <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>'
         );
-    }
+    };
 
     self.prepareSeries = function(series, method) {
         if (method === self.plottingMethods.addPlot && !self.canPlot()) {
@@ -54,14 +59,6 @@ TsaApplication.VisualizationController = (function (self) {
             $(document).trigger(plotDataReady);
         });
     };
-
-    function assignSeriesId() {
-        self.plottedSeries.forEach(function(series, index) {
-            series.dataset.forEach(function(data) {
-                data.seriesID = index;
-            });
-        });
-    }
 
     self.plotSeries = function() {
         var shouldPlot = true;
@@ -110,17 +107,12 @@ TsaApplication.VisualizationController = (function (self) {
         $("#graphContainer").empty();
         $("#legendContainer").find("ul").empty();
         $("#statisticsTable tbody").empty();
-    }
+    };
 
     // Adds commas to numbers in thousand intervals
     self.numberWithCommas = function (x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    $(window).resize(_.debounce(function(){
-        if ($("#visualizationTab").hasClass("active"))
-            self.plotSeries();
-    }, 500));
+    };
 
     // Moves an svg element to the last position of its container so it is rendered last and appears in front
     d3.selection.prototype.moveToFront = function() {
@@ -128,6 +120,14 @@ TsaApplication.VisualizationController = (function (self) {
         this.parentNode.appendChild(this);
       });
     };
+
+    function assignSeriesId() {
+        self.plottedSeries.forEach(function(series, index) {
+            series.dataset.forEach(function(data) {
+                data.seriesID = index;
+            });
+        });
+    }
 
     function calcSummaryStatistics(data){
         var summary = [];

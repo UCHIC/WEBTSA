@@ -32,9 +32,9 @@ TsaApplication.MapController = (function (self) {
                 infoWindows.push(markerInfoWindow);
                 markerInfoWindow.open(self.map, marker);
                 $('.btnViewSeries').on('click', function() {
+                    var siteFacet = _(TsaApplication.DataManager.facets).findWhere({ keyfield: 'sitecode' });
+                    TsaApplication.Search.selectOnlyFilter(siteFacet, this.dataset['sitecode']);
                     TsaApplication.UiHelper.loadView('datasets');
-                    var siteCode = this.dataset['sitecode']
-                    TsaApplication.TableController.filterBySite(siteCode);
                 });
             });
         });

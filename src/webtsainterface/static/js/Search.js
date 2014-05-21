@@ -13,8 +13,18 @@ TsaApplication.Search = (function (self) {
         var filter = _.find(facet.filters, function(filter){ return filter[facet.keyfield] == value; });
         filter.applied = !filter.applied;
         updateFilteredData(facet);
+    };
 
-        $(document).trigger(dataFiltered);
+    self.clearFacetFilters = function(facet) {
+       self.selectOnlyFilter(facet);
+    };
+
+    self.selectOnlyFilter = function(facet, savedFilter) {
+        var keyfield = facet.keyfield;
+        facet.filters.forEach(function(filter) {
+            filter.applied = (filter[keyfield] === savedFilter);
+        });
+        updateFilteredData(facet);
     };
 
     function updateFilteredData(facetFiltered) {
@@ -36,7 +46,7 @@ TsaApplication.Search = (function (self) {
             return _.contains(siteCodes, site.sitecode);
         });
 
-        // update filters count
+        // update filters and filters count
         TsaApplication.DataManager.facets.forEach(function(facet) {
             if (!facet.isFiltered()) {
                 facet.filters.forEach(function(filter) {
@@ -51,6 +61,8 @@ TsaApplication.Search = (function (self) {
                 filter.dataseriesCount = _.intersection(filter.filteredSeries, outerFacetsJoin).length;
             });
         });
+
+        $(document).trigger(dataFiltered);
     }
 
 	return self;

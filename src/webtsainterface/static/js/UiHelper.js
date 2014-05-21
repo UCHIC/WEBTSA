@@ -17,7 +17,7 @@ TsaApplication.UiHelper = (function (self) {
     };
 
     self.getActiveView = function() {
-        return $(".nav-tabs .active").attr("id").replace("Tab", "");
+        return $(".nav-tabs .active").prop("id").replace("Tab", "");
     };
 
     self.facetsTemplate = _.template("<div class='panel panel-default'>\
@@ -28,7 +28,7 @@ TsaApplication.UiHelper = (function (self) {
                 </a>\
             </h4>\
         </div>\
-        <div id='<%= facetid %>' class='panel-collapse collapse in'>\
+        <div id='<%= facetid %>' class='facet-list panel-collapse collapse in'>\
             <div class='panel-body'>\
                 <div class='list-group'>\
                     <ul class='list-group inputs-group'>\
@@ -41,7 +41,8 @@ TsaApplication.UiHelper = (function (self) {
     self.filterTemplate = _.template("<li class='list-group-item' id='<%= id %>'>\
         <span class='badge'><%= count %></span>\
         <label class='checkbox'>\
-            <input type='checkbox' data-facet='<%= facet %>' value='<%= id %>'><%= name %>\
+            <input type='checkbox' data-facet='<%= facet %>' value='<%= id %>' <%= checked %>>\
+            <%= name %>\
         </label>\
     </li>");
 
@@ -75,33 +76,41 @@ TsaApplication.UiHelper = (function (self) {
     };
 
     self.renderFilterItems = function() {
-        TsaApplication.DataManager.facets.forEach(function(facet) {
-            facet.filters.forEach(function(filter) {
-                var filterName = _.map(facet.namefields, function(namefield){ return filter[namefield]; }).join(', ');
-                var elementData = { facet: facet.keyfield, id: filter[facet.keyfield], name: filterName, count: filter.dataseriesCount };
-                var filterElement = $(self.filterTemplate(elementData))
-                    .appendTo($("#" + facet.keyfield + " ul"))
-                    .find("input:checkbox");
-                filterElement.on('change', function() {
-                    TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
-                });
-            });
-        });
-    };
+        $(".facet-list").find("ul").empty();
 
-    self.updateSeriesCount = function() {
         TsaApplication.DataManager.facets.forEach(function(facet) {
-            var filters = _.sortBy(facet.filters, function(filter) { return filter.dataseriesCount; });
-            filters.forEach(function(filter) {
-                var filterElement = $("#" + facet.keyfield + " [id='" + filter[facet.keyfield] + "']");
-                var counterElement = filterElement.find(".badge");
-                if (filter.dataseriesCount) {
-                    filterElement.slideDown();
-                    counterElement.text(filter.dataseriesCount);
-                } else {
-                    filterElement.slideUp();
+            var filters = [];
+            var orderedFilters = (_(facet.filters)
+                .chain()
+                .sortBy('dataseriesCount')
+                .sortBy('applied')
+                .reverse()
+                .value()
+            );
+
+            orderedFilters.forEach(function(filter) {
+                if (!filter.dataseriesCount) {
+                    return;
                 }
+
+                var filterName = _.map(facet.namefields, function(namefield){ return filter[namefield]; }).join(', ');
+                var elementData = {
+                    facet: facet.keyfield,
+                    id: filter[facet.keyfield],
+                    name: filterName,
+                    count: filter.dataseriesCount,
+                    checked: (filter.applied? 'checked': '')
+                };
+                filters.push(self.filterTemplate(elementData));
             });
+
+            var filterElements = $(filters.join('')).appendTo($("#" + facet.keyfield + " ul"));
+
+            filterElements.find("input:checkbox").on('change', function() {
+                TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
+            });
+
+
         });
     };
 
@@ -120,7 +129,7 @@ TsaApplication.UiHelper = (function (self) {
             }
         });
 
-        dialog.find("#btnAddToPlot").attr('disabled',
+        dialog.find("#btnAddToPlot").prop('disabled',
             !TsaApplication.VisualizationController.canPlot() || isAlreadyPlotted);
         dialog.modal('show');
     }
@@ -154,7 +163,7 @@ TsaApplication.UiHelper = (function (self) {
         if ($.support.placeholder) {
             var filter = $('#datasetsTable_filter');
             var txtSearch = filter.find('input[type="search"]').detach();
-            txtSearch.attr({placeholder: 'Search', results: 5});
+            txtSearch.prop({placeholder: 'Search', results: 5});
             filter.empty().append(txtSearch);
         }
     };

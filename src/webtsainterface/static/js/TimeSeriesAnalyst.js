@@ -35,7 +35,7 @@ var TsaApplication = (function(self){
 
         $(document).on('datafiltered', function() {
             //update map markers and dataseries table.
-            self.UiHelper.updateSeriesCount();
+            self.UiHelper.renderFilterItems();
             self.MapController.updateSitesMarkers();
             self.TableController.updateDataseries();
         });
