@@ -322,8 +322,11 @@ TsaApplication.VisualizationController = (function (self) {
     function drawMultiseries() {
         self.clearGraph();
         var varNames = _(self.plottedSeries).pluck('variablename');
-        var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var siteNames = _(self.plottedSeries).pluck('sitename');
+        var siteCodes = _(self.plottedSeries).pluck('sitecode');
+        var varCodes = _(self.plottedSeries).pluck('variablecode');
+        var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
+
         var datasets = getDatasetsAfterFilters();
 
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
@@ -338,10 +341,10 @@ TsaApplication.VisualizationController = (function (self) {
             }
         }
 
-        var margin = {top: 20, right: 20 + (Math.floor(numOfYAxises / 2)) * axisMargin, bottom:100, left: (Math.ceil(numOfYAxises / 2)) * axisMargin},
+        var margin = {top: 20, right: 30 + (Math.floor(numOfYAxises / 2)) * axisMargin, bottom:100, left: (Math.ceil(numOfYAxises / 2)) * axisMargin},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom,
-            margin2 = {top: height + 60, right: 20, bottom: 20, left: 20},
+            margin2 = {top: height + 60, right: 30, bottom: 20, left: 20},
             width2 = $("#graphContainer").width() - margin2.left - margin2.right,
             height2 = 30;
 
@@ -622,6 +625,7 @@ TsaApplication.VisualizationController = (function (self) {
                         .attr("transform", "rotate(-90)")
                         .attr("y", (getAxisSeparation(i) + 22) * axisProperties[yAxisCount].textdistance)
                         .style("text-anchor", "end")
+                        .style("font-size", "14px")
                         .attr("dy", ".71em")
                         .text(varNames[i] + " (" +  varUnits[i] + ")");
 
@@ -650,8 +654,8 @@ TsaApplication.VisualizationController = (function (self) {
                 '<li class="list-group-item" data-id="' + i + '">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varNames[i] + '</span>' +
-                    '<span class="caption">' + siteNames[i] + '</span></li>');
+                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
+                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
         }
 
         $('#legendContainer input[type="checkbox"]').click(function() {
@@ -795,7 +799,10 @@ TsaApplication.VisualizationController = (function (self) {
 
     function drawHistogram() {
         self.clearGraph();
-        var varnames = _.pluck(self.plottedSeries, 'variablename');
+        var varNames = _(self.plottedSeries).pluck('variablename');
+        var siteNames = _(self.plottedSeries).pluck('sitename');
+        var siteCodes = _(self.plottedSeries).pluck('sitecode');
+        var varCodes = _(self.plottedSeries).pluck('variablecode');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
         var summary = calcSummaryStatistics(datasets);
@@ -813,18 +820,19 @@ TsaApplication.VisualizationController = (function (self) {
             height = $("#graphContainer").height();
 
         var graphHeight = ($("#graphContainer").height() / numOfDatasets) - margin.bottom - margin.top;
-        // A formatter for counts.
+
         for (var i = 0; i < numOfDatasets; i++) {
             var formatCount = d3.format(",.0f");
 
             var domainMin = Math.min.apply(Math, values[i]);
             var domainMax = Math.max.apply(Math, values[i]);
 
+            // Append legend
             $("#legendContainer ul").append(
-            '<li class="list-group-item" data-id="' + i + '">' +
+                '<li class="list-group-item" data-id="' + i + '">' +
                 '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                '</span></li>');
+                '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
+                '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
 
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
@@ -915,7 +923,7 @@ TsaApplication.VisualizationController = (function (self) {
                   .attr("x", width / 2)
                   .attr("y", margin.bottom - 25)
                   .style("text-anchor", "middle")
-                  .text(varnames[i] + " (" + varUnits[i] + ")");
+                  .text(varNames[i] + " (" + varUnits[i] + ")");
 
             svg.append("g")
               .attr("class", "y axis")
@@ -953,7 +961,10 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     function drawBoxPlot(){
-        var varnames = _.pluck(self.plottedSeries, 'variablename');
+        var varNames = _(self.plottedSeries).pluck('variablename');
+        var siteNames = _(self.plottedSeries).pluck('sitename');
+        var siteCodes = _(self.plottedSeries).pluck('sitecode');
+        var varCodes = _(self.plottedSeries).pluck('variablecode');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var observations = getDatasetsAfterFilters()
         var summary = calcSummaryStatistics(observations);
@@ -968,9 +979,9 @@ TsaApplication.VisualizationController = (function (self) {
         var m = 0;
 
         // properties for the box plots
-        var margin = {top: 10, right: m, bottom: 20, left: m},
+        var margin = {top: 10, right: m, bottom: 30, left: m},
             width = 30,
-            height = ($("#graphContainer").height()) / Math.ceil(varnames.length / 3) - margin.top - margin.bottom;
+            height = ($("#graphContainer").height()) / Math.ceil(varNames.length / 3) - margin.top - margin.bottom;
 
         var colors = d3.scale.category10();
         var data = [];
@@ -983,6 +994,17 @@ TsaApplication.VisualizationController = (function (self) {
             self.clearGraph();
             self.boxWhiskerSvgs = [];
         }
+
+        // The x-axis
+        var x = d3.time.scale()
+            .domain([0,1])
+            .range([0, 180])
+            .nice(d3.time.day);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .ticks(0)
+            .orient("bottom");
 
         for (var i = 0; i < observations.length; i++){
             data[0] = observations[i];
@@ -998,6 +1020,8 @@ TsaApplication.VisualizationController = (function (self) {
                     min = data[0][j]
                 }
             }
+
+            min = min - (max - min) / 20;   //  Add a last tick so that the box doesn't appear on top of the x-axis
 
             // The y-axis
             var y = d3.scale.linear()
@@ -1015,11 +1039,26 @@ TsaApplication.VisualizationController = (function (self) {
 
             charts[i].domain([min, max]);
             if (self.boxWhiskerSvgs[i] != null){
+                // update domain
                 charts[i].domain([min, max]);
+
+                // Update size
+                self.boxWhiskerSvgs[i].attr("height", height);
+                self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top);
+
+                // call the new y-axis
                 self.boxWhiskerSvgs[i].datum(data[0]).call(charts[i].duration(1000));
                 self.boxWhiskerSvgs[i].select("g").call(yAxis);
-                self.boxWhiskerSvgs[i].attr("height", height);
-                self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top)
+
+                // Realign y-axis label
+                var text = $("svg[data-id='" + i + "'] .yAxisLabel");
+                var axisHeight = height;
+                var textHeight = $("svg[data-id=" + i +"] .yAxisLabel").width();
+                text.attr("x", -(axisHeight - textHeight)/2);
+                text.attr("y", -$("svg[data-id='" + i + "'] .tick:last text").width() - 26)
+
+                // Reposition x-axis
+               $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + height + ")")
             }
             else{
                  self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
@@ -1033,26 +1072,40 @@ TsaApplication.VisualizationController = (function (self) {
                   .call(charts[i]);
 
                 // Draw y-axis
-                self.boxWhiskerSvgs[i].append("g")
+                var text = self.boxWhiskerSvgs[i].append("g")
                 .attr("class", "y axis")
                 .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")")
                 .call(yAxis)
-                .append("text") // and text1
+                .append("text")
                   .attr("transform", "rotate(-90)")
-                  .attr("y", 6)
-                  .attr("x", -10)
+                  .attr("class", "yAxisLabel")
+                  .attr("y", -$("svg[data-id='" + i + "'] .tick:last text").width() - 26)
                   .attr("dy", ".71em")
                   .style("text-anchor", "end")
-                  .style("font-size", "16px")
-                  .text(varnames[i] + " (" + varUnits[i] + ")");
+                  .style("font-size", "14px")
+                  .text(varNames[i] + " (" + varUnits[i] + ")");
+
+                var axisHeight = height;
+                var textHeight = $("svg[data-id=" + i +"] .yAxisLabel").width();
+                    text.attr("x", -(axisHeight - textHeight)/2);
+
+                // Draw x-axis
+                self.boxWhiskerSvgs[i].append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + height + ")")
+                    .call(xAxis)
+                    .append("text")
+                      .style("text-anchor", "end")
+                      .attr("x", 105)
+                      .attr("y", 15)
+                      .text("Overall");
 
                 // Append legend
                 $("#legendContainer ul").append(
                     '<li class="list-group-item" data-id="' + i + '">' +
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                    '<font color=' + colors(i) + ' style="font-size: 22px; line-height: 1;"> ■ '  + '</font><span>' + varnames[i] +
-                    '</span></li>');
-
+                    '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
+                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
             }
             $("svg").css("margin-left", margin.left + "px");
             $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
