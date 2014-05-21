@@ -612,6 +612,10 @@ button.ColVis_Button {
     line-height: 1;
 }
 
+.caption{
+    display: block;
+    font-size: 12px;
+}
 button.close{
     margin-left: 3px;
 }

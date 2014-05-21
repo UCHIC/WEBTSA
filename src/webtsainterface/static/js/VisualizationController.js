@@ -321,18 +321,31 @@ TsaApplication.VisualizationController = (function (self) {
 
     function drawMultiseries() {
         self.clearGraph();
-        var varnames = _(self.plottedSeries).pluck('variablename');
+        var varNames = _(self.plottedSeries).pluck('variablename');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
+        var siteNames = _(self.plottedSeries).pluck('sitename');
         var datasets = getDatasetsAfterFilters();
 
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
         var axisMargin = 60;
-        var margin = {top: 20, right: 20 + (Math.floor(varnames.length / 2)) * axisMargin, bottom:120, left: (Math.ceil(varnames.length / 2)) * axisMargin},
+        var numOfYAxises = varNames.length;
+        for (var i = 0; i < varNames.length - 1; i++){
+            for (var j = i + 1; j < varNames.length; j++){
+                if (varNames[i] == varNames[j] && varUnits[i] == varUnits[j]){
+                    numOfYAxises--;
+                    break;
+                }
+            }
+        }
+
+        var margin = {top: 20, right: 20 + (Math.floor(numOfYAxises / 2)) * axisMargin, bottom:100, left: (Math.ceil(numOfYAxises / 2)) * axisMargin},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom,
-            margin2 = {top: height + 63, right: 20, bottom: 20, left: 20},
+            margin2 = {top: height + 60, right: 20, bottom: 20, left: 20},
             width2 = $("#graphContainer").width() - margin2.left - margin2.right,
-            height2 = 50;
+            height2 = 30;
+
+        var yAxisCount = 0;     // Counter to keep track of y-axises as we place them
 
         // Properties for the five vertical axises.
         // even: f(n) = n * 10
@@ -461,6 +474,8 @@ TsaApplication.VisualizationController = (function (self) {
                     }
                 })])
                 .range([height, 0]);
+
+
             y2[i] = d3.scale.linear()
                 .domain([d3.min(data, function (d) {
                     if (d.key == i) {
@@ -480,7 +495,7 @@ TsaApplication.VisualizationController = (function (self) {
             yAxis[i] = d3.svg.axis()
                 .scale(y[i])
                 //.tickFormat(d3.format(".2f"))
-                .orient(axisProperties[i].orient);
+
 
             lines[i] = d3.svg.line()
                 //.interpolate("basis")
@@ -569,41 +584,74 @@ TsaApplication.VisualizationController = (function (self) {
                 return max;
             }
 
-            var text = focus.append("g")
-                .attr("class", "y axis")
-                .attr("data-id", i)
-                .style("fill", color(i))
-                .attr("transform", "translate(" + axisProperties[i].xTranslate + " ,0)")
-                .call(yAxis[i])
-            .append("text")
-             .attr("transform", "rotate(-90)")
-             // .attr("y", ($(".y.axis[data-id='" + i +"'] .tick text").width() + 22) * axisProperties[i].textdistance)
-             .attr("y", (getAxisSeparation(i) + 22) * axisProperties[i].textdistance)
-             .style("text-anchor", "end")
-             .attr("dy", ".71em")
-             .text(varnames[i] + " (" +  varUnits[i] + ")");
+            // Append y-axis
+            var chosenYAxis = i;
 
-            var axisHeight = $(".y.axis[data-id=" + 0 +"]")[0].getBBox().height;
-            var textHeight = $(".y.axis[data-id='" + i +"'] > text").width();
-            text.attr("x", -(axisHeight - textHeight)/2);
+            for (var j = 0; j < i; j++){
+                if (i != j && varNames[i] == varNames[j] && varUnits[i] == varUnits[j] ){
+                    chosenYAxis = j;
+                    y[j].domain([d3.min(data, function (d) {
+                        if (d.key == i || d.key == j) {
+                            return d3.min(d.values, function (d) {
+                                return d.val;
+                            });
+                        }
+                        }), d3.max(data, function (d) {
+                            if (d.key == i || d.key == j) {
+                                return d3.max(d.values, function (d) {
+                                    return d.val;
+                                });
+                            }
+                        })]
+                    );
+                    break;
+                }
+            }
+
+            if (chosenYAxis == i){
+                // Create a new axis
+                yAxis[i].orient(axisProperties[yAxisCount].orient);
+                var text = focus.append("g")
+                    .attr("class", "y axis")
+                    .attr("data-id", i)
+                    .attr("id", "yAxis-" + yAxisCount)
+                    .style("fill", color(i))
+                    .attr("transform", "translate(" + (axisProperties[yAxisCount].xTranslate) + " ,0)")
+                    .call(yAxis[i])
+                    .append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", (getAxisSeparation(i) + 22) * axisProperties[yAxisCount].textdistance)
+                        .style("text-anchor", "end")
+                        .attr("dy", ".71em")
+                        .text(varNames[i] + " (" +  varUnits[i] + ")");
+
+                    var axisHeight = $(".y.axis[data-id=" + 0 +"]")[0].getBBox().height;
+                    var textHeight = $(".y.axis[data-id='" + i +"'] > text").width();
+                    text.attr("x", -(axisHeight - textHeight)/2);
+                yAxisCount++;
+            }
+            else{
+                // Use a previous axis
+                $("#yAxis-" + chosenYAxis).attr("style", "fill: #000");
+                focus.select("#yAxis-" + chosenYAxis).call(yAxis[chosenYAxis]);
+            }
 
             // Update the axis properties
-            if ( i == 0)
-                axisProperties[2].xTranslate = - $(".y.axis[data-id=" + 0 +"]")[0].getBBox().width - 10;
+            if ( yAxisCount - 1 == 0)
+                axisProperties[2].xTranslate = - $("#yAxis-" + 0)[0].getBBox().width;
 
-            if (i == 1)
-                axisProperties[3].xTranslate = axisProperties[1].xTranslate + $(".y.axis[data-id=" + 1 +"]")[0].getBBox().width + 10;
+            if (yAxisCount - 1 == 1)
+                axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-"+ 1)[0].getBBox().width;
 
-            if (i == 2)
-                axisProperties[4].xTranslate = axisProperties[2].xTranslate - $(".y.axis[data-id=" + 2 +"]")[0].getBBox().width - 10;
-
+            if (yAxisCount - 1 == 2)
+                axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
 
             $("#legendContainer ul").append(
                 '<li class="list-group-item" data-id="' + i + '">' +
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varnames[i] +
-                    '</span></li>');
+                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varNames[i] + '</span>' +
+                    '<span class="caption">' + siteNames[i] + '</span></li>');
         }
 
         $('#legendContainer input[type="checkbox"]').click(function() {
