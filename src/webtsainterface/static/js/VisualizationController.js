@@ -345,7 +345,7 @@ TsaApplication.VisualizationController = (function (self) {
         var margin = {top: 20, right: 30 + (Math.floor(numOfYAxises / 2)) * axisMargin, bottom:100, left: (Math.ceil(numOfYAxises / 2)) * axisMargin},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom,
-            margin2 = {top: height + 60, right: 30, bottom: 20, left: 20},
+            margin2 = {top: height + 60, right: margin.right, bottom: 20, left: margin.left},
             width2 = $("#graphContainer").width() - margin2.left - margin2.right,
             height2 = 30;
 

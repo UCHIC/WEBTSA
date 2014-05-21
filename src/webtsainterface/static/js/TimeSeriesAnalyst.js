@@ -134,35 +134,90 @@ var TsaApplication = (function(self){
         });
 
         $("#btnExport").click(function() {
-                $(".modal-header").find(".alert").remove();
-                $(".modal-header").append(
-                    '<div class="alert alert-info alert-dismissable">\
-                        Compiling file. Please wait... \
-                    </div>'
-                );
+            $(".modal-header").find(".alert").remove();
+            $(".modal-header").append(
+                '<div class="alert alert-info alert-dismissable">\
+                    Compiling file. Please wait... \
+                </div>'
+            );
             var dialog = $("#InfoDialog");
             var id = +dialog.get(0).dataset['series'];
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
 
             var csvContent = "data:text/csv;charset=utf-8,";
 
-            // Append property names
-            for (var name in series){
-                if(name != "loadDataset" && name != "dataset"){
-                   csvContent += "'" + name.toString() + "'" + ",";
-                }
-            }
-            csvContent = csvContent.slice(0, -1);                           // Delete las comma
-            csvContent += "\n";
+            // Append header
+            csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
+                            "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
+                            "# on the condition that neither iUTAH may be held liable for any damages resulting\n" +
+                            "# from its use. The following metadata describe the data in this file:\n" +
+                            "# ------------------------------------------------------------------------------------------\n#\n";
 
-            // Append property values
-            for (var name in series){
-                if(name != "loadDataset" && name != "dataset"){             // Ignore those two properties
-                   csvContent += "'" + series[name].toString() + "'" + ",";
-                }
-            }
-            csvContent = csvContent.slice(0, -1);                           // Delete last comma
-            csvContent += "\n";
+            // Append Site Information
+            csvContent +=   "# Site Information\n" +
+                            "# -----------------\n" +
+                            "# Network:" + series['network'] + "\n" +
+                            "# SiteCode:" + series['sitecode'] + "\n" +
+                            "# SiteName:" + series['sitename'] + "\n" +
+                            "# IsActive:" + series['isactive'] + "\n" +
+                            "# Latitude:" + series['latitude'] + "\n" +
+                            "# Longitude:" + series['longitude'] + "\n" +
+                            //"# Elevation:" + series['elevation'] + "\n" +                       // Not here
+                            //"# VerticalDatum:" + series['verticaldatum'] + "\n" +               // Not here
+                            "# State:" + series['state'] + "\n" +
+                            "# County:" + series['county'] + "\n" +
+                            //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not here
+                            "# SiteType:" + series['sitetype'] + "\n#\n";
+
+            // Append Variable Information
+            csvContent +=   "# Variable Information\n" +
+                            "# -----------------\n" +
+                            "# VariableCode:" + series['variablecode'] + "\n" +
+                            "# VariableName:" + series['variablename'] + "\n" +
+                            "# ValueType:" + series['valuetype'] + "\n" +
+                            "# DataType:" + series['datatype'] + "\n" +
+                            "# GeneralCategory:" + series['generalcategory'] + "\n" +
+                            "# SampleMedium:" + series['samplemedium'] + "\n" +
+                            "# VariableUnitsName:" + series['variableunitsname'] + "\n" +
+                            "# VariableUnitsType:" + series['variableunitstype'] + "\n" +
+                            "# VariableUnitsAbbreviation:" + series['variableunitsabbreviation'] + "\n" +
+                            //"# NoDataValue:" + series['county'] + "\n" +                                        // Not here
+                            //"# IsRegular:" + series['isregular'] + "\n" +                                       // Not here
+                            "# TimeSupport:" + series['timesupport'] + "\n" +
+                            "# TimeSupportUnitsAbbreviation:" + series['timesupportunitsabbreviation'] + "\n" +
+                            "# TimeSupportUnitsName:" + series['timesupportunitsname'] + "\n" +
+                            "# TimeSupportUnitsType:" + series['timesupportunitstype'] + "\n#\n";
+                            //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not here
+
+            // Append Method Information
+            csvContent +=   "# Method Information\n" +
+                            "# -----------------\n" +
+                            "# MethodDescription:" + series['methoddescription'] + "\n" +
+                            "# MethodLink:" + series['sitecode'] + "\n#\n";
+
+
+            // Append Series Information
+            csvContent +=   "# Series Information\n" +
+                            "# -----------------\n" +
+                            "# BeginDateTime:" + series['begindatetime'] + "\n" +
+                            "# EndDateTime:" + series['enddatetime'] + "\n" +
+                            "# DateLastUpdated:" + series['datelastupdated'] + "\n" +
+                            "# NumberOfObservations:" + series['numberofobservations'] + "\n" +
+                            "# QualityControlLevel:" + series['qualitycontrollevel'] + "\n" +
+                            "# QualityControllLevelDefinition:" + series['qualitycontrolleveldefinition'] + "\n" +
+                            "# QualityControlLevelExplanation:" + series['qualitycontrollevelexplanation'] + "\n" +
+                            "# GetDataUrl:" + series['getdataurl'] + "\n#\n";
+
+            // Append Source Information
+            csvContent +=   "# Source Information\n" +
+                            "# -----------------\n" +
+                            "# SourceOrganization:" + series['sourceorganization'] + "\n" +
+                            "# SourceDescription:" + series['sourcedescription'] + "\n#\n";
+                            //"# ContactName:" + series['contactname'] + "\n" +                   // Not here
+                            //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not here
+                            //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not here
+                            //"# Citation:" + series['citation'] + "\n";                          // Not here
+
 
             // Append dataset values once the dataset is loaded
             series.loadDataset(function() {
@@ -215,7 +270,7 @@ var TsaApplication = (function(self){
                 link.className = "glyphicon glyphicon-file";*/
                 // link.click();
                 $(".modal-header").find(".alert").empty();
-                $(".modal-header").find(".alert").append(link);
+                //$(".modal-header").find(".alert").append(link);
             });
         });
 
