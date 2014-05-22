@@ -250,7 +250,7 @@ var TsaApplication = (function(self){
                   $(".modal-header").find(".alert").empty();
                   $(".modal-header").find(".alert").append(link);
                 }
-                else if(navigator.msSaveBlob) { // IE 10+
+                else if(navigator.msSaveBlob) { // IE 10+ and Safari
                   $(".modal-header").find(".alert").empty();
                   $(".modal-header").find(".alert").append("We're sorry. Your browser does not support HTML5 download.");
                   /*link.addEventListener("click", function(event) {
