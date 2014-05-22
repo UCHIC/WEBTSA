@@ -96,7 +96,7 @@ TsaApplication.VisualizationController = (function (self) {
             return unplotted.seriesid === seriesid;
         });
 
-        TsaApplication.TableController.uncheckSeries(id);
+        TsaApplication.TableController.uncheckSeries(seriesid);
         if (TsaApplication.UiHelper.getActiveView() !== 'visualization') {
             self.shouldPlot = true;
             return;
@@ -110,6 +110,7 @@ TsaApplication.VisualizationController = (function (self) {
         $("#graphContainer").empty();
         $("#legendContainer").find("ul").empty();
         $("#statisticsTable tbody").empty();
+
     };
 
     // Adds commas to numbers in thousand intervals
@@ -154,6 +155,24 @@ TsaApplication.VisualizationController = (function (self) {
                 quantile75:0,
                 quantile90:0
             };
+
+            if (data[i].length == 0){
+                summary[i].maximum = "NaN";
+                summary[i].minimum = "NaN";
+                summary[i].arithmeticMean = "NaN";
+                summary[i].geometricSum = "NaN";
+                summary[i].geometricMean = "NaN";
+                summary[i].deviationSum = "NaN";
+                summary[i].standardDeviation = "NaN";
+                summary[i].observations = 0;
+                summary[i].quantile10 = "NaN";
+                summary[i].quantile25 = "NaN";
+                summary[i].median = "NaN";
+                summary[i].quantile75 = "NaN";
+                summary[i].quantile90 = "NaN";
+
+                continue;
+            }
 
             sortedValues[i] = sortedValues[i].map(function(value){
                 return parseFloat(value);
@@ -335,17 +354,25 @@ TsaApplication.VisualizationController = (function (self) {
 
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
         var axisMargin = 60;
-        var numOfYAxises = varNames.length;
+        var numOfYAxes = varNames.length;
+
+        // Iterate the datasets and see which ones share y-axes
+        for (var i = 0; i < varNames.length; i++){
+            if (datasets[i].length == 0){
+                numOfYAxes--;
+                continue;
+            }
+        }
         for (var i = 0; i < varNames.length - 1; i++){
             for (var j = i + 1; j < varNames.length; j++){
-                if (varNames[i] == varNames[j] && varUnits[i] == varUnits[j]){
-                    numOfYAxises--;
+                if (varNames[i] == varNames[j] && varUnits[i] == varUnits[j] && datasets[i].length > 0){
+                    numOfYAxes--;
                     break;
                 }
             }
         }
 
-        var margin = {top: 20, right: 30 + (Math.floor(numOfYAxises / 2)) * axisMargin, bottom:100, left: (Math.ceil(numOfYAxises / 2)) * axisMargin},
+        var margin = {top: 20, right: 30 + (Math.floor(numOfYAxes / 2)) * axisMargin, bottom:100, left: (Math.ceil(numOfYAxes / 2)) * axisMargin},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom,
             margin2 = {top: height + 60, right: margin.right, bottom: 20, left: margin.left},
@@ -366,6 +393,7 @@ TsaApplication.VisualizationController = (function (self) {
         ];
 
         var summary = calcSummaryStatistics(datasets);
+
         var data = _(datasets).flatten();
 
         // Restructure the data to use it in a time series
@@ -464,8 +492,19 @@ TsaApplication.VisualizationController = (function (self) {
             .attr("transform", "translate(0," + (height2) + ")")
             .call(xAxis2)
 
+        var offset = 0;     // offset for the data array when a dataset is empty
+        // Append legend
+        for (var i = 0; i < self.plottedSeries.length; i++){
+            $("#legendContainer ul").append(
+                '<li class="list-group-item" data-id="' + i + '">' +
+                    '<input type="checkbox" checked="" data-id="' + i + '">' +
+                    '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
+                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
+                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+        }
+
         // This loop builds and draws each time series
-        for (var i = 0; i < data.length; i++) {
+        for (var i = 0; i < datasets.length; i++) {
             y[i] = d3.scale.linear()
                 .domain([d3.min(data, function (d) {
                     if (d.key == i) {
@@ -524,10 +563,16 @@ TsaApplication.VisualizationController = (function (self) {
                     return y2[d.seriesID](d.val);
                 });
 
+            if (datasets[i].length == 0){
+                offset++;
+                continue;
+            }
+
              // ----------------------- OPTIMIZATION BEGINS -----------------------
             // if number of points > 2
-            var date1 = data[i]["values"][0].date;
-            var val1 = parseFloat(data[i]["values"][0].val);
+            var index = i - offset;
+            var date1 = data[index]["values"][0].date;
+            var val1 = parseFloat(data[index]["values"][0].val);
             var dataCopy = [];
             var marginOfError = 2; // The margin of error in degree units
 
@@ -535,18 +580,18 @@ TsaApplication.VisualizationController = (function (self) {
             var points = [];
             points.push({x:x(date1), y:y[i](val1)});  // push in the first point
 
-            for (var j = 2; j < data[i]["values"].length - 1; j++){
+            for (var j = 2; j < data[index]["values"].length - 1; j++){
                 // Current point
-                var date2 = data[i]["values"][j-1].date;
-                var val2 = parseFloat(data[i]["values"][j-1].val);
+                var date2 = data[index]["values"][j-1].date;
+                var val2 = parseFloat(data[index]["values"][j-1].val);
                 var point2 = {x:x(date2), y:y[i](val2)};
 
                 // Last inserted
                 var point1 = {x:points[points.length-1].x - point2.x, y:points[points.length-1].y-point2.y};
 
                 // Next point
-                var date3 = data[i]["values"][j].date;
-                var val3 = data[i]["values"][j].val;
+                var date3 = data[index]["values"][j].date;
+                var val3 = data[index]["values"][j].val;
                 var point3 = {x:(x(date3)- point2.x), y:(y[i](val3) - point2.y)};
 
                 var dotProduct = (point1.x * point3.x + point1.y * point3.y);
@@ -562,11 +607,11 @@ TsaApplication.VisualizationController = (function (self) {
             }
 
             // insert last value
-            date1 = data[i]["values"][data[i]["values"].length-1].date;
-            val1 = parseFloat(data[i]["values"][data[i]["values"].length-1].val);
+            date1 = data[index]["values"][data[index]["values"].length-1].date;
+            val1 = parseFloat(data[index]["values"][data[index]["values"].length-1].val);
 
             dataCopy.push({val: val1, date: date1,seriesID:i })
-            data[i]["values"] = dataCopy;   // Replace with new and optimized array
+            data[index]["values"] = dataCopy;   // Replace with new and optimized array
 
             // Show message with number of data points
            /* $("#graphArea .alert").remove();
@@ -654,12 +699,7 @@ TsaApplication.VisualizationController = (function (self) {
             if (yAxisCount - 1 == 2)
                 axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
 
-            $("#legendContainer ul").append(
-                '<li class="list-group-item" data-id="' + i + '">' +
-                    '<input type="checkbox" checked="" data-id="' + i + '">' +
-                    '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
-                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+
         }
 
         $('#legendContainer input[type="checkbox"]').click(function() {
@@ -823,7 +863,17 @@ TsaApplication.VisualizationController = (function (self) {
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height();
 
-        var graphHeight = ($("#graphContainer").height() / numOfDatasets) - margin.bottom - margin.top;
+        var numOfEmptyDatasets = 0;
+
+        for (var i = 0; i < numOfDatasets; i++){
+            if (values[i].length == 0){
+                numOfEmptyDatasets++;
+            }
+        }
+
+        var graphHeight = ($("#graphContainer").height() / (Math.max(numOfDatasets - numOfEmptyDatasets, 1))) - margin.bottom - margin.top;
+
+
 
         for (var i = 0; i < numOfDatasets; i++) {
             var formatCount = d3.format(",.0f");
@@ -844,6 +894,10 @@ TsaApplication.VisualizationController = (function (self) {
                 self.unplotSeries(id);
             });
 
+            if (values[i].length == 0){
+                continue;
+            }
+
             var x = d3.scale.linear()
                 .domain([domainMin, domainMax])
                 .range([0, width]);
@@ -862,7 +916,7 @@ TsaApplication.VisualizationController = (function (self) {
                 .orient("bottom");
 
             var yAxis = d3.svg.axis()
-                .ticks(25 / numOfDatasets)
+                .ticks(25 / (numOfDatasets - numOfEmptyDatasets))
                 //.tickSize(-width, 0, 0)
                 //.orient("right")
                 .scale(y)
@@ -1049,6 +1103,8 @@ TsaApplication.VisualizationController = (function (self) {
 
             charts[i].domain([min, max]);
             if (self.boxWhiskerSvgs[i] != null){
+
+
                 // update domain
                 charts[i].domain([min, max]);
 
