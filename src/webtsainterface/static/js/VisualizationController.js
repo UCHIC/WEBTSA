@@ -675,6 +675,7 @@ TsaApplication.VisualizationController = (function (self) {
         $('#legendContainer').find('button.close').click(function() {
             var id = +this.dataset['seriesid'];
             self.unplotSeries(id);
+            TsaApplication.TableController.uncheckSeries(id);
         });
 
         // Update xAxis ticks

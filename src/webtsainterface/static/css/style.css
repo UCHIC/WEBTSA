@@ -423,6 +423,9 @@ button.ColVis_Button {
     max-height: 20%;
 }
 
+table.dataTable tbody tr.selected {
+    background-color: #b0bed9 !important;
+}
 
 #txtSearch{
     width:30%;

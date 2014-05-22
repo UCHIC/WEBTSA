@@ -25,7 +25,7 @@ var TsaApplication = (function(self){
 
         $(document).on('dataloaded', function() {
             self.UiHelper.renderFilterItems();
-            if (self.UiHelper.getActiveView !== 'datasets') {
+            if (self.UiHelper.getActiveView() !== 'datasets') {
                 self.TableController.shouldInitialize = true;
                 return;
             }
@@ -81,6 +81,7 @@ var TsaApplication = (function(self){
 
         $(document).on('shown.bs.tab', 'a[href="#visualizationContent"]', function() {
             if (self.VisualizationController.unplottedSeries.length || self.VisualizationController.shouldPlot) {
+                self.UiHelper.endPlotAnimation();
                 self.VisualizationController.plotSeries();
             }
             self.VisualizationController.doPlot = true;

@@ -169,7 +169,7 @@ TsaApplication.UiHelper = (function (self) {
     };
 
     self.startPlotAnimation = function() {
-          $("#summarystats").hide();
+        $("#summarystats").hide();
         $("div#graphArea .ring").show();
     };
 

@@ -10,18 +10,25 @@ TsaApplication.TableController = (function(self) {
     self.initializeTable = function() {
         self.dataseriesTable = $('#datasetsTable').dataTable({
             data: TsaApplication.DataManager.dataseries,
-            dom: 'ftiS',
+            dom: 'TftiS',
             //stateSave: true,
             deferRender: true,
             scrollCollapse: true,
             scrollY: ($('div#datasetsContent').height() - tableOffsetY),
             scrollX: '100%',
+            tableTools: {
+                aButtons: [],
+                sRowSelect: 'multi',
+                sSelectedClass: 'selected',
+                fnPreRowSelect: function (event, nodes) {
+                    return !event;
+                }
+            },
             order: [[ 2, "asc" ]],
             columns: [
                 {
                     title: 'Plot', orderable: false, type: 'html',
-                    render: renderCheckbox, data: 'seriesid',
-                    searchable: true
+                    render: renderCheckbox, data: 'seriesid', name: 'plot'
                 },
                 {
                     title: 'Source Network Id',  data: 'sourcedataserviceid',
@@ -70,9 +77,10 @@ TsaApplication.TableController = (function(self) {
 
                 tableRow.find('input[type="checkbox"]').on('change', function() {
                     var visualization = TsaApplication.VisualizationController;
+                    var tableTools = TableTools.fnGetInstance("datasetsTable");
                     var series = data;
+
                     if (this.checked) {
-                        console.log('series:' + series.seriesid + ' can plot: ' + visualization.canPlot());
                         if (!visualization.canPlot()) {
                             this.checked = false;
                             return;
@@ -81,8 +89,10 @@ TsaApplication.TableController = (function(self) {
                         var method = visualization.plottingMethods.addPlot;
                         visualization.doPlot = false;
                         visualization.prepareSeries(series, method);
+                        tableTools.fnSelect(this.parentElement.parentElement)
                     } else {
                         visualization.unplotSeries(series.seriesid);
+                        tableTools.fnDeselect(this.parentElement.parentElement)
                     }
                 });
             }
@@ -93,7 +103,12 @@ TsaApplication.TableController = (function(self) {
         $.fn.dataTable.ColVis.fnRebuild();
         $(colvis.button()).appendTo('#tableButtons');
 
-        $(window).on('resize', _.debounce(self.reDrawTable, 500));
+        $(window).on('resize', function() {
+            _.debounce(self.reDrawTable, 500);
+            if ($('.ColVis_collection').is(':visible')) {
+                $('.ColVis_catcher').click();
+            }
+        });
 
         TsaApplication.UiHelper.customizeTableStyle();
         self.shouldInitialize = false;
@@ -125,18 +140,18 @@ TsaApplication.TableController = (function(self) {
         });
         api.draw();
     };
-//
-//    self.filterBySite = function(sitecode) {
-//        var api = self.dataseriesTable.api();
-//        var column = api.column('sitecode:name');
-//        column.search(sitecode).draw();
-//    };
+
+    self.uncheckSeries = function(id) {
+        var checkbox = $('#datasetsTable').find(':checkbox[data-seriesid="' + id + '"]');
+        checkbox.parent().parent().removeClass('selected');
+        checkbox.prop('checked', false);
+    };
 
     function renderCheckbox(data, type) {
         var visualization = TsaApplication.VisualizationController;
         var series = _(visualization.plottedSeries).union(visualization.unplottedSeries);
         var checked = (_(series).findWhere({seriesid: data}))? 'checked': '';
-        return ('<input type="checkbox" ' + checked + '>');
+        return ('<input data-seriesid="' + data + '" type="checkbox" ' + checked + '>');
     }
 
     return self;
