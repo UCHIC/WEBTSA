@@ -74,7 +74,7 @@ TsaApplication.VisualizationController = (function (self) {
             }
         });
 
-        if (!shouldPlot) {
+        if (!shouldPlot || TsaApplication.UiHelper.getActiveView() !== 'visualization') {
             self.doPlot = true;
             return;
         }
@@ -96,12 +96,14 @@ TsaApplication.VisualizationController = (function (self) {
             return unplotted.seriesid === seriesid;
         });
 
+        TsaApplication.TableController.uncheckSeries(id);
         if (TsaApplication.UiHelper.getActiveView() !== 'visualization') {
             self.shouldPlot = true;
             return;
         }
 
         self.plotSeries(); //TODO: remove it from the plot without re-plotting.
+
     };
 
     self.clearGraph = function(){
@@ -676,7 +678,6 @@ TsaApplication.VisualizationController = (function (self) {
         $('#legendContainer').find('button.close').click(function() {
             var id = +this.dataset['seriesid'];
             self.unplotSeries(id);
-            TsaApplication.TableController.uncheckSeries(id);
         });
 
         // Update xAxis ticks
