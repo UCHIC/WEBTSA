@@ -62,6 +62,7 @@ TsaApplication.VisualizationController = (function (self) {
 
     self.plotSeries = function() {
         var shouldPlot = true;
+
         if (self.unplottedSeries.length + self.plottedSeries.length === 0) {
             self.clearGraph();
             return;
@@ -1176,6 +1177,8 @@ TsaApplication.VisualizationController = (function (self) {
                 // Bind unplot button event
                 $('#legendContainer').find('button.close').click(function() {
                     var id = +this.dataset['seriesid'];
+                    $('#legendContainer ul').empty();
+                    self.boxWhiskerSvgs.length = 0;
                     self.unplotSeries(id);
                 });
             }

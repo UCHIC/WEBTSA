@@ -61,8 +61,6 @@ var TsaApplication = (function(self){
 
         $(document).on('plotfinished', function() {
             self.UiHelper.endPlotAnimation();
-            //TODO: if active tab is not visualization, clear plot, then move plottedSeries to unplottedSeries so it redraws when tab is shown next time.
-
         });
 
         google.maps.event.addDomListener(window, "load", function() {
