@@ -74,16 +74,17 @@ TsaApplication.VisualizationController = (function (self) {
             }
         });
 
-        if (shouldPlot) {
-            self.plottedSeries = _(self.plottedSeries).union(self.unplottedSeries);
-            self.unplottedSeries.length = 0;
-            assignSeriesId();
-            self.currentPlot();
-            //TODO: if not in visualization tab, make it redraw the plot.
+        if (!shouldPlot) {
+            self.doPlot = true;
+            return;
         }
 
-        self.doPlot = true;
+        self.plottedSeries = _(self.plottedSeries).union(self.unplottedSeries);
+        self.unplottedSeries.length = 0;
+        assignSeriesId();
+        self.currentPlot();
         $(document).trigger(plotFinished);
+        //TODO: if not in visualization tab, make it redraw the plot.
     };
     
     self.unplotSeries = function(seriesid) {
