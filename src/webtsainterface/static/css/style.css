@@ -5,6 +5,9 @@
     padding: 0;
 }
 
+#transparentPixel {
+    display: none;
+}
 
 /* --------------test -----------------------*/
 
