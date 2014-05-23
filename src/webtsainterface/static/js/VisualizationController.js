@@ -1047,16 +1047,13 @@ TsaApplication.VisualizationController = (function (self) {
         observations = observations.map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
-         var numOfDatasets = Math.min(observations.length, 3);
-
-        var boxContainerWidth = $("#graphContainer").width()/3;
-
-        var m = 0;
 
         // properties for the box plots
-        var margin = {top: 10, right: m, bottom: 30, left: m},
+        var margin = {top: 10, right: 0, bottom: 30, left: 0},
             width = 30,
             height = ($("#graphContainer").height()) / Math.ceil(varNames.length / 3) - margin.top - margin.bottom;
+
+        var boxContainerWidth = $("#graphContainer").width()/3 - 30;
 
         var colors = d3.scale.category10();
         var data = [];
@@ -1127,18 +1124,14 @@ TsaApplication.VisualizationController = (function (self) {
                 // update domain
                 charts[i].domain([min, max]);
 
-
-
                 // call the new y-axis
                 self.boxWhiskerSvgs[i].datum(data[0]).call(charts[i].duration(1000));
                 self.boxWhiskerSvgs[i].select("g").call(yAxis);
 
                 text = $("svg[data-id='" + i + "'] .yAxisLabel");
-
-
             }
             else{
-                 self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
+                self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
                   .data(data)
                   .attr("class", "box")
                     .attr("data-id", i)
@@ -1222,8 +1215,6 @@ TsaApplication.VisualizationController = (function (self) {
                 self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top);
             }
 
-
-
             $("svg").css("margin-left", margin.left + "px");
             $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
         }
@@ -1233,7 +1224,6 @@ TsaApplication.VisualizationController = (function (self) {
         // Highlight the first row
         $('#legendContainer .list-group-item').removeClass("highlight");
         $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
-
 
         $('#legendContainer .list-group-item').click(function (e) {
            if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
