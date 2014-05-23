@@ -625,7 +625,7 @@ TsaApplication.VisualizationController = (function (self) {
                 var browser = TsaApplication.UiHelper.getBrowserName;
                 var ticks = $(".y.axis[data-id='" + i +"'] .tick text");
                 var max = 0;
-                if (browser.substring(0,7) == "Firefox"){               // Firefox does not support width() for elements inside an svg. Must calculate it using the textContent and font size (12)
+                if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){               // Firefox and IE do not support width() for elements inside an svg. Must calculate it using the textContent and font size (12)
                     for (var index = 0; index < ticks.length; index++){
                         var a = ticks[index].textContent.length * 6.5;
                         if (max < a){
@@ -692,11 +692,11 @@ TsaApplication.VisualizationController = (function (self) {
 
                     // the width() method does not work in Firefox for elements inside an svg. Must calculate it
                     var browser = TsaApplication.UiHelper.getBrowserName;
-                    if (browser.substring(0,7) == "Firefox"){
+                    if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){
                         textHeight = $(".y.axis[data-id='" + i +"'] > text").text().length * 6.5;
                     }
                     text.attr("x", -(axisHeight - textHeight)/2);
-                yAxisCount++;
+                    yAxisCount++;
             }
             else{
                 // Use a previous axis
@@ -1203,7 +1203,7 @@ TsaApplication.VisualizationController = (function (self) {
             // Reposition y-axis label
             // the width() method does not work in Firefox for elements inside an svg. Must calculate it
             var browser = TsaApplication.UiHelper.getBrowserName;
-            if (browser.substring(0,7) == "Firefox"){
+            if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){
                 textHeight = $("svg[data-id=" + i +"] .yAxisLabel").text().length * 7;
                 textWidth = $("svg[data-id='" + i + "'] .tick:last text").text().length * 7;
             }
