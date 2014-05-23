@@ -3,6 +3,8 @@
     width:100%;
     margin: 0;
     padding: 0;
+    min-width: 1000px;
+    overflow:auto;
 }
 
 
@@ -233,6 +235,7 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     border-right: 1px solid #dddddd;
     overflow-x:hidden;
     overflow-y:auto;
+    float:left;
 }
 
 .col-sm-3{
