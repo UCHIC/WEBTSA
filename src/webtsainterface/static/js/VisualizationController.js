@@ -622,14 +622,26 @@ TsaApplication.VisualizationController = (function (self) {
 
             // Returns the length of the longest tick
             function getAxisSeparation(id){
+                var browser = TsaApplication.UiHelper.getBrowserName;
                 var ticks = $(".y.axis[data-id='" + i +"'] .tick text");
                 var max = 0;
-                for (var index = 0; index < ticks.length; index++){
-                    var a = $(ticks[index]);
-                    if (max < a.width()){
-                        max = a.width();
+                if (browser.substring(0,7) == "Firefox"){               // Firefox does not support width() for elements inside an svg. Must calculate it using the textContent and font size (12)
+                    for (var index = 0; index < ticks.length; index++){
+                        var a = ticks[index].textContent.length * 6.5;
+                        if (max < a){
+                            max = a;
+                        }
                     }
                 }
+                else{
+                    for (var index = 0; index < ticks.length; index++){
+                        var a = $(ticks[index]);
+                        if (max < a.width()){
+                            max = a.width();
+                        }
+                    }
+                }
+                console.log(max);
                 return max;
             }
 
@@ -677,6 +689,12 @@ TsaApplication.VisualizationController = (function (self) {
 
                     var axisHeight = $(".y.axis[data-id=" + 0 +"]")[0].getBBox().height;
                     var textHeight = $(".y.axis[data-id='" + i +"'] > text").width();
+
+                    // the width() method does not work in Firefox for elements inside an svg. Must calculate it
+                    var browser = TsaApplication.UiHelper.getBrowserName;
+                    if (browser.substring(0,7) == "Firefox"){
+                        textHeight = $(".y.axis[data-id='" + i +"'] > text").text().length * 6.5;
+                    }
                     text.attr("x", -(axisHeight - textHeight)/2);
                 yAxisCount++;
             }
@@ -695,8 +713,6 @@ TsaApplication.VisualizationController = (function (self) {
 
             if (yAxisCount - 1 == 2)
                 axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
-
-
         }
 
         $('#legendContainer input[type="checkbox"]').click(function() {
@@ -718,7 +734,6 @@ TsaApplication.VisualizationController = (function (self) {
         });
 
         // Update xAxis ticks
-        var axisSpace = 0;
 
         var seriesID = focus.selectAll(".seriesID")
             .data(data, function (d) {
@@ -1033,7 +1048,7 @@ TsaApplication.VisualizationController = (function (self) {
         observations = observations.map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
-        var numOfDatasets = Math.min(observations.length, 3);
+        // var numOfDatasets = Math.min(observations.length, 3);
 
         var boxContainerWidth = $("#graphContainer").width()/3;
 
@@ -1107,6 +1122,7 @@ TsaApplication.VisualizationController = (function (self) {
                 min = 1;
                 max = 1;
             }
+            var text;
             charts[i].domain([min, max]);
             if (self.boxWhiskerSvgs[i] != null){
                 // update domain
@@ -1120,12 +1136,7 @@ TsaApplication.VisualizationController = (function (self) {
                 self.boxWhiskerSvgs[i].datum(data[0]).call(charts[i].duration(1000));
                 self.boxWhiskerSvgs[i].select("g").call(yAxis);
 
-                // Realign y-axis label
-                var text = $("svg[data-id='" + i + "'] .yAxisLabel");
-                var axisHeight = height;
-                var textHeight = $("svg[data-id=" + i +"] .yAxisLabel").width();
-                text.attr("x", -(axisHeight - textHeight)/2);
-                text.attr("y", -$("svg[data-id='" + i + "'] .tick:last text").width() - 26)
+                text = $("svg[data-id='" + i + "'] .yAxisLabel");
 
                 // Reposition x-axis
                $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + height + ")");
@@ -1145,7 +1156,7 @@ TsaApplication.VisualizationController = (function (self) {
                   .call(charts[i]);
 
                 // Draw y-axis
-                var text = self.boxWhiskerSvgs[i].append("g")
+                text = self.boxWhiskerSvgs[i].append("g")
                 .attr("class", "y axis")
                 .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")")
                 .call(yAxis)
@@ -1157,10 +1168,6 @@ TsaApplication.VisualizationController = (function (self) {
                   .style("text-anchor", "end")
                   .style("font-size", "14px")
                   .text(varNames[i] + " (" + varUnits[i] + ")");
-
-                var axisHeight = height;
-                var textHeight = $("svg[data-id=" + i +"] .yAxisLabel").width();
-                    text.attr("x", -(axisHeight - textHeight)/2);
 
                 // Draw x-axis
                 self.boxWhiskerSvgs[i].append("g")
@@ -1188,6 +1195,22 @@ TsaApplication.VisualizationController = (function (self) {
                     self.unplotSeries(id);
                 });
             }
+
+            var axisHeight = height;
+            var textHeight = $("svg[data-id=" + i +"] .yAxisLabel").width();
+            var textWidth = $("svg[data-id='" + i + "'] .tick:last text").width();
+
+            // Reposition y-axis label
+            // the width() method does not work in Firefox for elements inside an svg. Must calculate it
+            var browser = TsaApplication.UiHelper.getBrowserName;
+            if (browser.substring(0,7) == "Firefox"){
+                textHeight = $("svg[data-id=" + i +"] .yAxisLabel").text().length * 7;
+                textWidth = $("svg[data-id='" + i + "'] .tick:last text").text().length * 7;
+            }
+
+            text.attr("x", -(axisHeight - textHeight)/2);
+            text.attr("y", -textWidth - 26)
+
             $("svg").css("margin-left", margin.left + "px");
             $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
         }
