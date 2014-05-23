@@ -641,7 +641,6 @@ TsaApplication.VisualizationController = (function (self) {
                         }
                     }
                 }
-                console.log(max);
                 return max;
             }
 
@@ -1048,16 +1047,13 @@ TsaApplication.VisualizationController = (function (self) {
         observations = observations.map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
-        // var numOfDatasets = Math.min(observations.length, 3);
-
-        var boxContainerWidth = $("#graphContainer").width()/3;
-
-        var m = 0;
 
         // properties for the box plots
-        var margin = {top: 10, right: m, bottom: 30, left: m},
+        var margin = {top: 10, right: 0, bottom: 30, left: 0},
             width = 30,
             height = ($("#graphContainer").height()) / Math.ceil(varNames.length / 3) - margin.top - margin.bottom;
+
+        var boxContainerWidth = $("#graphContainer").width()/3 - 30;
 
         var colors = d3.scale.category10();
         var data = [];
@@ -1128,37 +1124,27 @@ TsaApplication.VisualizationController = (function (self) {
                 // update domain
                 charts[i].domain([min, max]);
 
-                // Update size
-                self.boxWhiskerSvgs[i].attr("height", height);
-                self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top);
-
                 // call the new y-axis
                 self.boxWhiskerSvgs[i].datum(data[0]).call(charts[i].duration(1000));
                 self.boxWhiskerSvgs[i].select("g").call(yAxis);
 
                 text = $("svg[data-id='" + i + "'] .yAxisLabel");
-
-                // Reposition x-axis
-               $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + height + ")");
-
-               // Reposition y-axis
-                $("svg[data-id='" + i + "'] .y.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")");
             }
             else{
-                 self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
+                self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
                   .data(data)
                   .attr("class", "box")
                     .attr("data-id", i)
-                  .attr("width", boxContainerWidth)
-                  .attr("height", height + margin.bottom + margin.top)
                 .append("g")
                     .attr("transform", "translate(" + ((boxContainerWidth) / 2) + "," + margin.top + ")")
                   .call(charts[i]);
 
+                // Inline width does not work in IE.
+                $(".box[data-id=" + i + "]").css("width", boxContainerWidth + "px");
+
                 // Draw y-axis
                 text = self.boxWhiskerSvgs[i].append("g")
                 .attr("class", "y axis")
-                .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")")
                 .call(yAxis)
                 .append("text")
                   .attr("transform", "rotate(-90)")
@@ -1199,6 +1185,7 @@ TsaApplication.VisualizationController = (function (self) {
             var axisHeight = height;
             var textHeight = $("svg[data-id=" + i +"] .yAxisLabel").width();
             var textWidth = $("svg[data-id='" + i + "'] .tick:last text").width();
+            var tickWidth = $("svg[data-id='" + i + "'] text.box").width();
 
             // Reposition y-axis label
             // the width() method does not work in Firefox for elements inside an svg. Must calculate it
@@ -1206,10 +1193,27 @@ TsaApplication.VisualizationController = (function (self) {
             if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){
                 textHeight = $("svg[data-id=" + i +"] .yAxisLabel").text().length * 7;
                 textWidth = $("svg[data-id='" + i + "'] .tick:last text").text().length * 7;
+                tickWidth = $("svg[data-id='" + i + "'] text.box")[0].textContent.length * 7;
             }
+
+            // Reposition x-axis
+            $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-tickWidth - 40) + "," + height + ")");
+
+            // Reposition y-axis
+            $("svg[data-id='" + i + "'] .y.axis").attr("transform", "translate(" + (-tickWidth - 40) + "," + (0) + ")");
 
             text.attr("x", -(axisHeight - textHeight)/2);
             text.attr("y", -textWidth - 26)
+
+            // Update size
+            self.boxWhiskerSvgs[i].attr("height", height);
+            var browser = TsaApplication.UiHelper.getBrowserName;
+            if (browser.substr(0,2) == "IE"){
+                $(self.boxWhiskerSvgs[i][0][0].parentNode).css("height", height + margin.bottom + margin.top + "px");
+            }
+            else{
+                self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top);
+            }
 
             $("svg").css("margin-left", margin.left + "px");
             $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
@@ -1220,7 +1224,6 @@ TsaApplication.VisualizationController = (function (self) {
         // Highlight the first row
         $('#legendContainer .list-group-item').removeClass("highlight");
         $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
-
 
         $('#legendContainer .list-group-item').click(function (e) {
            if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {

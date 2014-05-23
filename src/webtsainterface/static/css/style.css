@@ -3,6 +3,8 @@
     width:100%;
     margin: 0;
     padding: 0;
+    min-width: 1000px;
+    overflow:auto;
 }
 
 #transparentPixel {
@@ -236,6 +238,7 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     border-right: 1px solid #dddddd;
     overflow-x:hidden;
     overflow-y:auto;
+    float:left;
 }
 
 .col-sm-3{
@@ -491,8 +494,11 @@ table.dataTable tbody tr.selected {
     width: -moz-calc(100% - 307px);
     width: -webkit-calc(100% - 307px);
     width: calc(100% - 307px);
+    min-height: 650px;
     float:left;
     padding-top: 5px;
+    overflow: auto;
+
 }
 
 #graphContainer .label{
