@@ -1069,6 +1069,11 @@ TsaApplication.VisualizationController = (function (self) {
 
         for (var i = 0; i < observations.length; i++){
             data[0] = observations[i];
+
+            if (data[0].length == 0){   // This will prevent the plugin from throwing errors when dealing with empty sets
+                data[0][0] = 0;
+            }
+
             var min = Infinity,
                 max = -Infinity;
 
@@ -1098,10 +1103,12 @@ TsaApplication.VisualizationController = (function (self) {
                 .width(width)
                 .height(height);
 
+            if (min == Infinity || max == -Infinity){
+                min = 1;
+                max = 1;
+            }
             charts[i].domain([min, max]);
             if (self.boxWhiskerSvgs[i] != null){
-
-
                 // update domain
                 charts[i].domain([min, max]);
 
@@ -1121,9 +1128,13 @@ TsaApplication.VisualizationController = (function (self) {
                 text.attr("y", -$("svg[data-id='" + i + "'] .tick:last text").width() - 26)
 
                 // Reposition x-axis
-               $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + height + ")")
+               $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + height + ")");
+
+               // Reposition y-axis
+                $("svg[data-id='" + i + "'] .y.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")");
             }
             else{
+
                  self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
                   .data(data)
                   .attr("class", "box")
