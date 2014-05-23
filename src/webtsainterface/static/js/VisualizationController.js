@@ -3,7 +3,6 @@
  */
 
 TsaApplication.VisualizationController = (function (self) {
-    self.plottingMethods = { addPlot: {}, newPlot: {} };
     self.plotTypes = { histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot };
     self.currentPlot = self.plotTypes.multiseries;
 
@@ -44,13 +43,10 @@ TsaApplication.VisualizationController = (function (self) {
         );
     };
 
-    self.prepareSeries = function(series, method) {
-        if (method === self.plottingMethods.addPlot && !self.canPlot()) {
+    self.prepareSeries = function(series) {
+        if (!self.canPlot()) {
             return;
-        } else if (method === self.plottingMethods.newPlot) {
-            self.plottedSeries.length = 0;
-            self.unplottedSeries.length = 0;
-        } //TODO: also check if method is not a plotting method and return.
+        }
 
         $(document).trigger(plotDataLoading);
         self.unplottedSeries.push(series);

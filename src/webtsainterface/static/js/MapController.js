@@ -91,12 +91,6 @@ TsaApplication.MapController = (function (self) {
             position: new google.maps.LatLng(site.latitude, site.longitude),
             icon: pinImage
         });
-        google.maps.event.addDomListener(marker, "visible_changed", function() {
-            if (marker.getVisible()) {
-                marker.setAnimation(google.maps.Animation.BOUNCE);
-                setTimeout(function(){ marker.setAnimation(null); }, 2000);
-            }
-        });
 
         return marker;
     }

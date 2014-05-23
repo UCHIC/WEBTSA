@@ -86,9 +86,8 @@ TsaApplication.TableController = (function(self) {
                             return;
                         }
 
-                        var method = visualization.plottingMethods.addPlot;
                         visualization.doPlot = false;
-                        visualization.prepareSeries(series, method);
+                        visualization.prepareSeries(series);
                         tableTools.fnSelect(this.parentElement.parentElement)
                     } else {
                         visualization.unplotSeries(series.seriesid);

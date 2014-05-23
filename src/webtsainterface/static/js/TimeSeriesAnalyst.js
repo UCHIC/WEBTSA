@@ -89,29 +89,31 @@ var TsaApplication = (function(self){
         $("#btnAddToPlot").click(function() {
             var dialog = $("#InfoDialog");
             var id = +dialog.get(0).dataset['series'];
-            var method = self.VisualizationController.plottingMethods.addPlot;
-            var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
 
             dialog.modal('hide');
-            self.UiHelper.loadView('visualization');
+            var checkbox = $('#datasetsTable').find(':checkbox[data-seriesid="' + id + '"]');
+            checkbox.click();
 
             self.VisualizationController.doPlot = true;
-            self.VisualizationController.prepareSeries(series, method);
-
-            var api = self.TableController.dataseriesTable.api();
-            api.$('tr').each(function(row) {
-                if (api.row(row).data().seriesid === id) {
-                    $(this).find("input[type='checkbox']").get(0).checked = true;
-                }
-            });
+            self.UiHelper.loadView('visualization');
         });
 
         $("#btnPlotDataset").click(function() {
-            self.VisualizationController.svgs = [];
             var dialog = $("#InfoDialog");
             var id = +dialog.get(0).dataset['series'];
-            var method = self.VisualizationController.plottingMethods.newPlot;
-            var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
+
+            // Clear checkboxes
+            self.VisualizationController.plottedSeries.forEach(function(series) {
+                self.TableController.uncheckSeries(series.seriesid);
+            });
+
+            self.VisualizationController.unplottedSeries.forEach(function(series) {
+                self.TableController.uncheckSeries(series.seriesid);
+            });
+
+            // Clear the plot arrays.
+            self.VisualizationController.plottedSeries.length = 0;
+            self.VisualizationController.unplottedSeries.length = 0;
 
             // Reset the date intervals
             self.VisualizationController.initializeDatePickers();
@@ -121,16 +123,11 @@ var TsaApplication = (function(self){
             self.VisualizationController.boxWhiskerSvgs = [];
 
             dialog.modal('hide');
-            self.UiHelper.loadView('visualization');
+            var checkbox = $('#datasetsTable').find(':checkbox[data-seriesid="' + id + '"]');
+            checkbox.click();
 
             self.VisualizationController.doPlot = true;
-            self.VisualizationController.prepareSeries(series, method);
-
-            var api = self.TableController.dataseriesTable.api();
-            api.$('tr').each(function(row) {
-                var checkbox = $(this).find("input[type='checkbox']").get(0);
-                checkbox.checked = (api.row(row).data().seriesid === id);
-            });
+            self.UiHelper.loadView('visualization');
         });
 
         $("#btnExport").click(function() {
