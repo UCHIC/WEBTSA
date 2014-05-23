@@ -315,6 +315,7 @@ table tbody td,  table thead th {
 
 table.dataTable {
     margin-bottom: 0px !important;
+    max-width: none !important;
 }
 
 #statisticsTable tbody tr td:nth-child(2){
