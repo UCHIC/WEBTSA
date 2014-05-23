@@ -369,7 +369,7 @@ TsaApplication.VisualizationController = (function (self) {
             }
         }
 
-        var margin = {top: 20, right: 30 + (Math.floor(numOfYAxes / 2)) * axisMargin, bottom:100, left: (Math.ceil(numOfYAxes / 2)) * axisMargin},
+        var margin = {top: 20, right: 30 + (Math.floor(numOfYAxes / 2)) * axisMargin, bottom:100, left: Math.max(50, (Math.ceil(numOfYAxes / 2)) * axisMargin)},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height() - margin.top - margin.bottom,
             margin2 = {top: height + 60, right: margin.right, bottom: 20, left: margin.left},
@@ -1134,7 +1134,6 @@ TsaApplication.VisualizationController = (function (self) {
                 $("svg[data-id='" + i + "'] .y.axis").attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + (0) + ")");
             }
             else{
-
                  self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
                   .data(data)
                   .attr("class", "box")
