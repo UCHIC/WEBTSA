@@ -69,7 +69,8 @@ TsaApplication.MapController = (function (self) {
             networkMarkersManager.setMinimumClusterSize(4);
             networkMarkersManager.setClusterClass(networkMarkersManager.getClusterClass() + " " + cssClass);
             networkMarkersManager.setStyles([{
-                url: '', width: 30, height: 30, textSize: 12, anchorText: [0, -1],
+                url: document.getElementById('transparentPixel').src,
+                width: 30, height: 30, textSize: 12, anchorText: [0, -1],
                 fontFamily: '"HelveticaNeue-Light", "Helvetica Neue Light",\
                     "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif'
             }]);

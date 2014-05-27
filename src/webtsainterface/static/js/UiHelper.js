@@ -7,6 +7,14 @@ TsaApplication.UiHelper = (function (self) {
     var defaultTabElementId = '#mapTab';
     var defaultContentElementId = '#mapContent';
 
+//    $(document).on('plotdataloading', function() {
+//        $('visualization')
+//    });
+//
+//    $(document).on('plotdataready', function() {
+//
+//    });
+
     self.loadView = function(view) {
         if ($('#' + view + 'Tab').hasClass('active')) {
             return;

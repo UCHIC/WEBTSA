@@ -5,7 +5,7 @@ TsaApplication.TableController = (function(self) {
     self.dataseriesTable = {};
     self.shouldInitialize = true;
 
-    var tableOffsetY = 110;
+    var tableOffsetY = 125;
 
     self.initializeTable = function() {
         self.dataseriesTable = $('#datasetsTable').dataTable({

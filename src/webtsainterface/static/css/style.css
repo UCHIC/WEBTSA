@@ -7,6 +7,9 @@
     overflow:auto;
 }
 
+#transparentPixel {
+    display: none;
+}
 
 /* --------------test -----------------------*/
 
