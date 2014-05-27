@@ -139,7 +139,7 @@ TsaApplication.UiHelper = (function (self) {
                     count: filter.dataseriesCount,
                     checked: (filter.applied? 'checked': '')
                 };
-                if (counter < 5){
+                if (counter < 6){
                     filters.push(self.filterTemplate(elementData));
                     counter++;
                 }
