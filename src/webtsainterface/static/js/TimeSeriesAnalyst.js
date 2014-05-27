@@ -130,6 +130,8 @@ var TsaApplication = (function(self){
             self.UiHelper.loadView('visualization');
         });
 
+
+
         $("#btnExport").click(function() {
             $(".modal-header").find(".alert").remove();
             $(".modal-header").append(

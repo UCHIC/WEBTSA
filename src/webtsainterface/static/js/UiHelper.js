@@ -47,7 +47,10 @@ TsaApplication.UiHelper = (function (self) {
         <div id='<%= facetid %>' class='facet-list panel-collapse collapse in'>\
             <div class='panel-body'>\
                 <div class='list-group'>\
-                    <ul class='list-group inputs-group'>\
+                    <ul class='list-group inputs-group default-values'>\
+                    </ul>\
+                    <a id='morebtn-<%= facetid %>' data-toggle='collapse' data-target='#more-<%= facetid %>' href='javascript:void(0)'>Show more</a>\
+                    <ul id='more-<%= facetid %>' class='list-group inputs-group collapse more'>\
                     </ul>\
                 </div>\
             </div>\
@@ -87,8 +90,17 @@ TsaApplication.UiHelper = (function (self) {
         TsaApplication.DataManager.facets.forEach(function(facet){
             facets = facets.concat(self.facetsTemplate({facetid: facet.keyfield, facettitle: facet.name}));
         });
+
         facetsHtml = facets.join('');
         parent.append($(facetsHtml));
+
+        TsaApplication.DataManager.facets.forEach(function(facet){
+            $("#morebtn-" + facet.keyfield).click(function(){
+                $(this).html($(this).html() == "Show more" ? "Show less" : "Show more");
+            });
+        });
+
+
     };
 
     self.renderFilterItems = function() {
@@ -96,6 +108,8 @@ TsaApplication.UiHelper = (function (self) {
 
         TsaApplication.DataManager.facets.forEach(function(facet) {
             var filters = [];
+            var filters2 = [];
+            var counter = 0;
             var orderedFilters = (_(facet.filters)
                 .chain()
                 .sortBy('dataseriesCount')
@@ -117,17 +131,34 @@ TsaApplication.UiHelper = (function (self) {
                     count: filter.dataseriesCount,
                     checked: (filter.applied? 'checked': '')
                 };
-                filters.push(self.filterTemplate(elementData));
+                if (counter < 15){
+                    filters.push(self.filterTemplate(elementData));
+                    counter++;
+                }
+                else{
+                    filters2.push(self.filterTemplate(elementData));
+                }
             });
 
-            var filterElements = $(filters.join('')).appendTo($("#" + facet.keyfield + " ul"));
+
+            var filterElements = $(filters.join('')).appendTo($("#" + facet.keyfield + "  .default-values"));
 
             filterElements.find("input:checkbox").on('change', function() {
                 TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
             });
 
+            if (!filters2.length){
+                $("#morebtn-" + facet.keyfield).remove();
+            }
+            else{
+                filterElements = $(filters2.join('')).appendTo($("#" + facet.keyfield + " .more"));
+            }
 
+            filterElements.find("input:checkbox").on('change', function() {
+                TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
+            });
         });
+
     };
 
     self.showDataseriesDialog = function(series) {

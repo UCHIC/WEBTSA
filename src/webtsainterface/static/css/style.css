@@ -204,6 +204,10 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
     margin:0px;
 }
 
+#leftPanel .list-group a{
+    margin-left: 80px;
+}
+
 .CheckBoxLabel{
      /* Some browsers use different cursor notations*/
     cursor: pointer;
