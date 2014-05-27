@@ -143,8 +143,9 @@ TsaApplication.UiHelper = (function (self) {
             var button = "<li id='morebtn-" + facet.keyfield + "' class='align-center'><a data-toggle='collapse' data-target='#more-" + facet.keyfield + "' href='javascript:void(0)'>Show more</a></li>";
             var filterElements = $(filters.join('')).appendTo($("#" + facet.keyfield + "  .default-values"));
 
-            $("#morebtn-" + facet.keyfield).remove();
-            $("#" + facet.keyfield).append(button);
+            if($("#morebtn-" + facet.keyfield).length == 0){
+                $("#" + facet.keyfield).append(button);
+            }
 
             // Toggle between "Show more" and "Show less"
             $("#morebtn-" + facet.keyfield + " a").click(function(){
