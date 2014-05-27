@@ -140,17 +140,25 @@ TsaApplication.UiHelper = (function (self) {
                 }
             });
 
-            var button = "<li id='morebtn-" + facet.keyfield + "' class='align-center'><a data-toggle='collapse' data-target='#more-" + facet.keyfield + "' href='javascript:void(0)'>Show more</a></li>";
             var filterElements = $(filters.join('')).appendTo($("#" + facet.keyfield + "  .default-values"));
 
             if($("#morebtn-" + facet.keyfield).length == 0){
-                $("#" + facet.keyfield).append(button);
-            }
+                var text = "Show more";
 
-            // Toggle between "Show more" and "Show less"
-            $("#morebtn-" + facet.keyfield + " a").click(function(){
-                $(this).html($(this).html() == "Show more" ? "Show less" : "Show more");
-            });
+                if ($("#more-" + facet.keyfield + ".in").length > 0){
+                    text = "Show less";
+                }
+
+                var button = "<li id='morebtn-" + facet.keyfield + "' class='align-center'><a data-toggle='collapse' data-target='#more-" +
+                                facet.keyfield + "' href='javascript:void(0)'>"+
+                                text +"</a></li>";
+
+                $("#" + facet.keyfield).append(button);
+                // Toggle between "Show more" and "Show less"
+                $("#morebtn-" + facet.keyfield + " a").click(function(){
+                    $(this).html($(this).html() == "Show more" ? "Show less" : "Show more");
+                });
+            }
 
             // Bind checkbox check event for the default values
             filterElements.find("input:checkbox").on('change', function() {
