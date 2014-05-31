@@ -202,6 +202,8 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 
 /* Left Panel*/
 
+
+
 #leftPanel .list-group{
     padding:0;
     margin:0px;
@@ -233,27 +235,115 @@ line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
 }
 
 #leftPanel .panel, .row{
-    border-radius:0px !important;
-    margin:1px 1px !important;
+    border-radius:0;
+    margin:0;
+    border-top:0px;
+}
+
+#leftPanel .panel-group{
+    margin-bottom: 0;
+    height:100%;
+    width:300px;
+}
+
+.facets-container{
+    height: calc(100% - 26px);
+    overflow-y: auto;
+    margin-left: 25px;
+    margin-bottom: 0;
+}
+
+.panel-toolbar-left{
+    float: left;
+    height: 100%;
+    background: #fff;
+    display: inline;
+    clear: none;
+    width: 26px;
+    position: fixed;
+    z-index: 20;
+    border-right: 1px solid #ddd;
+}
+
+.toolbar-top-button{
+    float:right;
+    margin-right:8px;
+    color:#999;
+    padding:3px;
+    cursor:default;
+}
+
+.panel-toolbar-top{
+    background: #fff;
+    height: 26px;
+    border: 1px solid #ddd;
+    border-right: 0;
+}
+
+.toolbar-left-button{
+    margin-left: -16px;
+    margin-top: 16px;
+    height: 26px;
+    color: #555;
+    padding-right: 10px;
+    padding-left: 10px;
+    cursor: default;
+}
+
+.toolbar-left-button:hover{
+    color:#000;
+    background:#ddd;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.toolbar-top-button:hover{
+    color:#555;
+}
+
+.rotate {
+  display:inline-block;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+
+    /* also accepts left, right, top, bottom coordinates; not required, but a good idea for styling */
+  -webkit-transform-origin: 50% 50%;
+  -moz-transform-origin: 50% 50%;
+  -ms-transform-origin: 50% 50%;
+  -o-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+
+  /* Should be unset in IE9+ I think. */
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 
 .col-sm-3, .col-sm-9{
     padding:0px;
     height:100%;
     border-right: 1px solid #ddd;
-    overflow-x:hidden;
-    overflow-y:auto;
+    /*overflow-x:hidden;*/
+    /*overflow-y:auto;*/
     float:left;
 }
 
 .col-sm-3{
-    overflow-y:auto;
-    overflow-x:hidden;
-    width: 300px;
+    width: auto;
+    min-width: 25px;
 }
 
 .col-sm-9{
-    width: calc(100% - 300px);
+    /*width: calc(100% - 326px);*/
+    float: none;
+    overflow: hidden;
+    width: inherit;
 }
 
 .row{
@@ -467,14 +557,17 @@ table.dataTable tbody tr.selected {
 #datePanel{
     float:right;
 }
+
+
 #leftPanel .list-group li.active{
     background:#a6cae9;
 }
 
-
 #lblSelectData{
     float:left;
 }
+
+
 
 .navbar > .container{
     margin-left: 15px;
@@ -559,9 +652,25 @@ table.dataTable tbody tr.selected {
     right:2px;
 }
 
+#btnCollapseToggleLeft .glyphicon{
+    top: 2px;
+    right:2px;
+}
+
 #btnCollapseToggle{
     float: left;
     margin-left: -21px;
+    margin-top: 6px;
+    position: absolute;
+    width: 10px;
+    border:1px solid #aaa;
+    border-right:0;
+    border-radius:3px 0 0 3px;
+}
+
+#btnCollapseToggleLeft{
+    float: right;
+    margin-left: 0px;
     margin-top: 6px;
     position: absolute;
     width: 10px;
