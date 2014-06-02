@@ -484,6 +484,7 @@ TsaApplication.VisualizationController = (function (self) {
           .attr("y", 35)
           .text("Date");
 
+
         context.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + (height2) + ")")
@@ -714,6 +715,16 @@ TsaApplication.VisualizationController = (function (self) {
                 axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
         }
 
+        // Append circle points
+        /*focus.selectAll("circle.line")
+		    .data(data[0]['values'])
+		    .enter().append("svg:circle")
+		    .attr("class", "line")
+		    .style("fill", "green")
+		    .attr("cx", lines[0].x())
+		    .attr("cy", lines[0].y())
+		    .attr("r", 3.5);*/
+
         $('#legendContainer input[type="checkbox"]').click(function() {
             var that = this;
             var path = $("#path" + that.getAttribute("data-id"));
@@ -884,8 +895,6 @@ TsaApplication.VisualizationController = (function (self) {
 
         var graphHeight = ($("#graphContainer").height() / (Math.max(numOfDatasets - numOfEmptyDatasets, 1))) - margin.bottom - margin.top;
 
-
-
         for (var i = 0; i < numOfDatasets; i++) {
             var formatCount = d3.format(",.0f");
 
@@ -928,7 +937,6 @@ TsaApplication.VisualizationController = (function (self) {
 
             var yAxis = d3.svg.axis()
                 .ticks(25 / (numOfDatasets - numOfEmptyDatasets))
-                //.tickSize(-width, 0, 0)
                 //.orient("right")
                 .scale(y)
                 .orient("left");
@@ -945,7 +953,7 @@ TsaApplication.VisualizationController = (function (self) {
                 .attr("class", "bar")
                 .attr("transform", function (d) {
                     return "translate(" + x(d.x) + "," + y(d.y) + ")";
-                });
+                })
                 /*.on("mouseover", function (d) {
                    d3.select(this).append("text")
                     .attr("dy", ".75em")
@@ -1134,10 +1142,10 @@ TsaApplication.VisualizationController = (function (self) {
                 self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
                   .data(data)
                   .attr("class", "box")
-                    .attr("data-id", i)
+                  .attr("data-id", i)
                 .append("g")
                     .attr("transform", "translate(" + ((boxContainerWidth) / 2) + "," + margin.top + ")")
-                  .call(charts[i]);
+                    .call(charts[i]);
 
                 // Inline width does not work in IE.
                 $(".box[data-id=" + i + "]").css("width", boxContainerWidth + "px");

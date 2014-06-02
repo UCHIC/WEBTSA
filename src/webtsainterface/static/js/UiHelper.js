@@ -55,7 +55,9 @@ TsaApplication.UiHelper = (function (self) {
         <div id='<%= facetid %>' class='facet-list panel-collapse collapse in'>\
             <div class='panel-body'>\
                 <div class='list-group'>\
-                    <ul class='list-group inputs-group'>\
+                    <ul class='list-group inputs-group default-values'>\
+                    </ul>\
+                    <ul id='more-<%= facetid %>' class='list-group inputs-group collapse more'>\
                     </ul>\
                 </div>\
             </div>\
@@ -95,6 +97,7 @@ TsaApplication.UiHelper = (function (self) {
         TsaApplication.DataManager.facets.forEach(function(facet){
             facets = facets.concat(self.facetsTemplate({facetid: facet.keyfield, facettitle: facet.name}));
         });
+
         facetsHtml = facets.join('');
         parent.append($(facetsHtml));
     };
@@ -103,7 +106,10 @@ TsaApplication.UiHelper = (function (self) {
         $(".facet-list").find("ul").empty();
 
         TsaApplication.DataManager.facets.forEach(function(facet) {
-            var filters = [];
+            var filters = [];           // Default filters
+            var filters2 = [];          // Non-default filters. Must click "Show more" to display.
+            var counter = 0;
+            var maxDefault = 6;         // Number of default filters
             var orderedFilters = (_(facet.filters)
                 .chain()
                 .sortBy('dataseriesCount')
@@ -125,17 +131,53 @@ TsaApplication.UiHelper = (function (self) {
                     count: filter.dataseriesCount,
                     checked: (filter.applied? 'checked': '')
                 };
-                filters.push(self.filterTemplate(elementData));
+                if (counter < maxDefault){
+                    filters.push(self.filterTemplate(elementData));
+                    counter++;
+                }
+                else{
+                    filters2.push(self.filterTemplate(elementData));
+                }
             });
 
-            var filterElements = $(filters.join('')).appendTo($("#" + facet.keyfield + " ul"));
+            var filterElements = $(filters.join('')).appendTo($("#" + facet.keyfield + "  .default-values"));
 
+            if($("#morebtn-" + facet.keyfield).length == 0){
+                var text = "Show more";
+
+                if ($("#more-" + facet.keyfield + ".in").length > 0){
+                    text = "Show less";
+                }
+
+                var button = "<li id='morebtn-" + facet.keyfield + "' class='align-center'><a data-toggle='collapse' data-target='#more-" +
+                                facet.keyfield + "' href='javascript:void(0)'>"+
+                                text +"</a></li>";
+
+                $("#" + facet.keyfield).append(button);
+                // Toggle between "Show more" and "Show less"
+                $("#morebtn-" + facet.keyfield + " a").click(function(){
+                    $(this).html($(this).html() == "Show more" ? "Show less" : "Show more");
+                });
+            }
+
+            // Bind checkbox check event for the default values
             filterElements.find("input:checkbox").on('change', function() {
                 TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
             });
 
+            if (!filters2.length){
+                $("#morebtn-" + facet.keyfield).remove();       // If there is nothing to show, remove the button
+            }
+            else{
+                filterElements = $(filters2.join('')).appendTo($("#" + facet.keyfield + " .more"));
 
+                // Bind checkbox check event for the non-default values
+                filterElements.find("input:checkbox").on('change', function() {
+                    TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
+                });
+            }
         });
+
     };
 
     self.showDataseriesDialog = function(series) {

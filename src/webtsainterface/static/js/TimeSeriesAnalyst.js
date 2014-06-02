@@ -1,6 +1,6 @@
 var TsaApplication = (function(self){
     var r =0, dir=false;
-
+    var isShown = true;
     self.initialParameters = {};
 
     self.initializeApplication = function() {
@@ -20,7 +20,7 @@ var TsaApplication = (function(self){
 
     function bindEvents() {
         $(document).on('facetsloaded', function() {
-            self.UiHelper.renderFacets($("#leftPanel"));
+            self.UiHelper.renderFacets($("#leftPanel .facets-container"));
         });
 
         $(document).on('dataloaded', function() {
@@ -132,6 +132,8 @@ var TsaApplication = (function(self){
             self.UiHelper.loadView('visualization');
         });
 
+
+
         $("#btnExport").click(function() {
             $(".modal-header").find(".alert").remove();
             $(".modal-header").append(
@@ -225,7 +227,7 @@ var TsaApplication = (function(self){
                 //csvContent += "TimeOffset, ";
                 //csvContent += "DateTimeUTC, ";
                 csvContent += "Value";
-                //csvContent += "SensorCode";
+                //csvContent += "CensorCode";
                 csvContent += "\n";
 
                 // Append property values
@@ -308,6 +310,7 @@ var TsaApplication = (function(self){
                 );
             }
         });
+
         $("#btnCollapseToggle").click(function() {
             dir = !dir;
             var slideDistance = 307;
@@ -316,15 +319,50 @@ var TsaApplication = (function(self){
             $("#btnCollapseToggle span").removeClass();
             if (!dir){
                 //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);    // animation
-                $("#graphContainer").width($("#graphContainer").width() - slideDistance);                     // no animation
+                $("#graphContainer").width($("#graphContainer").width() - slideDistance);           // no animation
                 $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-right");
             }
             else{
                 //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);    // animation
-                $("#graphContainer").width($("#graphContainer").width() + slideDistance);                     // no animation
+                $("#graphContainer").width($("#graphContainer").width() + slideDistance);           // no animation
                 $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
             }
             self.VisualizationController.plotSeries();
+        });
+
+        function toggleLeftPanel(){
+            if ($("#btnLeftPanelCollapse")[0].getAttribute("data-enabled") == "true"){
+                $("#leftPanel .panel-group").toggle();
+                isShown = !isShown;
+            }
+        }
+
+        function toggleLeftPanelButton(){
+            var btn = $("#btnLeftPanelCollapse")[0];
+            btn.setAttribute("data-enabled", "true");
+
+            if (isShown){
+                $("#leftPanel .panel-group").show();
+            }
+        }
+
+        $("#btnLeftPanelCollapse").on("click", toggleLeftPanel);
+
+        $("#btnHideLeftToolbar").on("click", toggleLeftPanel);
+
+        $("#visualizationTab").on("click", function(){
+            $("#leftPanel .panel-group").hide();
+
+            var btn = $("#btnLeftPanelCollapse")[0];
+            btn.setAttribute("data-enabled", "false");
+        });
+
+        $("#datasetsTab").on("click", function(){
+            toggleLeftPanelButton();
+        });
+
+        $("#mapTab").on("click", function(){
+            toggleLeftPanelButton();
         });
     }
 
@@ -337,7 +375,7 @@ var TsaApplication = (function(self){
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
 
-        self.Search.toggleFilter('sourcedataserviceid', networkFilter.sourcedataserviceid);
+        self.Search.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
         self.Search.toggleFilter('sitecode', selectedSite);
         self.Search.toggleFilter('variablecode', selectedVariable);
         self.Search.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
