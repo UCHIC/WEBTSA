@@ -503,6 +503,7 @@ TsaApplication.VisualizationController = (function (self) {
 
         // This loop builds and draws each time series
         for (var i = 0; i < datasets.length; i++) {
+            // y-coordinate for the graph
             y[i] = d3.scale.linear()
                 .domain([d3.min(data, function (d) {
                     if (d.key == i) {
@@ -519,7 +520,7 @@ TsaApplication.VisualizationController = (function (self) {
                 })])
                 .range([height, 0]);
 
-
+            // y-coordinate for the context view
             y2[i] = d3.scale.linear()
                 .domain([d3.min(data, function (d) {
                     if (d.key == i) {
@@ -541,25 +542,7 @@ TsaApplication.VisualizationController = (function (self) {
                 //.tickFormat(d3.format(".2f"))
 
 
-            lines[i] = d3.svg.line()
-                //.interpolate("basis")
-                .x(function (d) {
-                    return x(d.date);
-                })
-                .y(
-                function (d) {
-                    return y[d.seriesID](d.val);
-                });
 
-            lines2[i] = d3.svg.line()
-                //.interpolate("basis")
-                .x(function (d) {
-                    return x2(d.date);
-                })
-                .y(
-                function (d) {
-                    return y2[d.seriesID](d.val);
-                });
 
             if (datasets[i].length == 0){
                 offset++;
@@ -621,7 +604,7 @@ TsaApplication.VisualizationController = (function (self) {
             );*/
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
-            // Returns the length of the longest tick
+            // Returns the length of the longest tick in characters
             function getAxisSeparation(id){
                 var browser = TsaApplication.UiHelper.getBrowserName;
                 var ticks = $(".y.axis[data-id='" + i +"'] .tick text");
@@ -646,30 +629,60 @@ TsaApplication.VisualizationController = (function (self) {
             }
 
             // Append y-axis
-            var chosenYAxis = i;
+            var chosenYAxis = [i];
 
+            // Check if this axis will be shared with another variable
             for (var j = 0; j < i; j++){
                 if (i != j && varNames[i] == varNames[j] && varUnits[i] == varUnits[j] ){
-                    chosenYAxis = j;
-                    y[j].domain([d3.min(data, function (d) {
-                        if (d.key == i || d.key == j) {
-                            return d3.min(d.values, function (d) {
-                                return d.val;
-                            });
-                        }
-                        }), d3.max(data, function (d) {
-                            if (d.key == i || d.key == j) {
-                                return d3.max(d.values, function (d) {
-                                    return d.val;
-                                });
-                            }
-                        })]
-                    );
-                    break;
+                    chosenYAxis.push(j);
                 }
             }
 
-            if (chosenYAxis == i){
+
+
+            if (chosenYAxis.length > 1){
+                 var usedAxis = Math.min.apply(null, chosenYAxis);   // select the first axis created for this variable
+                // update previous axis
+                y[usedAxis].domain([d3.min(data, function (d) {
+                    if (d.key in chosenYAxis) {
+                        return d3.min(d.values, function (d) {
+                            return d.val;
+                        });
+                    }
+                    }), d3.max(data, function (d) {
+                        if (d.key in chosenYAxis) {
+                            return d3.max(d.values, function (d) {
+                                return d.val;
+                            });
+                        }
+                    })]
+                );
+
+                // Use a previous axis
+
+                $("#yAxis-" + usedAxis).attr("style", "fill: #000");
+                focus.select("#yAxis-" + usedAxis).call(yAxis[usedAxis]);
+
+                lines[i] = d3.svg.line()
+                    .x(function (d) {
+                        return x(d.date);
+                    })
+                    .y(
+                    function (d) {
+                        return y[usedAxis](d.val);
+                    });
+
+                lines2[i] = d3.svg.line()
+                    //.interpolate("basis")
+                    .x(function (d) {
+                        return x2(d.date);
+                    })
+                    .y(
+                    function (d) {
+                        return y2[usedAxis](d.val);
+                    });
+            }
+            else{
                 // Create a new axis
                 yAxis[i].orient(axisProperties[yAxisCount].orient);
                 var text = focus.append("g")
@@ -697,12 +710,27 @@ TsaApplication.VisualizationController = (function (self) {
                     }
                     text.attr("x", -(axisHeight - textHeight)/2);
                     yAxisCount++;
+
+                lines[i] = d3.svg.line()
+                .x(function (d) {
+                    return x(d.date);
+                })
+                .y(
+                function (d) {
+                    return y[d.seriesID](d.val);
+                });
+
+                lines2[i] = d3.svg.line()
+                    //.interpolate("basis")
+                    .x(function (d) {
+                        return x2(d.date);
+                    })
+                    .y(
+                    function (d) {
+                        return y2[d.seriesID](d.val);
+                    });
             }
-            else{
-                // Use a previous axis
-                $("#yAxis-" + chosenYAxis).attr("style", "fill: #000");
-                focus.select("#yAxis-" + chosenYAxis).call(yAxis[chosenYAxis]);
-            }
+
 
             // Update the axis properties
             if ( yAxisCount - 1 == 0)
