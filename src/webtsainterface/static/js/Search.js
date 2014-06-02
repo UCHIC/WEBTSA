@@ -11,6 +11,12 @@ TsaApplication.Search = (function (self) {
     self.toggleFilter = function(property, value) {
         var facet = _.find(TsaApplication.DataManager.facets, function(facet){ return facet.keyfield === property; });
         var filter = _.find(facet.filters, function(filter){ return filter[facet.keyfield] == value; });
+        if (!facet || !filter) {
+            return;
+        } else if (!filter.dataseriesCount) {
+            return;
+        }
+
         filter.applied = !filter.applied;
         updateFilteredData(facet);
     };
