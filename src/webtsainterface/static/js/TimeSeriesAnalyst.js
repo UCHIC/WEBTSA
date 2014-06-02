@@ -361,7 +361,7 @@ var TsaApplication = (function(self){
             toggleLeftPanelButton();
         });
 
-        $("#mapTab").on("click", function(){
+        $("#mapTab").on("click", function() {
             toggleLeftPanelButton();
         });
     }
@@ -371,6 +371,7 @@ var TsaApplication = (function(self){
         var selectedSite = self.initialParameters['sitecode'];
         var selectedVariable = self.initialParameters['variablecode'];
         var selectedControlLevel = self.initialParameters['qualitycontrollevelcode'];
+        var shouldPlot = self.initialParameters['plot'] === 'true';
         var networkFilter = _(_(self.DataManager.facets)
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
@@ -379,6 +380,12 @@ var TsaApplication = (function(self){
         self.Search.toggleFilter('sitecode', selectedSite);
         self.Search.toggleFilter('variablecode', selectedVariable);
         self.Search.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
+
+        if (self.Search.filteredDataseries.length === 1 && shouldPlot) {
+            var dataseries = _(self.Search.filteredDataseries).first();
+            self.VisualizationController.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
+            self.VisualizationController.prepareSeries(dataseries);
+        }
     }
 
     return self;

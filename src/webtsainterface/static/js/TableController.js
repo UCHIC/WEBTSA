@@ -68,7 +68,13 @@ TsaApplication.TableController = (function(self) {
                 { title: 'Active', data: 'isactive', name: 'isactive', visible: false }
             ],
             createdRow: function(row, data, dataIndex) {
+                var visualization = TsaApplication.VisualizationController;
                 var tableRow = $(row);
+
+                var plotSeries = _(visualization.plottedSeries).union(visualization.unplottedSeries);
+                var selected = (_(plotSeries).findWhere({seriesid: data.seriesid}))? 'selected': '';
+                tableRow.addClass(selected);
+
 
                 tableRow.find('td:not(:first)').click(function(){
                     var series = data;
@@ -76,7 +82,6 @@ TsaApplication.TableController = (function(self) {
                 });
 
                 tableRow.find('input[type="checkbox"]').on('change', function() {
-                    var visualization = TsaApplication.VisualizationController;
                     var tableTools = TableTools.fnGetInstance("datasetsTable");
                     var series = data;
 
@@ -88,10 +93,10 @@ TsaApplication.TableController = (function(self) {
 
                         visualization.doPlot = false;
                         visualization.prepareSeries(series);
-                        tableTools.fnSelect(this.parentElement.parentElement)
+                        tableTools.fnSelect(this.parentElement.parentElement);
                     } else {
                         visualization.unplotSeries(series.seriesid);
-                        tableTools.fnDeselect(this.parentElement.parentElement)
+                        tableTools.fnDeselect(this.parentElement.parentElement);
                     }
                 });
             }
