@@ -34,6 +34,10 @@ TsaApplication.TableController = (function(self) {
                     title: 'Source Network Id',  data: 'sourcedataserviceid',
                     name: 'sourcedataserviceid', visible: false, orderable: false
                 },
+                {
+                    title: 'Quality Control Level Code', data: 'qualitycontrollevelcode',
+                    name: 'qualitycontrollevelcode', visible: false, orderable: false
+                },
                 { title: 'Series',  data: 'seriesid', name: 'seriesid', type: 'numeric' },
                 { title: 'Network',  data: 'network',  name: 'network' },
                 { title: 'Site Code', data: 'sitecode', name: 'sitecode' },
@@ -103,7 +107,7 @@ TsaApplication.TableController = (function(self) {
         });
 
         var colvis = new $.fn.dataTable.ColVis(self.dataseriesTable);
-        colvis.s.aiExclude = [0, 1, 2];
+        colvis.s.aiExclude = [0, 1, 2, 3];
         $.fn.dataTable.ColVis.fnRebuild();
         $(colvis.button()).appendTo('#tableButtons');
 
@@ -137,7 +141,7 @@ TsaApplication.TableController = (function(self) {
             facet.filters.forEach(function(filter) {
                 if (filter.applied) {
                     filterRegex += (filterRegex === '')? '': '|';
-                    filterRegex += '(' + filter[facet.keyfield] + ')';
+                    filterRegex += '(^' + filter[facet.keyfield] + '$)';
                 }
             });
             column.search(filterRegex, true, false);
