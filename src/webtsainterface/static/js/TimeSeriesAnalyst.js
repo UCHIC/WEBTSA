@@ -25,6 +25,8 @@ var TsaApplication = (function(self){
 
         $(document).on('dataloaded', function() {
             self.UiHelper.renderFilterItems();
+            checkInitialFilters();
+
             if (self.UiHelper.getActiveView() !== 'datasets') {
                 self.TableController.shouldInitialize = true;
                 return;
@@ -324,6 +326,21 @@ var TsaApplication = (function(self){
             }
             self.VisualizationController.plotSeries();
         });
+    }
+
+    function checkInitialFilters() {
+        var selectedNetwork = self.initialParameters['network'];
+        var selectedSite = self.initialParameters['sitecode'];
+        var selectedVariable = self.initialParameters['variablecode'];
+        var selectedControlLevel = self.initialParameters['qualitycontrollevelcode'];
+        var networkFilter = _(_(self.DataManager.facets)
+            .findWhere({name:'Network'}).filters)
+            .findWhere({network:selectedNetwork});
+
+        self.Search.toggleFilter('sourcedataserviceid', networkFilter.sourcedataserviceid);
+        self.Search.toggleFilter('sitecode', selectedSite);
+        self.Search.toggleFilter('variablecode', selectedVariable);
+        self.Search.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
     }
 
     return self;
