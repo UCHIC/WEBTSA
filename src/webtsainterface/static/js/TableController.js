@@ -34,6 +34,10 @@ TsaApplication.TableController = (function(self) {
                     title: 'Source Network Id',  data: 'sourcedataserviceid',
                     name: 'sourcedataserviceid', visible: false, orderable: false
                 },
+                {
+                    title: 'Quality Control Level Code', data: 'qualitycontrollevelcode',
+                    name: 'qualitycontrollevelcode', visible: false, orderable: false
+                },
                 { title: 'Series',  data: 'seriesid', name: 'seriesid', type: 'numeric' },
                 { title: 'Network',  data: 'network',  name: 'network' },
                 { title: 'Site Code', data: 'sitecode', name: 'sitecode' },
@@ -68,7 +72,13 @@ TsaApplication.TableController = (function(self) {
                 { title: 'Active', data: 'isactive', name: 'isactive', visible: false }
             ],
             createdRow: function(row, data, dataIndex) {
+                var visualization = TsaApplication.VisualizationController;
                 var tableRow = $(row);
+
+                var plotSeries = _(visualization.plottedSeries).union(visualization.unplottedSeries);
+                var selected = (_(plotSeries).findWhere({seriesid: data.seriesid}))? 'selected': '';
+                tableRow.addClass(selected);
+
 
                 tableRow.find('td:not(:first)').click(function(){
                     var series = data;
@@ -76,7 +86,6 @@ TsaApplication.TableController = (function(self) {
                 });
 
                 tableRow.find('input[type="checkbox"]').on('change', function() {
-                    var visualization = TsaApplication.VisualizationController;
                     var tableTools = TableTools.fnGetInstance("datasetsTable");
                     var series = data;
 
@@ -88,17 +97,17 @@ TsaApplication.TableController = (function(self) {
 
                         visualization.doPlot = false;
                         visualization.prepareSeries(series);
-                        tableTools.fnSelect(this.parentElement.parentElement)
+                        tableTools.fnSelect(this.parentElement.parentElement);
                     } else {
                         visualization.unplotSeries(series.seriesid);
-                        tableTools.fnDeselect(this.parentElement.parentElement)
+                        tableTools.fnDeselect(this.parentElement.parentElement);
                     }
                 });
             }
         });
 
         var colvis = new $.fn.dataTable.ColVis(self.dataseriesTable);
-        colvis.s.aiExclude = [0, 1, 2];
+        colvis.s.aiExclude = [0, 1, 2, 3];
         $.fn.dataTable.ColVis.fnRebuild();
         $(colvis.button()).appendTo('#tableButtons');
 
@@ -132,7 +141,7 @@ TsaApplication.TableController = (function(self) {
             facet.filters.forEach(function(filter) {
                 if (filter.applied) {
                     filterRegex += (filterRegex === '')? '': '|';
-                    filterRegex += '(' + filter[facet.keyfield] + ')';
+                    filterRegex += '(^' + filter[facet.keyfield] + '$)';
                 }
             });
             column.search(filterRegex, true, false);

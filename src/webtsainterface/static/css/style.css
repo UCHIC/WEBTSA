@@ -772,7 +772,7 @@ button.close{
   margin:auto;
   width: 80px;
   height: 80px;
-  z-index: 999;
+  z-index: 998;
   border-left: 15px solid rgba(100,148,224,1);
   border-bottom: 15px solid rgba(100,148,224,1);
   border-right: 15px solid rgba(100,148,224,1);
