@@ -63,18 +63,20 @@ TsaApplication.DataManager = (function (self) {
 
                 $.ajax({
                     url: series.getdataurl
-                }).done(function(data){
-                    var values = $(data).find('values').find('value');
-                    series.dataset.noDataValue = +$(data).find('noDataValue').text();
-                    values.each(function(index, value) {
-                        value = $(value);
+                }).done(function(data) {
+                    var values = data.getElementsByTagName('value');
+                    var index = 0;
+                    var node;
+
+                    series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item().textContent;
+                    while (node = values[index++]) {
                         var seriesData = {};
-                        seriesData.date = value.attr('dateTime').match(dateRegex).shift();
-                        seriesData.value = value.text();
+                        seriesData.date = node.getAttribute('dateTime').match(dateRegex).shift();
+                        seriesData.value = node.textContent;
                         seriesData.variable = series.variablename;
                         series.dataset.push(seriesData);
-                    });})
-                    .done(function(){
+                    }})
+                    .done(function() {
                         if (callback) {
                             callback();
                         }
