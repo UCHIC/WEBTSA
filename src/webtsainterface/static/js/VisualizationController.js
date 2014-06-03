@@ -542,8 +542,6 @@ TsaApplication.VisualizationController = (function (self) {
                 //.tickFormat(d3.format(".2f"))
 
 
-
-
             if (datasets[i].length == 0){
                 offset++;
                 continue;
@@ -638,12 +636,24 @@ TsaApplication.VisualizationController = (function (self) {
                 }
             }
 
-
-
             if (chosenYAxis.length > 1){
                  var usedAxis = Math.min.apply(null, chosenYAxis);   // select the first axis created for this variable
                 // update previous axis
                 y[usedAxis].domain([d3.min(data, function (d) {
+                    if (d.key in chosenYAxis) {
+                        return d3.min(d.values, function (d) {
+                            return d.val;
+                        });
+                    }
+                    }), d3.max(data, function (d) {
+                        if (d.key in chosenYAxis) {
+                            return d3.max(d.values, function (d) {
+                                return d.val;
+                            });
+                        }
+                    })]
+                );
+                y2[usedAxis].domain([d3.min(data, function (d) {
                     if (d.key in chosenYAxis) {
                         return d3.min(d.values, function (d) {
                             return d.val;
