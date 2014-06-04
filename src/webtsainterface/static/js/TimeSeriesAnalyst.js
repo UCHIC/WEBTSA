@@ -260,14 +260,11 @@ var TsaApplication = (function(self){
                 else if(navigator.msSaveBlob) { // IE 10+ and Safari
                   $(".modal-header").find(".alert").empty();
                   $(".modal-header").find(".alert").append("We're sorry. Your browser does not support HTML5 download.");
-                  /*link.addEventListener("click", function(event) {
-
-                  }, false);*/
                 }
                 else {
                   // it needs to implement server side export
                   $(".modal-header").find(".alert").empty();
-                  $(".modal-header").find(".alert").append("We're sorry. Your browser does not support HTML5 download.");
+                  $(".modal-header").find(".alert").append("We're sorry, your browser does not support HTML5 download. Please use Chrome, Firefox or Opera to download.");
                 }
             });
         });
