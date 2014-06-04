@@ -916,7 +916,7 @@ TsaApplication.VisualizationController = (function (self) {
         });
 
         var numOfDatasets = values.length;
-        var numOfTicks = 20;                // Number of divisions for columns
+
         var colors = d3.scale.category10();
 
         var margin = {top: 8, right: 30, bottom: 60, left: 80},
@@ -931,13 +931,27 @@ TsaApplication.VisualizationController = (function (self) {
             }
         }
 
+        var numOfTicks = 20 / (numOfDatasets - numOfEmptyDatasets);                // Number of divisions for columns
         var graphHeight = ($("#graphContainer").height() / (Math.max(numOfDatasets - numOfEmptyDatasets, 1))) - margin.bottom - margin.top;
 
+
+
+        var x = [];
+        var y = [];
+        var xAxis = [];
+        var numberOfBins = []
+        var yAxis = [];
+        var svg = [];
+        var data = [];
+
         for (var i = 0; i < numOfDatasets; i++) {
+
             var formatCount = d3.format(",.0f");
 
             var domainMin = Math.min.apply(Math, values[i]);
             var domainMax = Math.max.apply(Math, values[i]);
+
+            numberOfBins[i] = 20;
 
             // Append legend
             $("#legendContainer ul").append(
@@ -952,62 +966,52 @@ TsaApplication.VisualizationController = (function (self) {
                 self.unplotSeries(id);
             });
 
+            // If the dataset is empty, skip to the next one
             if (values[i].length == 0){
                 continue;
             }
 
-            var x = d3.scale.linear()
+            x[i] = d3.scale.linear()
                 .domain([domainMin, domainMax])
                 .range([0, width]);
 
             // Generate a histogram using uniformly-spaced bins.
-            var data = d3.layout.histogram()
-                .bins(x.ticks(numOfTicks))
+            data[i] = d3.layout.histogram()
+                .bins(x[i].ticks(20))
                 (values[i]);
 
-            var y = d3.scale.linear()
-                .domain([0, d3.max(data, function (d) {return d.y;})])
+            y[i] = d3.scale.linear()
+                .domain([0, d3.max(data[i], function (d) {return d.y;})])
                 .range([graphHeight, 0]);
 
-            var xAxis = d3.svg.axis()
-                .scale(x)
-                .orient("bottom");
+            xAxis[i] = d3.svg.axis()
+                .scale(x[i])
+                .orient("bottom")
+                .ticks(20);
 
-            var yAxis = d3.svg.axis()
-                .ticks(25 / (numOfDatasets - numOfEmptyDatasets))
+            yAxis[i] = d3.svg.axis()
+                .ticks(numOfTicks)
                 //.orient("right")
-                .scale(y)
+                .scale(y[i])
                 .orient("left");
 
-            var svg = d3.select("#graphContainer").append("svg")
+            svg[i] = d3.select("#graphContainer").append("svg")
                 .attr("width", width + margin.left + margin.right)
+                .attr("id", "graph-" + i)
+                .attr("data-id", i)
                 .attr("height", graphHeight + margin.bottom + margin.top)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + ","+margin.top +")");
 
-            var bar = svg.selectAll(".bar")
-                .data(data)
+            var bar = svg[i].selectAll(".bar")
+                .data(data[i])
                 .enter().append("g")
                 .attr("class", "bar")
                 .attr("transform", function (d) {
-                    return "translate(" + x(d.x) + "," + y(d.y) + ")";
-                })
-                /*.on("mouseover", function (d) {
-                   d3.select(this).append("text")
-                    .attr("dy", ".75em")
-                    .attr("y", 2)
-                    .attr("x", x(data[0].dx + domainMin) / 2)
-                    .attr("text-anchor", "middle")
-                    .text(function (d) {
-                        return formatCount(d.y);
-                    });
-                })
+                    return "translate(" + x[i](d.x) + "," + y[i](d.y) + ")";
+                });
 
-                .on("mouseout", function (d) {
-                   d3.select(this).select("text").remove();
-                });*/
-
-            // TODO: IMPLEMENT DIV
+            // TODO: IMPLEMENT FLOATING DIV
                 /*.on("mouseover", function(d) {
                     var bar_width = parseInt($(this).attr("width"), 10);
                     var x = parseInt($(this).attr("x"), 10) + bar_width / 2 + 5;
@@ -1021,40 +1025,101 @@ TsaApplication.VisualizationController = (function (self) {
 */
             bar.append("rect")
                 .attr("x", 1)
-                .attr("width", x(data[0].dx + domainMin) - 1)
+                .attr("width", x[i](data[i][0].dx + domainMin) - 1)
                 .style("fill", colors(i))
                 .style("opacity", 1)
                 .attr("height", function (d) {
-                        return graphHeight - y(d.y);
+                        return graphHeight - y[i](d.y);
                 });
 
             bar.append("text")
                 .attr("dy", ".75em")
                 .attr("y", 6)
-                .attr("x", x(data[0].dx + domainMin) / 2)
+                .attr("x", x[i](data[i][0].dx + domainMin) / 2)
                 .attr("text-anchor", "middle")
                 .text(function(d) { return formatCount(d.y); });
 
-            svg.append("g")
+            svg[i].append("g")
                 .attr("class", "x axis")
+                .attr("id", "x-axis-" + i)
                 .attr("transform", "translate(0," + graphHeight + ")")
-                .call(xAxis)
+                .call(xAxis[i])
                 .append("text")
                 .attr("class", "x label")
                   .attr("x", width / 2)
                   .attr("y", margin.bottom - 25)
                   .style("text-anchor", "middle")
-                  .text(varNames[i] + " (" + varUnits[i] + ")");
+                  .text(varNames[i] + " (" + varUnits[i] + ")")
 
-            svg.append("g")
+            svg[i].append("g")
               .attr("class", "y axis")
-              .call(yAxis)
+              .attr("id", "y-axis-" + i)
+              .call(yAxis[i])
             .append("text")
                 .attr("class", "y label")
               .attr("transform", "rotate(-90)")
               .attr("x", -(graphHeight + margin.bottom) / 2)
               .attr("y", -50)
               .text("Data points");
+
+            // Scroll event
+            $('#graph-' + i).on('mousewheel DOMMouseScroll', function(e){
+                var i = e.currentTarget.getAttribute("data-id");
+                var delta;
+
+                if(e.originalEvent.wheelDelta > 0 || e.originalEvent.detail > 0){
+                    numberOfBins[i] = Math.min(30, numberOfBins[i] + 1 )        // scrolling up
+                    delta = 1;
+                }
+                else {
+                    numberOfBins[i] = Math.max(2, numberOfBins[i] - 1 );        // scrolling down
+                    delta = -1
+                }
+
+                var binNumber = $("#graph-" + i + " .bar").length;
+
+                while (binNumber == $("#graph-" + i + " .bar").length && numberOfBins[i] > 2 && numberOfBins[i] < 30){
+                    binNumber = $("#graph-" + i + " .bar").length;
+                    data[i] = d3.layout.histogram()
+                    .bins(x[i].ticks(numberOfBins[i]))
+                    (values[i]);
+
+                    y[i].domain([0, d3.max(data[i], function (d) {return d.y;})])
+                    xAxis[i].scale(x[i]);
+                    xAxis[i].ticks(numberOfBins[i]);
+                    yAxis[i].scale(y[i]);
+
+                    d3.select("#x-axis-" + i).call(xAxis[i]);
+                    d3.select("#y-axis-" + i).call(yAxis[i]);
+
+                    svg[i].selectAll(".bar").remove();
+                    var bar = svg[i].selectAll(".bar")
+                    .data(data[i])
+                    .enter().append("g")
+                    .attr("class", "bar")
+                    .attr("transform", function (d) {
+                        return "translate(" + x[i](d.x) + "," + y[i](d.y) + ")";
+                    });
+
+                    bar.append("rect")
+                        .attr("x", 1)
+                        .attr("width", x[i](data[i][0].dx + x[i].domain()[0]) - 1)
+                        .style("fill", colors(i))
+                        .style("opacity", 1)
+                        .attr("height", function (d) {
+                                return graphHeight - y[i](d.y);
+                        });
+
+                    bar.append("text")
+                        .attr("dy", ".75em")
+                        .attr("y", 6)
+                        .attr("x", x[i](data[i][0].dx + x[i].domain()[0]) / 2)
+                        .attr("text-anchor", "middle")
+                        .text(function(d) { return formatCount(d.y); });
+
+                     numberOfBins[i] += delta;
+                }
+            });
         }
 
         // Set the first summary statistics by default
@@ -1062,7 +1127,6 @@ TsaApplication.VisualizationController = (function (self) {
         // Highlight the first row
         $('#legendContainer .list-group-item').removeClass("highlight");
         $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
-
 
         $('#legendContainer .list-group-item').click(function (e) {
            if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
