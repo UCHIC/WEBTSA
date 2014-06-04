@@ -132,8 +132,6 @@ var TsaApplication = (function(self){
             self.UiHelper.loadView('visualization');
         });
 
-
-
         $("#btnExport").click(function() {
             $(".modal-header").find(".alert").remove();
             $(".modal-header").append(
@@ -141,14 +139,22 @@ var TsaApplication = (function(self){
                     Compiling file. Please wait... \
                 </div>'
             );
+
+            var link = document.createElement("a");
+            if(link.download === undefined) { // feature detection
+              // it needs to implement server side export
+              $(".modal-header").find(".alert").empty();
+              $(".modal-header").find(".alert").removeClass("alert-info");
+              $(".modal-header").find(".alert").addClass("alert-danger");
+              $(".modal-header").find(".alert").append("<strong>We're sorry, your browser does not support HTML5 download. </strong><br>Please use Chrome, Firefox or Opera to download.");
+              return;
+            }
+
             var dialog = $("#InfoDialog");
             var id = +dialog.get(0).dataset['series'];
             var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
 
             var csvContent = "data:text/csv;charset=utf-8,";
-
-
-
 
             // Append dataset values once the dataset is loaded
             series.loadDataset(function() {
@@ -243,29 +249,18 @@ var TsaApplication = (function(self){
 
                 // Encode the string to avoid escape characters
                 var encodedUri = encodeURI(csvContent);
-
-                var link = document.createElement("a");
                 var filename = series.sitecode + " - " + series.variablename + ".csv";
 
-                if(link.download !== undefined) { // feature detection
-                  // Browsers that support HTML5 download attribute
-                  link.setAttribute("href", encodedUri);
-                  link.setAttribute("download", filename);
-                  link.className = "glyphicon glyphicon-file";
-                  link.innerHTML = " <span class='container-title'>" + filename + "</span>";
+                // Set HTML5 download
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", filename);
+                link.className = "glyphicon glyphicon-file";
+                link.innerHTML = " <span class='container-title'>" + filename + "</span>";
 
-                  $(".modal-header").find(".alert").empty();
-                  $(".modal-header").find(".alert").append(link);
-                }
-                else if(navigator.msSaveBlob) { // IE 10+ and Safari
-                  $(".modal-header").find(".alert").empty();
-                  $(".modal-header").find(".alert").append("We're sorry. Your browser does not support HTML5 download.");
-                }
-                else {
-                  // it needs to implement server side export
-                  $(".modal-header").find(".alert").empty();
-                  $(".modal-header").find(".alert").append("We're sorry, your browser does not support HTML5 download. Please use Chrome, Firefox or Opera to download.");
-                }
+                $(".modal-header").find(".alert").empty();
+                $(".modal-header").find(".alert").removeClass("alert-info");
+                $(".modal-header").find(".alert").addClass("alert-success");
+                $(".modal-header").find(".alert").append(link);
             });
         });
 
