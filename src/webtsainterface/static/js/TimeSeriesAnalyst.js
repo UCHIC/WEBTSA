@@ -334,6 +334,7 @@ var TsaApplication = (function(self){
             if ($("#btnLeftPanelCollapse")[0].getAttribute("data-enabled") == "true"){
                 $("#leftPanel .panel-group").toggle();
                 isShown = !isShown;
+                google.maps.event.trigger(self.MapController.map, 'resize');
             }
         }
 
