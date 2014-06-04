@@ -1025,7 +1025,7 @@ TsaApplication.VisualizationController = (function (self) {
 */
             bar.append("rect")
                 .attr("x", 1)
-                .attr("width", x[i](data[i][0].dx + domainMin) - 1)
+                .attr("width", x[i](data[i][0].dx + domainMin) - 2)
                 .style("fill", colors(i))
                 .style("opacity", 1)
                 .attr("height", function (d) {
@@ -1103,7 +1103,7 @@ TsaApplication.VisualizationController = (function (self) {
 
                     bar.append("rect")
                         .attr("x", 1)
-                        .attr("width", x[i](data[i][0].dx + x[i].domain()[0]) - 1)
+                        .attr("width", x[i](data[i][0].dx + x[i].domain()[0]) - 2)
                         .style("fill", colors(i))
                         .style("opacity", 1)
                         .attr("height", function (d) {

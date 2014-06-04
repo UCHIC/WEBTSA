@@ -69,11 +69,18 @@ TsaApplication.DataManager = (function (self) {
                     var node;
 
                     series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item().textContent;
+                    series.dataset.verticalDatum = data.getElementsByTagName('verticalDatum').item().textContent;
+                    series.dataset.elevation = +data.getElementsByTagName('elevation_m').item().textContent;
+
                     while (node = values[index++]) {
                         var seriesData = {};
                         seriesData.date = node.getAttribute('dateTime').match(dateRegex).shift();
                         seriesData.value = node.textContent;
                         seriesData.variable = series.variablename;
+                        seriesData.dateTimeUTC = node.getAttribute('dateTimeUTC');
+                        seriesData.timeOffset = node.getAttribute('timeOffset');
+                        seriesData.censorCode = node.getAttribute('censorCode');
+
                         series.dataset.push(seriesData);
                     }})
                     .done(function() {

@@ -184,15 +184,25 @@ button span{
 }
 
 .bar rect{
-  fill: steelblue;
-  shape-rendering: crispEdges;
+    shape-rendering: crispEdges;
+    stroke-width: 1;
+    stroke: black;
+    stroke-opacity: 0.8;
+}
+
+.bar:hover{
+    opacity:0.7;
 }
 
 .bar text {
   fill: #fff;
 }
 
-line.tick { stroke: #cccccc; fill:none; shape-rendering: crispEdges;}
+line.tick {
+    stroke: #cccccc;
+    fill:none;
+    shape-rendering: crispEdges;
+}
 
 /* body*/
 
