@@ -910,19 +910,14 @@ TsaApplication.VisualizationController = (function (self) {
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
         var summary = calcSummaryStatistics(datasets);
-
         var values = _(datasets).map(function(dataset) {
             return _.pluck(dataset, 'value');
         });
-
         var numOfDatasets = values.length;
-
         var colors = d3.scale.category10();
-
         var margin = {top: 8, right: 30, bottom: 60, left: 80},
             width = $("#graphContainer").width() - margin.left - margin.right,
             height = $("#graphContainer").height();
-
         var numOfEmptyDatasets = 0;
 
         for (var i = 0; i < numOfDatasets; i++){
@@ -934,24 +929,14 @@ TsaApplication.VisualizationController = (function (self) {
         var numOfTicks = 20 / (numOfDatasets - numOfEmptyDatasets);                // Number of divisions for columns
         var graphHeight = ($("#graphContainer").height() / (Math.max(numOfDatasets - numOfEmptyDatasets, 1))) - margin.bottom - margin.top;
 
-
-
-        var x = [];
-        var y = [];
-        var xAxis = [];
-        var numberOfBins = []
-        var yAxis = [];
-        var svg = [];
-        var data = [];
+        var graphs = [];
 
         for (var i = 0; i < numOfDatasets; i++) {
-
             var formatCount = d3.format(",.0f");
-
             var domainMin = Math.min.apply(Math, values[i]);
             var domainMax = Math.max.apply(Math, values[i]);
 
-            numberOfBins[i] = 20;
+            var graph = {x:null, y:null, xAxis:null, numberOfBins:20, yAxis:null, svg:null, data:null}
 
             // Append legend
             $("#legendContainer ul").append(
@@ -971,31 +956,30 @@ TsaApplication.VisualizationController = (function (self) {
                 continue;
             }
 
-            x[i] = d3.scale.linear()
+            graph.x = d3.scale.linear()
                 .domain([domainMin, domainMax])
                 .range([0, width]);
 
             // Generate a histogram using uniformly-spaced bins.
-            data[i] = d3.layout.histogram()
-                .bins(x[i].ticks(20))
+            graph.data = d3.layout.histogram()
+                .bins(graph.x.ticks(20))
                 (values[i]);
 
-            y[i] = d3.scale.linear()
-                .domain([0, d3.max(data[i], function (d) {return d.y;})])
+            graph.y = d3.scale.linear()
+                .domain([0, d3.max(graph.data, function (d) {return d.y;})])
                 .range([graphHeight, 0]);
 
-            xAxis[i] = d3.svg.axis()
-                .scale(x[i])
-                .orient("bottom")
-                .ticks(20);
+            graph.xAxis = d3.svg.axis()
+                .scale(graph.x)
+                .ticks(20)
+                .orient("bottom");
 
-            yAxis[i] = d3.svg.axis()
+            graph.yAxis = d3.svg.axis()
                 .ticks(numOfTicks)
-                //.orient("right")
-                .scale(y[i])
+                .scale(graph.y)
                 .orient("left");
 
-            svg[i] = d3.select("#graphContainer").append("svg")
+            graph.svg = d3.select("#graphContainer").append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("id", "graph-" + i)
                 .attr("data-id", i)
@@ -1003,12 +987,12 @@ TsaApplication.VisualizationController = (function (self) {
                 .append("g")
                 .attr("transform", "translate(" + margin.left + ","+margin.top +")");
 
-            var bar = svg[i].selectAll(".bar")
-                .data(data[i])
+            var bar = graph.svg.selectAll(".bar")
+                .data(graph.data)
                 .enter().append("g")
                 .attr("class", "bar")
                 .attr("transform", function (d) {
-                    return "translate(" + x[i](d.x) + "," + y[i](d.y) + ")";
+                    return "translate(" + graph.x(d.x) + "," + graph.y(d.y) + ")";
                 });
 
             // TODO: IMPLEMENT FLOATING DIV
@@ -1025,25 +1009,25 @@ TsaApplication.VisualizationController = (function (self) {
 */
             bar.append("rect")
                 .attr("x", 1)
-                .attr("width", x[i](data[i][0].dx + domainMin) - 2)
+                .attr("width", graph.x(graph.data[0].dx + domainMin) - 2)
                 .style("fill", colors(i))
                 .style("opacity", 1)
                 .attr("height", function (d) {
-                        return graphHeight - y[i](d.y);
+                        return graphHeight - graph.y(d.y);
                 });
 
             bar.append("text")
                 .attr("dy", ".75em")
                 .attr("y", 6)
-                .attr("x", x[i](data[i][0].dx + domainMin) / 2)
+                .attr("x", graph.x(graph.data[0].dx + domainMin) / 2)
                 .attr("text-anchor", "middle")
-                .text(function(d) { return formatCount(d.y); });
+                .text(function(d) { return formatCount(d.y);});
 
-            svg[i].append("g")
+            graph.svg.append("g")
                 .attr("class", "x axis")
                 .attr("id", "x-axis-" + i)
                 .attr("transform", "translate(0," + graphHeight + ")")
-                .call(xAxis[i])
+                .call(graph.xAxis)
                 .append("text")
                 .attr("class", "x label")
                   .attr("x", width / 2)
@@ -1051,10 +1035,10 @@ TsaApplication.VisualizationController = (function (self) {
                   .style("text-anchor", "middle")
                   .text(varNames[i] + " (" + varUnits[i] + ")")
 
-            svg[i].append("g")
+            graph.svg.append("g")
               .attr("class", "y axis")
               .attr("id", "y-axis-" + i)
-              .call(yAxis[i])
+              .call(graph.yAxis)
             .append("text")
                 .attr("class", "y label")
               .attr("transform", "rotate(-90)")
@@ -1062,62 +1046,72 @@ TsaApplication.VisualizationController = (function (self) {
               .attr("y", -50)
               .text("Data points");
 
+            graphs.push(graph);
+
             // Scroll event
             $('#graph-' + i).on('mousewheel DOMMouseScroll', function(e){
                 var i = e.currentTarget.getAttribute("data-id");
                 var delta;
 
                 if(e.originalEvent.wheelDelta > 0 || e.originalEvent.detail > 0){
-                    numberOfBins[i] = Math.min(30, numberOfBins[i] + 1 )        // scrolling up
+                    graphs[i].numberOfBins = Math.min(40,  graphs[i].numberOfBins + 1 )        // scrolling up
                     delta = 1;
                 }
                 else {
-                    numberOfBins[i] = Math.max(2, numberOfBins[i] - 1 );        // scrolling down
+                    graphs[i].numberOfBins = Math.max(8, graphs[i].numberOfBins - 1 );        // scrolling down
                     delta = -1
                 }
 
-                var binNumber = $("#graph-" + i + " .bar").length;
+                var binNumber = graphs[i].x.ticks(graphs[i].numberOfBins).length;
 
-                while (binNumber == $("#graph-" + i + " .bar").length && numberOfBins[i] > 2 && numberOfBins[i] < 30){
-                    binNumber = $("#graph-" + i + " .bar").length;
-                    data[i] = d3.layout.histogram()
-                    .bins(x[i].ticks(numberOfBins[i]))
+                while (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length && graphs[i].numberOfBins > 8 && graphs[i].numberOfBins < 40){
+                    graphs[i].numberOfBins += delta;
+                    if (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length){
+
+                        continue;
+                    }
+
+                    graphs[i].data = d3.layout.histogram()
+                    .bins(graphs[i].x.ticks(graphs[i].numberOfBins))
                     (values[i]);
 
-                    y[i].domain([0, d3.max(data[i], function (d) {return d.y;})])
-                    xAxis[i].scale(x[i]);
-                    xAxis[i].ticks(numberOfBins[i]);
-                    yAxis[i].scale(y[i]);
+                    var domainMin = Math.min.apply(Math, values[i]);
+                    var domainMax = Math.max.apply(Math, values[i]);
 
-                    d3.select("#x-axis-" + i).call(xAxis[i]);
-                    d3.select("#y-axis-" + i).call(yAxis[i]);
+                    graphs[i].y.domain([0, d3.max(graphs[i].data, function (d) {return d.y;})])
+                    graphs[i].x.domain([domainMin, domainMax]);
+                    graphs[i].x.range([0, width]);
+                    graphs[i].xAxis.scale(graphs[i].x);
+                    //graphs[i].xAxis.ticks(graphs[i].numberOfBins);
+                    graphs[i].yAxis.scale(graphs[i].y);
 
-                    svg[i].selectAll(".bar").remove();
-                    var bar = svg[i].selectAll(".bar")
-                    .data(data[i])
+                    d3.select("#x-axis-" + i).call(graphs[i].xAxis);
+                    d3.select("#y-axis-" + i).call(graphs[i].yAxis);
+
+                    graphs[i].svg.selectAll(".bar").remove();
+                    var bar = graphs[i].svg.selectAll(".bar")
+                    .data(graphs[i].data)
                     .enter().append("g")
                     .attr("class", "bar")
                     .attr("transform", function (d) {
-                        return "translate(" + x[i](d.x) + "," + y[i](d.y) + ")";
+                        return "translate(" + graphs[i].x(d.x) + "," + graphs[i].y(d.y) + ")";
                     });
 
                     bar.append("rect")
                         .attr("x", 1)
-                        .attr("width", x[i](data[i][0].dx + x[i].domain()[0]) - 2)
+                        .attr("width", graphs[i].x(graphs[i].data[0].dx + graphs[i].x.domain()[0]) - 2)
                         .style("fill", colors(i))
                         .style("opacity", 1)
                         .attr("height", function (d) {
-                                return graphHeight - y[i](d.y);
+                                return graphHeight - graphs[i].y(d.y);
                         });
 
                     bar.append("text")
                         .attr("dy", ".75em")
                         .attr("y", 6)
-                        .attr("x", x[i](data[i][0].dx + x[i].domain()[0]) / 2)
+                        .attr("x", graphs[i].x(graphs[i].data[0].dx + graphs[i].x.domain()[0]) / 2)
                         .attr("text-anchor", "middle")
                         .text(function(d) { return formatCount(d.y); });
-
-                     numberOfBins[i] += delta;
                 }
             });
         }

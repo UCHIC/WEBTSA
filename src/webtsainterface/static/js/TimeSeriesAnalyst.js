@@ -141,12 +141,15 @@ var TsaApplication = (function(self){
             );
 
             var link = document.createElement("a");
-            if(link.download === undefined) { // feature detection
+
+            // feature detection
+            if(link.download === undefined) {
               // it needs to implement server side export
               $(".modal-header").find(".alert").empty();
               $(".modal-header").find(".alert").removeClass("alert-info");
               $(".modal-header").find(".alert").addClass("alert-danger");
-              $(".modal-header").find(".alert").append("<strong>We're sorry, your browser does not support HTML5 download. </strong><br>Please use Chrome, Firefox or Opera to download.");
+              $(".modal-header").find(".alert").append("<strong>We're sorry, your browser does not support HTML5 download. </strong>" +
+                                                        "<br>Please use Chrome, Firefox or Opera to download.");
               return;
             }
 
@@ -161,8 +164,8 @@ var TsaApplication = (function(self){
                     // Append header
                 csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
                                 "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
-                                "# on the condition that neither iUTAH may be held liable for any damages resulting\n" +
-                                "# from its use. The following metadata describe the data in this file:\n" +
+                                "# on the condition that neither iUTAH may be held liable for any damages resulting from\n" +
+                                "# its use. The following metadata describe the data in this file:\n" +
                                 "# ------------------------------------------------------------------------------------------\n#\n";
 
                 // Append Site Information
@@ -174,11 +177,11 @@ var TsaApplication = (function(self){
                                 "# IsActive: " + series['isactive'] + "\n" +
                                 "# Latitude: " + series['latitude'] + "\n" +
                                 "# Longitude: " + series['longitude'] + "\n" +
-                                "# Elevation: " + series.dataset.elevation + "\n" +                       // Not here
-                                "# VerticalDatum: " + series.dataset['verticalDatum'] + "\n" +               // Not here
+                                "# Elevation: " + series.dataset.elevation + "\n" +
+                                "# VerticalDatum: " + series.dataset['verticalDatum'] + "\n" +
                                 "# State: " + series['state'] + "\n" +
                                 "# County: " + series['county'] + "\n" +
-                                //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not here
+                                //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not found
                                 "# SiteType: " + series['sitetype'] + "\n#\n";
 
                 // Append Variable Information
@@ -193,13 +196,13 @@ var TsaApplication = (function(self){
                                 "# VariableUnitsName: " + series['variableunitsname'] + "\n" +
                                 "# VariableUnitsType: " + series['variableunitstype'] + "\n" +
                                 "# VariableUnitsAbbreviation: " + series['variableunitsabbreviation'] + "\n" +
-                                "# NoDataValue:" + series.dataset['noDataValue'] + "\n" +                                        // Not here
-                                //"# IsRegular:" + series['isregular'] + "\n" +                                       // Not here
+                                "# NoDataValue:" + series.dataset['noDataValue'] + "\n" +
+                                //"# IsRegular:" + series['isregular'] + "\n" +                                         // Not found
                                 "# TimeSupport: " + series['timesupport'] + "\n" +
                                 "# TimeSupportUnitsAbbreviation: " + series['timesupportunitsabbreviation'] + "\n" +
                                 "# TimeSupportUnitsName: " + series['timesupportunitsname'] + "\n" +
                                 "# TimeSupportUnitsType: " + series['timesupportunitstype'] + "\n#\n";
-                                //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not here
+                                //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not found
 
                 // Append Method Information
                 csvContent +=   "# Method Information\n" +
@@ -225,10 +228,10 @@ var TsaApplication = (function(self){
                                 "# ---------------------------\n" +
                                 "# SourceOrganization: " + series['sourceorganization'] + "\n" +
                                 "# SourceDescription: " + series['sourcedescription'] + "\n#\n";
-                                //"# ContactName:" + series['contactname'] + "\n" +                   // Not here
-                                //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not here
-                                //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not here
-                                //"# Citation:" + series['citation'] + "\n";                          // Not here
+                                //"# ContactName:" + series['contactname'] + "\n" +                   // Not found
+                                //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not found
+                                //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not found
+                                //"# Citation:" + series['citation'] + "\n";                          // Not found
 
                 // Append property names
                 csvContent += "DateTime, ";
