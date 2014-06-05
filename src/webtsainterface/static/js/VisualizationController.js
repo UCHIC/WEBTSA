@@ -1082,7 +1082,7 @@ TsaApplication.VisualizationController = (function (self) {
                     graphs[i].x.domain([domainMin, domainMax]);
                     graphs[i].x.range([0, width]);
                     graphs[i].xAxis.scale(graphs[i].x);
-                    //graphs[i].xAxis.ticks(graphs[i].numberOfBins);
+                    graphs[i].xAxis.ticks(graphs[i].numberOfBins);
                     graphs[i].yAxis.scale(graphs[i].y);
 
                     d3.select("#x-axis-" + i).call(graphs[i].xAxis);
