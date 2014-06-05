@@ -6,6 +6,8 @@ define('map', ['mapLibraries'], function() {
     var self = {};
     
     self.map = {};
+
+
     var settings = {};
     var markersManagers = {};
     var infoWindows = [];
@@ -24,7 +26,6 @@ define('map', ['mapLibraries'], function() {
     self.loadMarkers = function() {
         var ui = require('ui');
         var data = require('data');
-        var search = require('search');
 
         loadMarkerManagers();
         data.sites.forEach(function(site) {
@@ -41,7 +42,7 @@ define('map', ['mapLibraries'], function() {
                 markerInfoWindow.open(self.map, marker);
                 $('.btnViewSeries').on('click', function() {
                     var siteFacet = _(data.facets).findWhere({ keyfield: 'sitecode' });
-                    search.selectOnlyFilter(siteFacet, this.dataset['sitecode']);
+                    data.selectOnlyFilter(siteFacet, this.dataset['sitecode']);
                     ui.loadView('datasets');
                 });
             });
@@ -49,12 +50,12 @@ define('map', ['mapLibraries'], function() {
     };
 
     self.updateSitesMarkers = function() {
-        var search = require('search');
+        var data = require('data');
         for (var property in markersManagers) {
             if (markersManagers.hasOwnProperty(property)) {
                 var markersManager = markersManagers[property];
                 markersManager.getMarkers().forEach(function(marker) {
-                    var siteMarker = _.find(search.filteredSites, function(site) {
+                    var siteMarker = _.find(data.filteredSites, function(site) {
                         return site.sitename === marker.title;
                     });
                     marker.setVisible(( (siteMarker)? true: false ));

@@ -1,10 +1,9 @@
-define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'search', 'generalLibraries'], function(data, map, table, ui, visualization, search) {
+define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'], function(data, map, table, ui, visualization) {
     var self = {};
     self.ui = ui;
     self.map = map;
     self.data = data;
     self.table = table;
-    self.search = search;
     self.visualization = visualization;
     
     var r =0, dir=false;
@@ -381,13 +380,13 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'search', 'general
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
 
-        self.search.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
-        self.search.toggleFilter('sitecode', selectedSite);
-        self.search.toggleFilter('variablecode', selectedVariable);
-        self.search.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
+        self.data.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
+        self.data.toggleFilter('sitecode', selectedSite);
+        self.data.toggleFilter('variablecode', selectedVariable);
+        self.data.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
 
-        if (self.search.filteredDataseries.length === 1 && shouldPlot) {
-            var dataseries = _(self.search.filteredDataseries).first();
+        if (self.data.filteredDataseries.length === 1 && shouldPlot) {
+            var dataseries = _(self.data.filteredDataseries).first();
             self.visualization.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
             self.visualization.prepareSeries(dataseries);
         }

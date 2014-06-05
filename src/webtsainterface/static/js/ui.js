@@ -2,7 +2,7 @@
  * Created by Juan on 4/6/14.
  */
 
-define('ui', ['search', 'visualization', 'jquery', 'underscore'], function() {
+define('ui', ['visualization', 'jquery', 'underscore'], function() {
     var self = {};
     
     var visibleViewClass = 'active';
@@ -99,7 +99,6 @@ define('ui', ['search', 'visualization', 'jquery', 'underscore'], function() {
 
     self.renderFilterItems = function() {
         var data = require('data');
-        var search = require('search');
 
         $(".facet-list").find("ul").empty();
 
@@ -160,7 +159,7 @@ define('ui', ['search', 'visualization', 'jquery', 'underscore'], function() {
 
             // Bind checkbox check event for the default values
             filterElements.find("input:checkbox").on('change', function() {
-                search.toggleFilter(this.dataset.facet, this.value);
+                data.toggleFilter(this.dataset.facet, this.value);
             });
 
             if (!filters2.length){
@@ -171,7 +170,7 @@ define('ui', ['search', 'visualization', 'jquery', 'underscore'], function() {
 
                 // Bind checkbox check event for the non-default values
                 filterElements.find("input:checkbox").on('change', function() {
-                    search.toggleFilter(this.dataset.facet, this.value);
+                    data.toggleFilter(this.dataset.facet, this.value);
                 });
             }
         });
@@ -199,9 +198,9 @@ define('ui', ['search', 'visualization', 'jquery', 'underscore'], function() {
     }
 
     self.updateTabsFilteredCount = function() {
-        var search = require('search');
-        var sitesCount = search.filteredSites.length;
-        var seriesCount = search.filteredDataseries.length;
+        var data = require('data');
+        var sitesCount = data.filteredSites.length;
+        var seriesCount = data.filteredDataseries.length;
         $("div#datasetsTab .badge").text(seriesCount);
         $("div#mapTab .badge").text(sitesCount);
     };
