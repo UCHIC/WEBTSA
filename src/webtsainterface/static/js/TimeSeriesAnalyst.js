@@ -299,7 +299,7 @@ var TsaApplication = (function(self){
 
             var a = new Date(dateFirst.val());
             var b = new Date(dateLast.val())
-            if(a < b){
+            if(a <= b){
                 self.VisualizationController.plotSeries();  // Dates do not overlap, proceed
             } else {
                 // Dates overlap, display an error.

@@ -957,12 +957,22 @@ TsaApplication.VisualizationController = (function (self) {
             }
 
             graph.x = d3.scale.linear()
-                .domain([domainMin, domainMax])
+                .domain([domainMin, Math.max(domainMin + 1, domainMax)])// domain can't be [0,0]
+                .range([0, width]);
+
+            var ticks = graph.x.ticks(20);
+            var ticksDelta = ticks[1] - ticks[0];
+
+            ticks.unshift(ticks[0] - (ticksDelta));
+            ticks.push(ticks[ticks.length - 1] + ticksDelta);
+
+            graph.x = d3.scale.linear()
+                .domain([ticks[0], ticks[ticks.length - 1]])
                 .range([0, width]);
 
             // Generate a histogram using uniformly-spaced bins.
             graph.data = d3.layout.histogram()
-                .bins(graph.x.ticks(20))
+                .bins(ticks)
                 (values[i]);
 
             graph.y = d3.scale.linear()
@@ -971,7 +981,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             graph.xAxis = d3.svg.axis()
                 .scale(graph.x)
-                .ticks(20)
+                .tickValues(ticks)
                 .orient("bottom");
 
             graph.yAxis = d3.svg.axis()
@@ -1009,7 +1019,7 @@ TsaApplication.VisualizationController = (function (self) {
 */
             bar.append("rect")
                 .attr("x", 1)
-                .attr("width", graph.x(graph.data[0].dx + domainMin) - 2)
+                .attr("width", graph.x(graph.data[1].dx + ticks[0]) - 2)
                 .style("fill", colors(i))
                 .style("opacity", 1)
                 .attr("height", function (d) {
@@ -1019,7 +1029,7 @@ TsaApplication.VisualizationController = (function (self) {
             bar.append("text")
                 .attr("dy", ".75em")
                 .attr("y", 6)
-                .attr("x", graph.x(graph.data[0].dx + domainMin) / 2)
+                .attr("x", graph.x(graph.data[0].dx + ticks[0]) / 2)
                 .attr("text-anchor", "middle")
                 .text(function(d) { return formatCount(d.y);});
 
@@ -1050,39 +1060,60 @@ TsaApplication.VisualizationController = (function (self) {
 
             // Scroll event
             $('#graph-' + i).on('mousewheel DOMMouseScroll', function(e){
+                var minTicks = 5;
+                var maxTicks = 40;
                 var i = e.currentTarget.getAttribute("data-id");
                 var delta;
 
-                if(e.originalEvent.wheelDelta > 0 || e.originalEvent.detail > 0){
-                    graphs[i].numberOfBins = Math.min(40,  graphs[i].numberOfBins + 1 )        // scrolling up
-                    delta = 1;
-                }
-                else {
-                    graphs[i].numberOfBins = Math.max(8, graphs[i].numberOfBins - 1 );        // scrolling down
-                    delta = -1
-                }
+                var domainMax = Math.max.apply(Math, values[i]);
+                var domainMin = Math.min.apply(Math, values[i]);
+
+                graphs[i].x = d3.scale.linear()
+                    .domain([domainMin, domainMax])
+                    .range([0, width]);
 
                 var binNumber = graphs[i].x.ticks(graphs[i].numberOfBins).length;
 
-                while (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length && graphs[i].numberOfBins > 8 && graphs[i].numberOfBins < 40){
-                    graphs[i].numberOfBins += delta;
-                    if (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length){
+                if(e.originalEvent.wheelDelta > 0 || e.originalEvent.detail > 0){
+                    delta = 1;
+                }
+                else {
+                    delta = -1
+                }
 
+                do{
+                    graphs[i].x = d3.scale.linear()
+                        .domain([domainMin, domainMax])
+                        .range([0, width]);
+
+                    graphs[i].numberOfBins += delta;
+
+                    // Check for boundaries
+                    graphs[i].numberOfBins = Math.max(graphs[i].numberOfBins, minTicks);
+                    graphs[i].numberOfBins = Math.min(graphs[i].numberOfBins, maxTicks);
+
+                    if (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length){
                         continue;
                     }
 
+                    var ticks = graphs[i].x.ticks(graphs[i].numberOfBins);
+                    var ticksDelta = ticks[1] - ticks[0];
+
+                    ticks.unshift(ticks[0] - (ticksDelta));
+                    ticks.push(ticks[ticks.length - 1] + ticksDelta);
+
+                    graphs[i].x = d3.scale.linear()
+                        .domain([ticks[0], ticks[ticks.length - 1]])
+                        .range([0, width]);
                     graphs[i].data = d3.layout.histogram()
-                    .bins(graphs[i].x.ticks(graphs[i].numberOfBins))
+                    .bins(ticks)
                     (values[i]);
 
-                    var domainMin = Math.min.apply(Math, values[i]);
-                    var domainMax = Math.max.apply(Math, values[i]);
+                    graphs[i].y.domain([0, d3.max(graphs[i].data, function (d) {return d.y;})]);
 
-                    graphs[i].y.domain([0, d3.max(graphs[i].data, function (d) {return d.y;})])
-                    graphs[i].x.domain([domainMin, domainMax]);
-                    graphs[i].x.range([0, width]);
+                    graphs[i].xAxis.tickValues(ticks);
+                    graphs[i].xAxis.tickFormat(d3.format(""));  // Empty format so it doesn't use its default format which rounds the numbers
                     graphs[i].xAxis.scale(graphs[i].x);
-                    graphs[i].xAxis.ticks(graphs[i].numberOfBins);
                     graphs[i].yAxis.scale(graphs[i].y);
 
                     d3.select("#x-axis-" + i).call(graphs[i].xAxis);
@@ -1099,7 +1130,7 @@ TsaApplication.VisualizationController = (function (self) {
 
                     bar.append("rect")
                         .attr("x", 1)
-                        .attr("width", graphs[i].x(graphs[i].data[0].dx + graphs[i].x.domain()[0]) - 2)
+                        .attr("width", graphs[i].x(graphs[i].data[1].dx + ticks[0]) - 2)
                         .style("fill", colors(i))
                         .style("opacity", 1)
                         .attr("height", function (d) {
@@ -1113,6 +1144,7 @@ TsaApplication.VisualizationController = (function (self) {
                         .attr("text-anchor", "middle")
                         .text(function(d) { return formatCount(d.y); });
                 }
+                while (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length && graphs[i].numberOfBins > minTicks && graphs[i].numberOfBins < maxTicks);
             });
         }
 
