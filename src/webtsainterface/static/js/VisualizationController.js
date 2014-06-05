@@ -1099,8 +1099,8 @@ TsaApplication.VisualizationController = (function (self) {
                     var ticks = graphs[i].x.ticks(graphs[i].numberOfBins);
                     var ticksDelta = ticks[1] - ticks[0];
 
-                    ticks.unshift(ticks[0] - (ticksDelta));
-                    ticks.push(ticks[ticks.length - 1] + ticksDelta);
+                    ticks.unshift(parseFloat((ticks[0] - ticksDelta).toFixed(2)));
+                    ticks.push(parseFloat((ticks[ticks.length - 1] + ticksDelta).toFixed(2)));
 
                     graphs[i].x = d3.scale.linear()
                         .domain([ticks[0], ticks[ticks.length - 1]])
