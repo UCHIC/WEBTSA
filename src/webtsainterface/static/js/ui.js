@@ -6,20 +6,20 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     var self = {};
     
     var visibleViewClass = 'active';
-    var defaultTabElementId = '#mapTab';
-    var defaultContentElementId = '#mapContent';
+    var defaultView = 'map';
 
     self.loadView = function(view) {
-        if ($('#' + view + 'Tab').hasClass('active')) {
+        view = ($('.nav-tabs').find('li[id*="' + view + '"]').length === 0)? 'map': view;
+        if ($('#' + view + 'Tab').hasClass(visibleViewClass)) {
             return;
         }
-        var contentElement = view + 'Content';
-        //contentElement = (contentElement.length == 0)? $(defaultContentElementId): contentElement;
-        $(".nav-tabs").find("a[href='#" + contentElement + "']").click();
+
+        var contentLink = $("a[href='#" + view + "Content']");
+        contentLink.click();
     };
 
     self.getActiveView = function() {
-        return $(".nav-tabs .active").prop("id").replace("Tab", "");
+        return $('.nav-tabs').find('.active').prop("id").replace("Tab", "");
     };
 
     self.getBrowserName= (function(){
