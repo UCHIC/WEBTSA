@@ -1,15 +1,22 @@
 /**
  * Created by Juan on 4/6/14.
  */
-TsaApplication.TableController = (function(self) {
+
+define('table', ['datatablesLibraries'], function() {
+    var self = {};
+
     self.dataseriesTable = {};
     self.shouldInitialize = true;
 
     var tableOffsetY = 125;
 
     self.initializeTable = function() {
+        var ui = require('ui');
+        var data = require('data');
+        var visualization = require('visualization');
+
         self.dataseriesTable = $('#datasetsTable').dataTable({
-            data: TsaApplication.DataManager.dataseries,
+            data: data.dataseries,
             dom: 'TftiS',
             //stateSave: true,
             deferRender: true,
@@ -72,7 +79,6 @@ TsaApplication.TableController = (function(self) {
                 { title: 'Active', data: 'isactive', name: 'isactive', visible: false }
             ],
             createdRow: function(row, data, dataIndex) {
-                var visualization = TsaApplication.VisualizationController;
                 var tableRow = $(row);
 
                 var plotSeries = _(visualization.plottedSeries).union(visualization.unplottedSeries);
@@ -82,7 +88,7 @@ TsaApplication.TableController = (function(self) {
 
                 tableRow.find('td:not(:first)').click(function(){
                     var series = data;
-                    TsaApplication.UiHelper.showDataseriesDialog(series);
+                    ui.showDataseriesDialog(series);
                 });
 
                 tableRow.find('input[type="checkbox"]').on('change', function() {
@@ -118,7 +124,7 @@ TsaApplication.TableController = (function(self) {
             }
         });
 
-        TsaApplication.UiHelper.customizeTableStyle();
+        ui.customizeTableStyle();
         self.shouldInitialize = false;
         self.updateDataseries();
     };
@@ -130,11 +136,12 @@ TsaApplication.TableController = (function(self) {
     };
 
     self.updateDataseries = function() {
+        var data = require('data');
         if (self.shouldInitialize) {
             return;
         }
         var api = self.dataseriesTable.api();
-        TsaApplication.DataManager.facets.forEach(function(facet) {
+        data.facets.forEach(function(facet) {
             var column = api.column(facet.keyfield + ':name');
             var filterRegex = '';
 
@@ -156,11 +163,11 @@ TsaApplication.TableController = (function(self) {
     };
 
     function renderCheckbox(data, type) {
-        var visualization = TsaApplication.VisualizationController;
+        var visualization = require('visualization');
         var series = _(visualization.plottedSeries).union(visualization.unplottedSeries);
         var checked = (_(series).findWhere({seriesid: data}))? 'checked': '';
         return ('<input data-seriesid="' + data + '" type="checkbox" ' + checked + '>');
     }
 
     return self;
-}(TsaApplication.TableController || {}));
+});

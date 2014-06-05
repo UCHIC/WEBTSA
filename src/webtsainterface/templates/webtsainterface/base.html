@@ -17,41 +17,11 @@
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.css" type="text/css" />
 
         <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" />
-
-
-        <script type="text/javascript" charset="utf8" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" charset="utf8" src="//cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.6/jquery.browser.min.js"></script>
-
-        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
-        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/colvis/1.1.0/js/dataTables.colVis.min.js"></script>
-        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/scroller/1.2.1/js/dataTables.scroller.min.js"></script>
-        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/tabletools/2.2.1/js/dataTables.tableTools.min.js"></script>
-{#        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/colreorder/1.1.1/js/dataTables.colReorder.min.js"></script>#}
-        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/e9421181788/integration/bootstrap/3/dataTables.bootstrap.js"></script>
-
-        <script type="text/javascript" charset="utf8" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
-
-        <script type="text/javascript" charset="utf8" src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-        <script src="{% static 'js/vendor/bootstrap/bootstrap-datepicker.js' %}"></script>
-
-        <script type="text/javascript" charset="utf8"   src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.6/d3.min.js"></script>
-        <script type="text/javascript" charset="utf8"   src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
-        <script type="text/javascript" charset="utf8"   src="{% static 'js/vendor/d3/box.js' %}"></script>
-
-        <script type="text/javascript" charset="utf8"   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANPfBBVteHSTx4o9O-kgjC8RVMuXW0O2o&sensor=false"></script>
-        <script type="text/javascript" charset="utf8"   src="{% static 'js/vendor/maps/markerclusterer.js' %}"></script>
-
-        <script src="{% static 'js/TimeSeriesAnalyst.js' %}"></script>
-        <script src="{% static 'js/DataManager.js' %}"></script>
-        <script src="{% static 'js/MapController.js' %}"></script>
-        <script src="{% static 'js/Search.js' %}"></script>
-        <script src="{% static 'js/TableController.js' %}"></script>
-        <script src="{% static 'js/VisualizationController.js' %}"></script>
-        <script src="{% static 'js/UiHelper.js' %}"></script>
     </head>
     <body>
         {% block body %}
 
         {% endblock %}
+        <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js" data-main="{% static 'js/main.js' %}"></script>
     </body>
 </html>

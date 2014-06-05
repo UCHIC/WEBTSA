@@ -2,7 +2,8 @@
  * Created by Juan on 4/6/14.
  */
 
-TsaApplication.DataManager = (function (self) {
+define('data', ['jquery'], function() {
+    var self = {};
     var dataLoader = { loadedData: 0, dataToLoad: ['facets', 'dataseries', 'sites'] };
     //data
     self.dataseries = [];
@@ -32,13 +33,13 @@ TsaApplication.DataManager = (function (self) {
             dataLoader.loadedData++;
             $(document).trigger(facetsLoaded);
         });
-		
+
 		$.getJSON(window.location.pathname + "api/v1/sites?limit=0").done(function(data) {
             self.sites = data.objects;
             dataLoader.loadedData++;
             $(document).trigger(sitesLoaded);
         });
-		
+
         $.getJSON(window.location.pathname + "api/v1/dataseries?limit=0").done(function(data) {
             self.dataseries = data.objects;
             extendDataseries();
@@ -134,4 +135,4 @@ TsaApplication.DataManager = (function (self) {
         });
     }
 	return self;
-}(TsaApplication.DataManager || {}));
+});
