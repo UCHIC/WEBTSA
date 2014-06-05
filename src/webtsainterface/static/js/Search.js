@@ -2,14 +2,16 @@
  * Created by Juan on 4/6/14.
  */
 
-TsaApplication.Search = (function (self) {
+define('search', ['data', 'jquery'], function(data) {
+    var self = {};
     self.filteredDataseries = [];
     self.filteredSites = [];
 
     var dataFiltered = jQuery.Event("datafiltered");
 
     self.toggleFilter = function(property, value) {
-        var facet = _.find(TsaApplication.DataManager.facets, function(facet){ return facet.keyfield === property; });
+        var data = require('data');
+        var facet = _.find(data.facets, function(facet){ return facet.keyfield === property; });
         var filter = _.find(facet.filters, function(filter){ return filter[facet.keyfield] == value; });
         if (!facet || !filter) {
             return;
@@ -34,12 +36,13 @@ TsaApplication.Search = (function (self) {
     };
 
     function updateFilteredData(facetFiltered) {
-        self.filteredDataseries = TsaApplication.DataManager.dataseries;
-        self.filteredSites = TsaApplication.DataManager.sites;
+        var data = require('data');
+        self.filteredDataseries = data.dataseries;
+        self.filteredSites = data.sites;
         var filteredFacetSeries = {};
 
         // update dataseries
-        TsaApplication.DataManager.facets.forEach(function(facet) {
+        data.facets.forEach(function(facet) {
             var facetSeries = (facet === facetFiltered)? facet.updateFacetSeries(): facet.filteredFacetSeries;
             filteredFacetSeries[facet.keyfield] = facetSeries;
             self.filteredDataseries = _.intersection(self.filteredDataseries, facetSeries);
@@ -53,7 +56,7 @@ TsaApplication.Search = (function (self) {
         });
 
         // update filters and filters count
-        TsaApplication.DataManager.facets.forEach(function(facet) {
+        data.facets.forEach(function(facet) {
             if (!facet.isFiltered()) {
                 facet.filters.forEach(function(filter) {
                     filter.dataseriesCount = _.intersection(filter.filteredSeries, self.filteredDataseries).length;
@@ -72,4 +75,4 @@ TsaApplication.Search = (function (self) {
     }
 
 	return self;
-}(TsaApplication.Search || {}));
+});
