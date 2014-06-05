@@ -1,4 +1,4 @@
-define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'search'], function(data, map, table, ui, visualization, search) {
+define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'search', 'generalLibraries'], function(data, map, table, ui, visualization, search) {
     var self = {};
     self.ui = ui;
     self.map = map;
@@ -17,7 +17,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'search'], functio
         self.ui.loadView(selectedView);
         bindEvents();
         self.map.initializeMap();
-        //google.maps.event.trigger(self.map.map, 'resize');
         self.data.loadData();
     };
 

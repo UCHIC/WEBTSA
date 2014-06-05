@@ -2,7 +2,7 @@
  * Created by Juan on 4/6/14.
  */
 
-define('ui', ['search', 'visualization'], function() {
+define('ui', ['search', 'visualization', 'jquery', 'underscore'], function() {
     var self = {};
     
     var visibleViewClass = 'active';

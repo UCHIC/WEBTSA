@@ -2,7 +2,7 @@
  * Created by Juan on 4/6/14.
  */
 
-define('map', [], function() {
+define('map', ['mapLibraries'], function() {
     var self = {};
     
     self.map = {};
