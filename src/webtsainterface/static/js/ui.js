@@ -22,6 +22,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
         return $('.nav-tabs').find('.active').prop("id").replace("Tab", "");
     };
 
+    //TODO: use jQuery.browser instead.
     self.getBrowserName= (function(){
         var ua= navigator.userAgent, tem,
         M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
@@ -178,6 +179,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     };
 
     self.showDataseriesDialog = function(series) {
+        var visualization = require('visualization');
         var dialog = $('#InfoDialog');
         var plottedSeries = visualization.plottedSeries;
         var isAlreadyPlotted = _(_(plottedSeries).pluck('seriesid')).contains(series.seriesid);
