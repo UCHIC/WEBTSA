@@ -2,27 +2,36 @@
  * Created by Juan on 4/6/14.
  */
 
-TsaApplication.MapController = (function (self) {
+define('map', ['mapLibraries'], function() {
+    var self = {};
+    
     self.map = {};
+
+
     var settings = {};
     var markersManagers = {};
     var infoWindows = [];
 
     self.initializeMap = function() {
+        var ui = require('ui');
+
         settings = {
             center: new google.maps.LatLng(41.0648701, -111.4622151),
             mapTypeId: google.maps.MapTypeId.TERRAIN,
             zoom: 7
         };
-        self.map = new google.maps.Map(TsaApplication.UiHelper.getMapCanvas(), settings);
+        self.map = new google.maps.Map(ui.getMapCanvas(), settings);
     };
 
     self.loadMarkers = function() {
+        var ui = require('ui');
+        var data = require('data');
+
         loadMarkerManagers();
-        TsaApplication.DataManager.sites.forEach(function(site) {
+        data.sites.forEach(function(site) {
             var marker = createMarker(site);
             markersManagers[site.sourcedataserviceid].addMarker(marker);
-            var markerInfoWindow = new google.maps.InfoWindow({ content: TsaApplication.UiHelper.siteInfoWindowTemplate({
+            var markerInfoWindow = new google.maps.InfoWindow({ content: ui.siteInfoWindowTemplate({
                 sitecode: site.sitecode, sitename: site.sitename, network: site.network, sitetype: site.sitetype,
                 latitude: site.latitude, longitude: site.longitude, state: site.state, county: site.county})
             });
@@ -32,20 +41,21 @@ TsaApplication.MapController = (function (self) {
                 infoWindows.push(markerInfoWindow);
                 markerInfoWindow.open(self.map, marker);
                 $('.btnViewSeries').on('click', function() {
-                    var siteFacet = _(TsaApplication.DataManager.facets).findWhere({ keyfield: 'sitecode' });
-                    TsaApplication.Search.selectOnlyFilter(siteFacet, this.dataset['sitecode']);
-                    TsaApplication.UiHelper.loadView('datasets');
+                    var siteFacet = _(data.facets).findWhere({ keyfield: 'sitecode' });
+                    data.selectOnlyFilter(siteFacet, this.dataset['sitecode']);
+                    ui.loadView('datasets');
                 });
             });
         });
     };
 
     self.updateSitesMarkers = function() {
+        var data = require('data');
         for (var property in markersManagers) {
             if (markersManagers.hasOwnProperty(property)) {
                 var markersManager = markersManagers[property];
                 markersManager.getMarkers().forEach(function(marker) {
-                    var siteMarker = _.find(TsaApplication.Search.filteredSites, function(site) {
+                    var siteMarker = _.find(data.filteredSites, function(site) {
                         return site.sitename === marker.title;
                     });
                     marker.setVisible(( (siteMarker)? true: false ));
@@ -57,14 +67,17 @@ TsaApplication.MapController = (function (self) {
     };
 
     function loadMarkerManagers() {
-        var uniqueNetworks = _.uniq(TsaApplication.DataManager.sites, function(site) { return site.sourcedataserviceid; });
+        var data = require('data');
+        var ui = require('ui');
+
+        var uniqueNetworks = _.uniq(data.sites, function(site) { return site.sourcedataserviceid; });
         var networkIds = _.pluck(uniqueNetworks, 'sourcedataserviceid');
         var networkNames = _.pluck(uniqueNetworks, 'network');
         var networks = _.object(networkIds, networkNames);
 
         networkIds.forEach(function(networkId) {
             var networkMarkersManager = new MarkerClusterer(self.map);
-            var cssClass = TsaApplication.UiHelper.generateClusterClass(networkId);
+            var cssClass = ui.generateClusterClass(networkId);
             networkMarkersManager.setIgnoreHidden(true);
             networkMarkersManager.setMinimumClusterSize(4);
             networkMarkersManager.setClusterClass(networkMarkersManager.getClusterClass() + " " + cssClass);
@@ -79,7 +92,7 @@ TsaApplication.MapController = (function (self) {
               return { text: markers.length.toString(), index: 1, title: networks[networkId] };
             });
 
-            TsaApplication.UiHelper.addColorToClass(cssClass, getMarkerColorMapping(networkId));
+            ui.addColorToClass(cssClass, getMarkerColorMapping(networkId));
             markersManagers[networkId] = networkMarkersManager;
         });
     }
@@ -116,4 +129,4 @@ TsaApplication.MapController = (function (self) {
 
 
 	return self;
-}(TsaApplication.MapController || {}));
+});

@@ -2,7 +2,9 @@
  * Created by Juan on 4/6/14.
  */
 
-TsaApplication.VisualizationController = (function (self) {
+define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
+    var self = {};
+
     self.plotTypes = { histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot };
     self.currentPlot = self.plotTypes.multiseries;
 
@@ -57,6 +59,8 @@ TsaApplication.VisualizationController = (function (self) {
     };
 
     self.plotSeries = function() {
+        var ui = require('ui');
+
         var shouldPlot = true;
 
         if (self.unplottedSeries.length + self.plottedSeries.length === 0) {
@@ -71,7 +75,7 @@ TsaApplication.VisualizationController = (function (self) {
             }
         });
 
-        if (!shouldPlot || TsaApplication.UiHelper.getActiveView() !== 'visualization') {
+        if (!shouldPlot || ui.getActiveView() !== 'visualization') {
             self.doPlot = true;
             return;
         }
@@ -83,8 +87,10 @@ TsaApplication.VisualizationController = (function (self) {
         $(document).trigger(plotFinished);
         //TODO: if not in visualization tab, make it redraw the plot.
     };
-    
+
     self.unplotSeries = function(seriesid) {
+        var table = require('table');
+        var ui = require('ui');
         self.plottedSeries = _(self.plottedSeries).reject(function(plotted) {
             return plotted.seriesid === seriesid;
         });
@@ -93,8 +99,8 @@ TsaApplication.VisualizationController = (function (self) {
             return unplotted.seriesid === seriesid;
         });
 
-        TsaApplication.TableController.uncheckSeries(seriesid);
-        if (TsaApplication.UiHelper.getActiveView() !== 'visualization') {
+        table.uncheckSeries(seriesid);
+        if (ui.getActiveView() !== 'visualization') {
             self.shouldPlot = true;
             return;
         }
@@ -340,6 +346,8 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
     function drawMultiseries() {
+        var ui = require('ui');
+
         self.clearGraph();
         var varNames = _(self.plottedSeries).pluck('variablename');
         var siteNames = _(self.plottedSeries).pluck('sitename');
@@ -604,7 +612,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             // Returns the length of the longest tick in characters
             function getAxisSeparation(id){
-                var browser = TsaApplication.UiHelper.getBrowserName;
+                var browser = ui.getBrowserName;
                 var ticks = $(".y.axis[data-id='" + i +"'] .tick text");
                 var max = 0;
                 if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){               // Firefox and IE do not support width() for elements inside an svg. Must calculate it using the textContent and font size (12)
@@ -714,7 +722,7 @@ TsaApplication.VisualizationController = (function (self) {
                     var textHeight = $(".y.axis[data-id='" + i +"'] > text").width();
 
                     // the width() method does not work in Firefox for elements inside an svg. Must calculate it
-                    var browser = TsaApplication.UiHelper.getBrowserName;
+                    var browser = ui.getBrowserName;
                     if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){
                         textHeight = $(".y.axis[data-id='" + i +"'] > text").text().length * 6.5;
                     }
@@ -1335,7 +1343,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             // Reposition y-axis label
             // the width() method does not work in Firefox for elements inside an svg. Must calculate it
-            var browser = TsaApplication.UiHelper.getBrowserName;
+            var browser = ui.getBrowserName;
             if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){
                 textHeight = $("svg[data-id=" + i +"] .yAxisLabel").text().length * 7;
                 textWidth = $("svg[data-id='" + i + "'] .tick:last text").text().length * 7;
@@ -1353,7 +1361,7 @@ TsaApplication.VisualizationController = (function (self) {
 
             // Update size
             self.boxWhiskerSvgs[i].attr("height", height);
-            var browser = TsaApplication.UiHelper.getBrowserName;
+            var browser = ui.getBrowserName;
             if (browser.substr(0,2) == "IE"){
                 $(self.boxWhiskerSvgs[i][0][0].parentNode).css("height", height + margin.bottom + margin.top + "px");
             }
@@ -1403,4 +1411,4 @@ TsaApplication.VisualizationController = (function (self) {
     }
 
 	return self;
-}(TsaApplication.VisualizationController || {}));
+});

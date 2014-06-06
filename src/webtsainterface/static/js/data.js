@@ -2,18 +2,24 @@
  * Created by Juan on 4/6/14.
  */
 
-TsaApplication.DataManager = (function (self) {
+define('data', ['jquery'], function() {
+    var self = {};
     var dataLoader = { loadedData: 0, dataToLoad: ['facets', 'dataseries', 'sites'] };
+
     //data
+    self.filteredDataseries = [];
+    self.filteredSites = [];
     self.dataseries = [];
     self.facets = [];
     self.sites = [];
 
+
     //events
     var dataLoaded = jQuery.Event("dataloaded");
+    var dataFiltered = jQuery.Event("datafiltered");
     var dataseriesLoaded = jQuery.Event("dataseriesloaded");
-    var sitesLoaded = jQuery.Event("sitesloaded");
     var facetsLoaded = jQuery.Event("facetsloaded");
+    var sitesLoaded = jQuery.Event("sitesloaded");
 
     self.loadData = function() {
         dataLoader.watch("loadedData", function(id, oldval, newval) {
@@ -32,13 +38,13 @@ TsaApplication.DataManager = (function (self) {
             dataLoader.loadedData++;
             $(document).trigger(facetsLoaded);
         });
-		
+
 		$.getJSON(window.location.pathname + "api/v1/sites?limit=0").done(function(data) {
             self.sites = data.objects;
             dataLoader.loadedData++;
             $(document).trigger(sitesLoaded);
         });
-		
+
         $.getJSON(window.location.pathname + "api/v1/dataseries?limit=0").done(function(data) {
             self.dataseries = data.objects;
             extendDataseries();
@@ -48,6 +54,69 @@ TsaApplication.DataManager = (function (self) {
         });
     };
 
+    self.toggleFilter = function(property, value) {
+        var facet = _.find(self.facets, function(facet){ return facet.keyfield === property; });
+        var filter = _.find(facet.filters, function(filter){ return filter[facet.keyfield] == value; });
+        if (!facet || !filter) {
+            return;
+        } else if (!filter.dataseriesCount) {
+            return;
+        }
+
+        filter.applied = !filter.applied;
+        updateFilteredData(facet);
+    };
+
+    self.clearFacetFilters = function(facet) {
+       self.selectOnlyFilter(facet);
+    };
+
+    self.selectOnlyFilter = function(facet, savedFilter) {
+        var keyfield = facet.keyfield;
+        facet.filters.forEach(function(filter) {
+            filter.applied = (filter[keyfield] === savedFilter);
+        });
+        updateFilteredData(facet);
+    };
+
+    function updateFilteredData(facetFiltered) {
+        self.filteredDataseries = self.dataseries;
+        self.filteredSites = self.sites;
+        var filteredFacetSeries = {};
+
+        // update dataseries
+        self.facets.forEach(function(facet) {
+            var facetSeries = (facet === facetFiltered)? facet.updateFacetSeries(): facet.filteredFacetSeries;
+            filteredFacetSeries[facet.keyfield] = facetSeries;
+            self.filteredDataseries = _.intersection(self.filteredDataseries, facetSeries);
+        });
+
+        // update sites
+        var uniqueSites = _.uniq(self.filteredDataseries, function(series) { return series["sitecode"]; });
+        var siteCodes = _.pluck(uniqueSites, 'sitecode');
+        self.filteredSites = _.filter(self.filteredSites, function(site) {
+            return _.contains(siteCodes, site.sitecode);
+        });
+
+        // update filters and filters count
+        self.facets.forEach(function(facet) {
+            if (!facet.isFiltered()) {
+                facet.filters.forEach(function(filter) {
+                    filter.dataseriesCount = _.intersection(filter.filteredSeries, self.filteredDataseries).length;
+                });
+                return;
+            }
+
+            var outerFacets = _.values(_.omit(filteredFacetSeries, facet.keyfield));
+            var outerFacetsJoin = _.reduce(outerFacets, function(a, b) { return _.intersection(a, b); });
+            facet.filters.forEach(function(filter) {
+                filter.dataseriesCount = _.intersection(filter.filteredSeries, outerFacetsJoin).length;
+            });
+        });
+
+        $(document).trigger(dataFiltered);
+    }
+
     function extendDataseries() {
         var dateRegex = /^(\d{4}\-\d\d\-\d\d([tT][\d:]*)?)/;
 
@@ -55,9 +124,7 @@ TsaApplication.DataManager = (function (self) {
             series.dataset = [];
             series.loadDataset = function(callback) {
                 if (series.dataset.length !== 0) {
-                    if (callback) {
-                        callback();
-                    }
+                    callback && callback();
                     return;
                 }
 
@@ -68,9 +135,9 @@ TsaApplication.DataManager = (function (self) {
                     var index = 0;
                     var node;
 
-                    series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item().textContent;
-                    series.dataset.verticalDatum = data.getElementsByTagName('verticalDatum').item().textContent;
-                    series.dataset.elevation = +data.getElementsByTagName('elevation_m').item().textContent;
+                    series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item(0).textContent;
+                    series.dataset.verticalDatum = data.getElementsByTagName('verticalDatum').item(0).textContent;
+                    series.dataset.elevation = +data.getElementsByTagName('elevation_m').item(0).textContent;
 
                     while (node = values[index++]) {
                         var seriesData = {};
@@ -84,9 +151,7 @@ TsaApplication.DataManager = (function (self) {
                         series.dataset.push(seriesData);
                     }})
                     .done(function() {
-                        if (callback) {
-                            callback();
-                        }
+                        callback && callback();
                     }
                 );
             };
@@ -141,4 +206,4 @@ TsaApplication.DataManager = (function (self) {
         });
     }
 	return self;
-}(TsaApplication.DataManager || {}));
+});

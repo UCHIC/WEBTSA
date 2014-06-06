@@ -1,14 +1,22 @@
-var TsaApplication = (function(self){
+define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'], function(data, map, table, ui, visualization) {
+    var self = {};
+    self.ui = ui;
+    self.map = map;
+    self.data = data;
+    self.table = table;
+    self.visualization = visualization;
+    
     var r =0, dir=false;
     var isShown = true;
     self.initialParameters = {};
-
+    
     self.initializeApplication = function() {
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
-        self.UiHelper.loadView(selectedView);
+        self.ui.loadView(selectedView);
         bindEvents();
-        self.DataManager.loadData();
+        self.map.initializeMap();
+        self.data.loadData();
     };
 
 
@@ -20,72 +28,67 @@ var TsaApplication = (function(self){
 
     function bindEvents() {
         $(document).on('facetsloaded', function() {
-            self.UiHelper.renderFacets($("#leftPanel .facets-container"));
+            self.ui.renderFacets($("#leftPanel .facets-container"));
         });
 
         $(document).on('dataloaded', function() {
-            self.UiHelper.renderFilterItems();
+            self.ui.renderFilterItems();
             checkInitialFilters();
 
-            if (self.UiHelper.getActiveView() !== 'datasets') {
-                self.TableController.shouldInitialize = true;
+            if (self.ui.getActiveView() !== 'datasets') {
+                self.table.shouldInitialize = true;
                 return;
             }
 
-            self.TableController.initializeTable();
+            self.table.initializeTable();
         });
 
         $(document).on('datafiltered', function() {
             //update map markers and dataseries table.
-            self.UiHelper.renderFilterItems();
-            self.MapController.updateSitesMarkers();
-            self.TableController.updateDataseries();
+            self.ui.renderFilterItems();
+            self.map.updateSitesMarkers();
+            self.table.updateDataseries();
         });
 
         $(document).on('sitesloaded', function() {
-            self.MapController.loadMarkers();
+            self.map.loadMarkers();
         });
 
         $(document).on('plotdataloading', function() {
-            self.UiHelper.startPlotAnimation();
+            self.ui.startPlotAnimation();
         });
 
         $(document).on('plotdataready', function() {
-            self.UiHelper.endPlotAnimation();
-            if (self.VisualizationController.doPlot) {
-                self.VisualizationController.plotSeries();
+            self.ui.endPlotAnimation();
+            if (self.visualization.doPlot) {
+                self.visualization.plotSeries();
             }
         });
 
         $(document).on('plotstarted', function() {
-            self.UiHelper.startPlotAnimation();
+            self.ui.startPlotAnimation();
         });
 
         $(document).on('plotfinished', function() {
-            self.UiHelper.endPlotAnimation();
-        });
-
-        google.maps.event.addDomListener(window, "load", function() {
-            self.MapController.initializeMap();
-            google.maps.event.trigger(self.MapController.map, 'resize');
+            self.ui.endPlotAnimation();
         });
 
         $(document).on('shown.bs.tab', 'a[href="#mapContent"]', function() {
-            google.maps.event.trigger(self.MapController.map, 'resize');
+            google.maps.event.trigger(self.map.map, 'resize');
         });
 
         $(document).on('shown.bs.tab', 'a[href="#datasetsContent"]', function() {
-            if (self.TableController.shouldInitialize) {
-                self.TableController.initializeTable();
+            if (self.table.shouldInitialize) {
+                self.table.initializeTable();
             }
         });
 
         $(document).on('shown.bs.tab', 'a[href="#visualizationContent"]', function() {
-            if (self.VisualizationController.unplottedSeries.length || self.VisualizationController.shouldPlot) {
-                self.UiHelper.endPlotAnimation();
-                self.VisualizationController.plotSeries();
+            if (self.visualization.unplottedSeries.length || self.visualization.shouldPlot) {
+                self.ui.endPlotAnimation();
+                self.visualization.plotSeries();
             }
-            self.VisualizationController.doPlot = true;
+            self.visualization.doPlot = true;
         });
 
         $("#btnAddToPlot").click(function() {
@@ -96,8 +99,8 @@ var TsaApplication = (function(self){
             var checkbox = $('#datasetsTable').find(':checkbox[data-seriesid="' + id + '"]');
             checkbox.click();
 
-            self.VisualizationController.doPlot = true;
-            self.UiHelper.loadView('visualization');
+            self.visualization.doPlot = true;
+            self.ui.loadView('visualization');
         });
 
         $("#btnPlotDataset").click(function() {
@@ -105,31 +108,31 @@ var TsaApplication = (function(self){
             var id = +dialog.get(0).dataset['series'];
 
             // Clear checkboxes
-            self.VisualizationController.plottedSeries.forEach(function(series) {
-                self.TableController.uncheckSeries(series.seriesid);
+            self.visualization.plottedSeries.forEach(function(series) {
+                self.table.uncheckSeries(series.seriesid);
             });
 
-            self.VisualizationController.unplottedSeries.forEach(function(series) {
-                self.TableController.uncheckSeries(series.seriesid);
+            self.visualization.unplottedSeries.forEach(function(series) {
+                self.table.uncheckSeries(series.seriesid);
             });
 
             // Clear the plot arrays.
-            self.VisualizationController.plottedSeries.length = 0;
-            self.VisualizationController.unplottedSeries.length = 0;
+            self.visualization.plottedSeries.length = 0;
+            self.visualization.unplottedSeries.length = 0;
 
             // Reset the date intervals
-            self.VisualizationController.initializeDatePickers();
+            self.visualization.initializeDatePickers();
 
             // Clear the graph
-            self.VisualizationController.clearGraph();
-            self.VisualizationController.boxWhiskerSvgs = [];
+            self.visualization.clearGraph();
+            self.visualization.boxWhiskerSvgs = [];
 
             dialog.modal('hide');
             var checkbox = $('#datasetsTable').find(':checkbox[data-seriesid="' + id + '"]');
             checkbox.click();
 
-            self.VisualizationController.doPlot = true;
-            self.UiHelper.loadView('visualization');
+            self.visualization.doPlot = true;
+            self.ui.loadView('visualization');
         });
 
         $("#btnExport").click(function() {
@@ -155,7 +158,7 @@ var TsaApplication = (function(self){
 
             var dialog = $("#InfoDialog");
             var id = +dialog.get(0).dataset['series'];
-            var series = _(self.DataManager.dataseries).where({seriesid: id}).pop();
+            var series = _(self.data.dataseries).where({seriesid: id}).pop();
 
             var csvContent = "data:text/csv;charset=utf-8,";
 
@@ -278,17 +281,17 @@ var TsaApplication = (function(self){
 
         $("#btnTimeSeries").click(function() {
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
-            self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.multiseries;
+            self.visualization.currentPlot = self.visualization.plotTypes.multiseries;
         });
 
         $("#btnHistogram").click(function() {
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
-            self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.histogram;
+            self.visualization.currentPlot = self.visualization.plotTypes.histogram;
         });
 
         $("#btnBoxAndWhisker").click(function() {
             $("#visualizationDropDown").text($(this).text() + " ").append("<span class='caret'></span>");
-            self.VisualizationController.currentPlot = self.VisualizationController.plotTypes.box;
+            self.visualization.currentPlot = self.visualization.plotTypes.box;
         });
 
         $("#btnSetPlotOptions").click(function() {
@@ -300,7 +303,7 @@ var TsaApplication = (function(self){
             var a = new Date(dateFirst.val());
             var b = new Date(dateLast.val())
             if(a <= b){
-                self.VisualizationController.plotSeries();  // Dates do not overlap, proceed
+                self.visualization.plotSeries();  // Dates do not overlap, proceed
             } else {
                 // Dates overlap, display an error.
                 $("#graphArea").prepend(
@@ -328,14 +331,14 @@ var TsaApplication = (function(self){
                 $("#graphContainer").width($("#graphContainer").width() + slideDistance);           // no animation
                 $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
             }
-            self.VisualizationController.plotSeries();
+            self.visualization.plotSeries();
         });
 
         function toggleLeftPanel(){
             if ($("#btnLeftPanelCollapse")[0].getAttribute("data-enabled") == "true"){
                 $("#leftPanel .panel-group").toggle();
                 isShown = !isShown;
-                google.maps.event.trigger(self.MapController.map, 'resize');
+                google.maps.event.trigger(self.map.map, 'resize');
             }
         }
 
@@ -374,61 +377,21 @@ var TsaApplication = (function(self){
         var selectedVariable = self.initialParameters['variablecode'];
         var selectedControlLevel = self.initialParameters['qualitycontrollevelcode'];
         var shouldPlot = self.initialParameters['plot'] === 'true';
-        var networkFilter = _(_(self.DataManager.facets)
+        var networkFilter = _(_(self.data.facets)
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
 
-        self.Search.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
-        self.Search.toggleFilter('sitecode', selectedSite);
-        self.Search.toggleFilter('variablecode', selectedVariable);
-        self.Search.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
+        self.data.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
+        self.data.toggleFilter('sitecode', selectedSite);
+        self.data.toggleFilter('variablecode', selectedVariable);
+        self.data.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
 
-        if (self.Search.filteredDataseries.length === 1 && shouldPlot) {
-            var dataseries = _(self.Search.filteredDataseries).first();
-            self.VisualizationController.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
-            self.VisualizationController.prepareSeries(dataseries);
+        if (self.data.filteredDataseries.length === 1 && shouldPlot) {
+            var dataseries = _(self.data.filteredDataseries).first();
+            self.visualization.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
+            self.visualization.prepareSeries(dataseries);
         }
     }
 
     return self;
-}(TsaApplication || {}));
-
-
-$(document).ready(function(){
-    TsaApplication.initializeApplication();
 });
-
-
-/*
- * object.watch polyfill
- * By Eli Grey, http://eligrey.com
- */
-if (!Object.prototype.watch) {
-	Object.defineProperty(Object.prototype, "watch", {
-		  enumerable: false
-		, configurable: true
-		, writable: false
-		, value: function (prop, handler) {
-			var
-			  oldval = this[prop]
-			, newval = oldval
-			, getter = function () {
-				return newval;
-			}
-			, setter = function (val) {
-				oldval = newval;
-				return newval = handler.call(this, prop, oldval, val);
-			}
-			;
-
-			if (delete this[prop]) { // can't watch constants
-				Object.defineProperty(this, prop, {
-					  get: getter
-					, set: setter
-					, enumerable: true
-					, configurable: true
-				});
-			}
-		}
-	});
-}

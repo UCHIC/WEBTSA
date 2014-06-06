@@ -2,32 +2,27 @@
  * Created by Juan on 4/6/14.
  */
 
-TsaApplication.UiHelper = (function (self) {
+define('ui', ['visualization', 'jquery', 'underscore'], function() {
+    var self = {};
+    
     var visibleViewClass = 'active';
-    var defaultTabElementId = '#mapTab';
-    var defaultContentElementId = '#mapContent';
-
-//    $(document).on('plotdataloading', function() {
-//        $('visualization')
-//    });
-//
-//    $(document).on('plotdataready', function() {
-//
-//    });
+    var defaultView = 'map';
 
     self.loadView = function(view) {
-        if ($('#' + view + 'Tab').hasClass('active')) {
+        view = ($('.nav-tabs').find('li[id*="' + view + '"]').length === 0)? 'map': view;
+        if ($('#' + view + 'Tab').hasClass(visibleViewClass)) {
             return;
         }
-        var contentElement = view + 'Content';
-        //contentElement = (contentElement.length == 0)? $(defaultContentElementId): contentElement;
-        $(".nav-tabs").find("a[href='#" + contentElement + "']").click();
+
+        var contentLink = $("a[href='#" + view + "Content']");
+        contentLink.click();
     };
 
     self.getActiveView = function() {
-        return $(".nav-tabs .active").prop("id").replace("Tab", "");
+        return $('.nav-tabs').find('.active').prop("id").replace("Tab", "");
     };
 
+    //TODO: use jQuery.browser instead.
     self.getBrowserName= (function(){
         var ua= navigator.userAgent, tem,
         M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
@@ -92,10 +87,11 @@ TsaApplication.UiHelper = (function (self) {
     </section>");
 
     self.renderFacets = function(parent){
+        var data = require('data');
         var facets = [];
         var facetsHtml;
 
-        TsaApplication.DataManager.facets.forEach(function(facet){
+        data.facets.forEach(function(facet){
             facets = facets.concat(self.facetsTemplate({facetid: facet.keyfield, facettitle: facet.name}));
         });
 
@@ -104,9 +100,11 @@ TsaApplication.UiHelper = (function (self) {
     };
 
     self.renderFilterItems = function() {
+        var data = require('data');
+
         $(".facet-list").find("ul").empty();
 
-        TsaApplication.DataManager.facets.forEach(function(facet) {
+        data.facets.forEach(function(facet) {
             var filters = [];           // Default filters
             var filters2 = [];          // Non-default filters. Must click "Show more" to display.
             var counter = 0;
@@ -163,7 +161,7 @@ TsaApplication.UiHelper = (function (self) {
 
             // Bind checkbox check event for the default values
             filterElements.find("input:checkbox").on('change', function() {
-                TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
+                data.toggleFilter(this.dataset.facet, this.value);
             });
 
             if (!filters2.length){
@@ -174,7 +172,7 @@ TsaApplication.UiHelper = (function (self) {
 
                 // Bind checkbox check event for the non-default values
                 filterElements.find("input:checkbox").on('change', function() {
-                    TsaApplication.Search.toggleFilter(this.dataset.facet, this.value);
+                    data.toggleFilter(this.dataset.facet, this.value);
                 });
             }
         });
@@ -182,8 +180,9 @@ TsaApplication.UiHelper = (function (self) {
     };
 
     self.showDataseriesDialog = function(series) {
+        var visualization = require('visualization');
         var dialog = $('#InfoDialog');
-        var plottedSeries = TsaApplication.VisualizationController.plottedSeries;
+        var plottedSeries = visualization.plottedSeries;
         var isAlreadyPlotted = _(_(plottedSeries).pluck('seriesid')).contains(series.seriesid);
 
          $(".modal-header").find(".alert").remove();    // Clear previous download links
@@ -197,13 +196,14 @@ TsaApplication.UiHelper = (function (self) {
         });
 
         dialog.find("#btnAddToPlot").prop('disabled',
-            !TsaApplication.VisualizationController.canPlot() || isAlreadyPlotted);
+            !visualization.canPlot() || isAlreadyPlotted);
         dialog.modal('show');
     }
 
     self.updateTabsFilteredCount = function() {
-        var sitesCount = TsaApplication.Search.filteredSites.length;
-        var seriesCount = TsaApplication.Search.filteredDataseries.length;
+        var data = require('data');
+        var sitesCount = data.filteredSites.length;
+        var seriesCount = data.filteredDataseries.length;
         $("div#datasetsTab .badge").text(seriesCount);
         $("div#mapTab .badge").text(sitesCount);
     };
@@ -253,4 +253,4 @@ TsaApplication.UiHelper = (function (self) {
     });
 
 	return self;
-}(TsaApplication.UiHelper || {}));
+});
