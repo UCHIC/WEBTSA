@@ -135,7 +135,7 @@ define('data', ['jquery'], function() {
                     var index = 0;
                     var node;
 
-                    series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item().textContent;
+                    series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item(0).textContent;
                     while (node = values[index++]) {
                         var seriesData = {};
                         seriesData.date = node.getAttribute('dateTime').match(dateRegex).shift();
