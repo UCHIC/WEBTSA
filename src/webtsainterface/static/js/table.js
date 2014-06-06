@@ -78,22 +78,22 @@ define('table', ['datatablesLibraries'], function() {
                 { title: 'Date Last Updated', data: 'datelastupdated', name: 'datelastupdated' },
                 { title: 'Active', data: 'isactive', name: 'isactive', visible: false }
             ],
-            createdRow: function(row, data, dataIndex) {
+            createdRow: function(row, rowData, dataIndex) {
                 var tableRow = $(row);
 
                 var plotSeries = _(visualization.plottedSeries).union(visualization.unplottedSeries);
-                var selected = (_(plotSeries).findWhere({seriesid: data.seriesid}))? 'selected': '';
+                var selected = (_(plotSeries).findWhere({seriesid: rowData.seriesid}))? 'selected': '';
                 tableRow.addClass(selected);
 
 
                 tableRow.find('td:not(:first)').click(function(){
-                    var series = data;
+                    var series = rowData;
                     ui.showDataseriesDialog(series);
                 });
 
                 tableRow.find('input[type="checkbox"]').on('change', function() {
                     var tableTools = TableTools.fnGetInstance("datasetsTable");
-                    var series = data;
+                    var series = rowData;
 
                     if (this.checked) {
                         if (!visualization.canPlot()) {
@@ -157,9 +157,17 @@ define('table', ['datatablesLibraries'], function() {
     };
 
     self.uncheckSeries = function(id) {
-        var checkbox = $('#datasetsTable').find(':checkbox[data-seriesid="' + id + '"]');
-        checkbox.parent().parent().removeClass('selected');
-        checkbox.prop('checked', false);
+        var tableTools = TableTools.fnGetInstance("datasetsTable");
+        var selectedRows = tableTools.fnGetSelected();
+        var api = self.dataseriesTable.api();
+
+        selectedRows.forEach(function(row) {
+            var rowData = api.row(row).data();
+            if (rowData.seriesid === id) {
+                tableTools.fnDeselect(row);
+                $(row).find('input[type="checkbox"]').prop('checked', false);
+            }
+        });
     };
 
     function renderCheckbox(data, type) {
