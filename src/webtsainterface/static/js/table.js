@@ -18,7 +18,7 @@ define('table', ['datatablesLibraries'], function() {
         self.dataseriesTable = $('#datasetsTable').dataTable({
             data: data.dataseries,
             dom: 'TftiS',
-            //stateSave: true,
+            stateSave: true,
             deferRender: true,
             scrollCollapse: true,
             scrollY: ($('div#datasetsContent').height() - tableOffsetY),

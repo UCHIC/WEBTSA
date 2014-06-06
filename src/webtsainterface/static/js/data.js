@@ -135,9 +135,13 @@ define('data', ['jquery'], function() {
                     var index = 0;
                     var node;
 
+                    var verticalDatumNode = data.getElementsByTagName('verticalDatum').item(0);
+                    var elevationNode = data.getElementsByTagName('elevation_m').item(0);
+
                     series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item(0).textContent;
-                    series.dataset.verticalDatum = data.getElementsByTagName('verticalDatum').item(0).textContent;
-                    series.dataset.elevation = +data.getElementsByTagName('elevation_m').item(0).textContent;
+
+                    series.dataset.verticalDatum = verticalDatumNode && verticalDatumNode.textContent;
+                    series.dataset.elevation = elevationNode && +elevationNode.textContent;
 
                     while (node = values[index++]) {
                         var seriesData = {};

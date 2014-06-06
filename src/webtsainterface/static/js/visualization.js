@@ -473,6 +473,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
           .append("rect")
             .attr("width", width)
             .attr("height", height);
+
         var focus = svg.append("g")
              .attr("class", "focus")
              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -749,7 +750,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     });
             }
 
-
             // Update the axis properties
             if ( yAxisCount - 1 == 0)
                 axisProperties[2].xTranslate = - $("#yAxis-" + 0)[0].getBBox().width;
@@ -788,8 +788,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             var id = +this.dataset['seriesid'];
             self.unplotSeries(id);
         });
-
-        // Update xAxis ticks
 
         var seriesID = focus.selectAll(".seriesID")
             .data(data, function (d) {
