@@ -263,6 +263,15 @@ line.tick {
     margin-bottom: 0;
 }
 
+.facets-container .glyphicon{
+    color:#999;
+    left: -5px;
+}
+
+.facets-container .glyphicon:hover{
+    color:#555;
+}
+
 .panel-toolbar-left{
     float: left;
     height: 100%;

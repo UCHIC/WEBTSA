@@ -47,6 +47,7 @@ TsaApplication.UiHelper = (function (self) {
     self.facetsTemplate = _.template("<div class='panel panel-default'>\
         <div class='panel-heading'>\
             <h4 class='panel-title'>\
+                <span class='glyphicon glyphicon-unchecked'' title='Clear filter'></span>\
                 <a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#<%= facetid %>'>\
                     <%= facettitle %> \
                 </a>\
