@@ -11,10 +11,7 @@
     display: none;
 }
 
-/* --------------test -----------------------*/
-
 .seriesID {
-  fill: steelblue;
   clip-path: url(#clip);
 }
 
@@ -31,8 +28,6 @@
   shape-rendering: crispEdges;
 }
 
-
-/* --------------test -----------------------*/
 
 .clearfix:after {
     visibility: hidden;

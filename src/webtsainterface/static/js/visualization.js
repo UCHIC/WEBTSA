@@ -1105,6 +1105,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     graphs[i].numberOfBins = Math.max(graphs[i].numberOfBins, minTicks);
                     graphs[i].numberOfBins = Math.min(graphs[i].numberOfBins, maxTicks);
 
+                    // If this input does not produce a different number of bins in the graph, skip to the next iteration
                     if (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length){
                         continue;
                     }
@@ -1124,19 +1125,21 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                         .domain([ticks[0], ticks[ticks.length - 1]])
                         .range([0, width]);
                     graphs[i].data = d3.layout.histogram()
-                    .bins(ticks)
-                    (values[i]);
+                        .bins(ticks)(values[i]);
 
                     graphs[i].y.domain([0, d3.max(graphs[i].data, function (d) {return d.y;})]);
 
+                    // Bind new axis properties
                     graphs[i].xAxis.tickValues(ticks);
                     graphs[i].xAxis.tickFormat(d3.format(""));  // Empty format so it doesn't use its default format which rounds the numbers
                     graphs[i].xAxis.scale(graphs[i].x);
                     graphs[i].yAxis.scale(graphs[i].y);
 
+                    // Call axes
                     d3.select("#x-axis-" + i).call(graphs[i].xAxis);
                     d3.select("#y-axis-" + i).call(graphs[i].yAxis);
 
+                    // Append new graph
                     graphs[i].svg.selectAll(".bar").remove();
                     var bar = graphs[i].svg.selectAll(".bar")
                     .data(graphs[i].data)
@@ -1166,10 +1169,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             });
         }
 
-        // Set the first summary statistics by default
-        setSummaryStatistics(summary[0]);
-        // Highlight the first row
-        $('#legendContainer .list-group-item').removeClass("highlight");
+
+        setSummaryStatistics(summary[0]);                                               // Set the first summary statistics by default
+
+        $('#legendContainer .list-group-item').removeClass("highlight");                // Highlight the first row
         $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
 
         $('#legendContainer .list-group-item').click(function (e) {
@@ -1252,7 +1255,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 }
             }
 
-            min = min - (max - min) / 20;   //  Add a last tick so that the box doesn't appear on top of the x-axis
+            min = min - (max - min) / 20;   //  Add a last tick so that the box doesn't appear right on top of the x-axis
 
             // The y-axis
             var y = d3.scale.linear()
