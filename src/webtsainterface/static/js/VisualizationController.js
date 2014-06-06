@@ -966,6 +966,11 @@ TsaApplication.VisualizationController = (function (self) {
             ticks.unshift(ticks[0] - (ticksDelta));
             ticks.push(ticks[ticks.length - 1] + ticksDelta);
 
+            for(var x = 0; x < ticks.length; x++){
+                ticks[x] = parseFloat(ticks[x].toFixed(2))
+            }
+
+
             graph.x = d3.scale.linear()
                 .domain([ticks[0], ticks[ticks.length - 1]])
                 .range([0, width]);
@@ -1099,8 +1104,13 @@ TsaApplication.VisualizationController = (function (self) {
                     var ticks = graphs[i].x.ticks(graphs[i].numberOfBins);
                     var ticksDelta = ticks[1] - ticks[0];
 
-                    ticks.unshift(parseFloat((ticks[0] - ticksDelta).toFixed(2)));
-                    ticks.push(parseFloat((ticks[ticks.length - 1] + ticksDelta).toFixed(2)));
+                    ticks.unshift(ticks[0] - ticksDelta);
+                    ticks.push(ticks[ticks.length - 1] + ticksDelta);
+
+                    // Format the ticks to prevent a big chain of 0s
+                    for(var x = 0; x < ticks.length; x++){
+                        ticks[x] = parseFloat(ticks[x].toFixed(2))
+                    }
 
                     graphs[i].x = d3.scale.linear()
                         .domain([ticks[0], ticks[ticks.length - 1]])
