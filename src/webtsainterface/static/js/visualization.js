@@ -759,17 +759,20 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
             if (yAxisCount - 1 == 2)
                 axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
+
+            // If the graph contains less than 3 data points, append circles
+            if (data[i].values.length < 3){
+                focus.selectAll("circle.line")
+                .data(data[i]['values'])
+                .enter().append("svg:circle")
+                .attr("class", "line")
+                .style("fill", color(i))
+                .attr("cx", lines[i].x())
+                .attr("cy", lines[i].y())
+                .attr("r", 3.5);
+            }
         }
 
-        // Append circle points
-        /*focus.selectAll("circle.line")
-		    .data(data[0]['values'])
-		    .enter().append("svg:circle")
-		    .attr("class", "line")
-		    .style("fill", "green")
-		    .attr("cx", lines[0].x())
-		    .attr("cy", lines[0].y())
-		    .attr("r", 3.5);*/
 
         $('#legendContainer input[type="checkbox"]').click(function() {
             var that = this;
