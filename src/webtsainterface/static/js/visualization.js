@@ -1191,6 +1191,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
     }
 
     function drawBoxPlot(){
+        var ui = require('ui');
         var varNames = _(self.plottedSeries).pluck('variablename');
         var siteNames = _(self.plottedSeries).pluck('sitename');
         var siteCodes = _(self.plottedSeries).pluck('sitecode');
