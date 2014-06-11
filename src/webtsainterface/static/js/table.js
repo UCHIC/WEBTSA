@@ -117,8 +117,10 @@ define('table', ['datatablesLibraries'], function() {
         $.fn.dataTable.ColVis.fnRebuild();
         $(colvis.button()).appendTo('#tableButtons');
 
+        var reDraw = _.debounce(self.reDrawTable, 500);
+
         $(window).on('resize', function() {
-            _.debounce(self.reDrawTable, 500);
+            reDraw();
             if ($('.ColVis_collection').is(':visible')) {
                 $('.ColVis_catcher').click();
             }
