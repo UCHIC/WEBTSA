@@ -7,14 +7,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
     self.plotTypes = { histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot };
     self.currentPlot = self.plotTypes.multiseries;
-
     self.plotLimit = 5;
-
     self.doPlot = true;
     self.shouldPlot = false;
     self.plottedSeries = [];
     self.unplottedSeries = [];
-
     self.boxWhiskerSvgs = [];
     self.dateFirst;
     self.dateLast;
@@ -293,11 +290,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
         // If no dates are set, display the last month. Display the whole set if it contains less than 500 data points.
         if (self.dateFirst.date.valueOf() == now.valueOf() && self.dateLast.date.valueOf() == now.valueOf()) {
-
-
-
-
-
             // Mark the button of last month interval
             $("#dateIntervals button").removeClass("active");
             $("#btnLastMonth").addClass("active");
@@ -958,18 +950,44 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         }
     }
 
-    function onMouseOver(){
-        d3.select(this)
+    function onMouseOver(color){
+        return function(){
+            var lighterColor = increase_brightness(color, 30);
+            d3.select(this)
             .transition()
             .duration(50)
-            .attr('opacity', 0.7);
+            //.attr('opacity', 0.7);
+            .style('fill', lighterColor);
+        }
     }
 
-    function onMouseOut(){
-        d3.select(this)
+    function onMouseOut(color){
+        return function(){
+           d3.select(this)
             .transition()
             .duration(300)
-            .attr('opacity', 1);
+            .style('fill', color);
+            //.attr('opacity', 1);
+        }
+    }
+
+    function increase_brightness(hex, percent){
+        // strip the leading # if it's there
+        hex = hex.replace(/^\s*#|\s*$/g, '');
+
+        // convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
+        if(hex.length == 3){
+            hex = hex.replace(/(.)/g, '$1$1');
+        }
+
+        var r = parseInt(hex.substr(0, 2), 16),
+            g = parseInt(hex.substr(2, 2), 16),
+            b = parseInt(hex.substr(4, 2), 16);
+
+        return '#' +
+           ((0|(1<<8) + r + (256 - r) * percent / 100).toString(16)).substr(1) +
+           ((0|(1<<8) + g + (256 - g) * percent / 100).toString(16)).substr(1) +
+           ((0|(1<<8) + b + (256 - b) * percent / 100).toString(16)).substr(1);
     }
 
     function drawHistogram() {
@@ -1119,15 +1137,30 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 .attr("height", function (d) {
                         return graphHeight - graph.y(d.y);
                 })
-                .on("mouseover", onMouseOver)
-                .on("mouseout", onMouseOut);;
+                .on("mouseover", onMouseOver(colors(i)))
+                .on("mouseout", onMouseOut(colors(i)));
 
             bar.append("text")
                 .attr("dy", ".75em")
-                .attr("y", 6)
+                .attr("y", function(d){
+                    if (graphHeight - graph.y(d.y) > 16){
+                        return 6;
+                    }
+                    else{
+                        return -14;
+                    }
+                })
                 .attr("x", rectWidth / 2)
+                .attr("fill", function(d){
+                    if (graphHeight - graph.y(d.y) > 16){
+                        return "#fff";
+                    }
+                    else{
+                        return "#000";
+                    }
+                })
                 .attr("text-anchor", "middle")
-                .text(function(d) { return formatCount(d.y);});
+                 .text(function(d) { if (formatCount(d.y) != "0"){return formatCount(d.y);} });
 
             graph.svg.append("g")
                 .attr("class", "x axis")
@@ -1275,15 +1308,30 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                         .attr("height", function (d) {
                                 return graphHeight - graphs[i].y(d.y);
                         })
-                        .on("mouseover", onMouseOver)
-                        .on("mouseout", onMouseOut);
+                        .on("mouseover", onMouseOver(colors(i)))
+                        .on("mouseout", onMouseOut(colors(i)));
 
                     bar.append("text")
                         .attr("dy", ".75em")
-                        .attr("y", 6)
                         .attr("x", rectWidth / 2)
+                        .attr("y", function(d){
+                            if (graphHeight - graphs[i].y(d.y) > 16){
+                                return 6;
+                            }
+                            else{
+                                return -14;
+                            }
+                        })
                         .attr("text-anchor", "middle")
-                        .text(function(d) { return formatCount(d.y); });
+                        .attr("fill", function(d){
+                            if (graphHeight - graphs[i].y(d.y) > 16){
+                                return "#fff";
+                            }
+                            else{
+                                return "#000";
+                            }
+                        })
+                        .text(function(d) { if (formatCount(d.y) != "0"){return formatCount(d.y);} });
                 }
                 while (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length && graphs[i].numberOfBins > minTicks && graphs[i].numberOfBins < maxTicks);
             });
