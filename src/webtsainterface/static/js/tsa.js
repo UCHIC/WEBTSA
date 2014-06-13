@@ -29,6 +29,13 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
     function bindEvents() {
         $(document).on('facetsloaded', function() {
             self.ui.renderFacets($("#leftPanel .facets-container"));
+            $('.clear-filter').click(function() {
+                if (!this.dataset.facet) {
+                    return;
+                }
+                var facet = _(self.data.facets).findWhere({ keyfield: this.dataset.facet });
+                self.data.clearFacetFilters(facet);
+            });
         });
 
         $(document).on('dataloaded', function() {
@@ -89,6 +96,12 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 self.visualization.plotSeries();
             }
             self.visualization.doPlot = true;
+        });
+
+        $('#btnClearAllFilters').click(function() {
+            self.data.facets.forEach(function(facet) {
+                self.data.clearFacetFilters(facet);
+            });
         });
 
         $("#btnAddToPlot").click(function() {

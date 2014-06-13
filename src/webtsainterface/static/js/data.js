@@ -67,6 +67,7 @@ define('data', ['jquery'], function() {
         updateFilteredData(facet);
     };
 
+
     self.clearFacetFilters = function(facet) {
        self.selectOnlyFilter(facet);
     };

@@ -47,6 +47,10 @@
     height:100%;
 }
 
+.clear-filter, #btnClearAllFilters {
+    cursor: pointer;
+}
+
 .site-infowindow {
     padding-left: 10px;
     padding-bottom: 10px;

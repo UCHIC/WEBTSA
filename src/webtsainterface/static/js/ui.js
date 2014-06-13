@@ -42,7 +42,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     self.facetsTemplate = _.template("<div class='panel panel-default'>\
         <div class='panel-heading'>\
             <h4 class='panel-title'>\
-                <span class='glyphicon glyphicon-unchecked'' title='Clear filter'></span>\
+                <span class='clear-filter glyphicon glyphicon-remove-circle' data-facet='<%= facetid %>' title='Clear filter'></span>\
                 <a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#<%= facetid %>'>\
                     <%= facettitle %> \
                 </a>\
