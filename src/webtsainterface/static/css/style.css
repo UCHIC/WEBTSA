@@ -7,6 +7,10 @@
     overflow:auto;
 }
 
+.grid path {
+    stroke-width: 0;
+}
+
 #transparentPixel {
     display: none;
 }
@@ -187,14 +191,6 @@ button span{
     stroke-width: 1;
     stroke: black;
     stroke-opacity: 0.8;
-}
-
-.bar:hover{
-    opacity:0.7;
-}
-
-.bar text {
-  fill: #fff;
 }
 
 line.tick {
