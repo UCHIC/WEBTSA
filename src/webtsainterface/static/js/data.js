@@ -137,9 +137,9 @@ define('data', ['jquery'], function() {
 
                     var verticalDatumNode = data.getElementsByTagName('verticalDatum').item(0);
                     var elevationNode = data.getElementsByTagName('elevation_m').item(0);
+                    var noDataValueNode = data.getElementsByTagName('noDataValue').item(0);
 
-                    series.dataset.noDataValue = +data.getElementsByTagName('noDataValue').item(0).textContent;
-
+                    series.dataset.noDataValue = noDataValueNode && +noDataValueNode.textContent;
                     series.dataset.verticalDatum = verticalDatumNode && verticalDatumNode.textContent;
                     series.dataset.elevation = elevationNode && +elevationNode.textContent;
 

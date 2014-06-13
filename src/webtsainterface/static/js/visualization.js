@@ -291,8 +291,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var nowTemp = new Date();
         var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
-        // If no dates are set, display the last month
+        // If no dates are set, display the last month. Display the whole set if it contains less than 500 data points.
         if (self.dateFirst.date.valueOf() == now.valueOf() && self.dateLast.date.valueOf() == now.valueOf()) {
+
+
+
+
+
             // Mark the button of last month interval
             $("#dateIntervals button").removeClass("active");
             $("#btnLastMonth").addClass("active");
@@ -513,20 +518,29 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         // This loop builds and draws each time series
         for (var i = 0; i < datasets.length; i++) {
             // y-coordinate for the graph
-            y[i] = d3.scale.linear()
-                .domain([d3.min(data, function (d) {
+            var domainMin = d3.min(data, function (d) {
                     if (d.key == i) {
                         return d3.min(d.values, function (d) {
                             return d.val;
                         });
                     }
-                }), d3.max(data, function (d) {
+                });
+            var domainMax = d3.max(data, function (d) {
                     if (d.key == i) {
                         return d3.max(d.values, function (d) {
                             return d.val;
                         });
                     }
-                })])
+                });
+
+            if (domainMin == domainMax){
+                var delta = (domainMin + 1) / 10;
+                domainMin -= delta;
+                domainMax += delta;
+            }
+
+            y[i] = d3.scale.linear()
+                .domain([domainMin, domainMax])
                 .range([height, 0]);
 
             // y-coordinate for the context view
@@ -760,8 +774,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             if (yAxisCount - 1 == 2)
                 axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
 
-            // If the graph contains less than 3 data points, append circles
-            if (data[i].values.length < 3){
+            // If the graph contains less than 2 data points, append circles
+            if (data[i].values.length < 2){
                 focus.selectAll("circle.line")
                 .data(data[i]['values'])
                 .enter().append("svg:circle")
@@ -769,6 +783,15 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 .style("fill", color(i))
                 .attr("cx", lines[i].x())
                 .attr("cy", lines[i].y())
+                .attr("r", 3.5);
+
+                context.selectAll("circle.line")
+                .data(data[i]['values'])
+                .enter().append("svg:circle")
+                .attr("class", "line")
+                .style("fill", color(i))
+                .attr("cx", lines2[i].x())
+                .attr("cy", lines2[i].y())
                 .attr("r", 3.5);
             }
         }
@@ -816,8 +839,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             .attr("class", "seriesID2");
 
          var brush = d3.svg.brush()
-        .x(x2)
-        .on("brush", brushed);
+            .x(x2)
+            .on("brush", brushed);
 
         context.append("g")
           .attr("class", "x brush")
@@ -827,6 +850,17 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
           .attr("height", height2+7);
 
         function pathClickHandler (d){
+            var id = 0;
+            var varName = varNames[this.parentElement.getAttribute("data-id")];
+            var varUnit = varUnits[this.parentElement.getAttribute("data-id")];
+            for (var x = 0; x < varNames.length; x++){
+                if (varName == varNames[x] && varUnit == varUnits[x]){
+                    id = x;
+                    break;
+                }
+            }
+
+            d3.selectAll(".grid").remove();     // Clear all grid lines
             if(d3.select(this).style("stroke-width") == "2.5px"){
                 d3.select(this)
                    .style("stroke-width", 1.5);
@@ -835,9 +869,21 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 svg.selectAll(".line").style("stroke-width", 1.5)
                 d3.select(this).style("stroke-width", 2.5);
                 d3.select(this.parentElement).moveToFront();
+
+                // Draw new grid lines
+                var gridAxis = d3.svg.axis()
+                    .scale(y[id])
+                    .orient("left")
+                    .tickSize(-width, 0, 0)
+                    .tickFormat("");
+
+                focus.insert("g", ":first-child")
+                .attr("class", "grid")
+                .style({ 'stroke':  'lightgray', 'stroke-width': '1.5px'})
+                .call(gridAxis);
             }
 
-             $('#legendContainer .list-group-item').removeClass("highlight");
+            $('#legendContainer .list-group-item').removeClass("highlight");
 
             $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]').addClass("highlight");
             setSummaryStatistics(summary[this.parentElement.getAttribute("data-id")]);
@@ -885,12 +931,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             var id = that.getAttribute("data-id");
 
             if (that.className != "list-group-item"){
-                var path = d3.select("#path" + that.getAttribute("data-id") + " path");
+                var path = d3.select("#path" + id + " path");
                 path.each(pathClickHandler);
             }
 
             if (that.className == "list-group-item"){
                 $('#legendContainer .list-group-item').removeClass("highlight");
+                d3.selectAll(".grid").remove();
                 this.className="list-group-item highlight"
 
                 svg.selectAll(".line")
@@ -906,8 +953,23 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
           focus.selectAll(".seriesID")
             .selectAll("path")
             .attr("d", function(d) {return lines[d.key](d.values); });
+
           focus.select(".x.axis").call(xAxis);
         }
+    }
+
+    function onMouseOver(){
+        d3.select(this)
+            .transition()
+            .duration(50)
+            .attr('opacity', 0.7);
+    }
+
+    function onMouseOut(){
+        d3.select(this)
+            .transition()
+            .duration(300)
+            .attr('opacity', 1);
     }
 
     function drawHistogram() {
@@ -965,8 +1027,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 continue;
             }
 
+            // domain can't be closed on a single value
+            if (domainMin == domainMax){
+                if (domainMin == 0){
+                    domainMax = 1;
+                }
+                else{
+                    domainMax += domainMin / 10;
+                }
+            }
+
             graph.x = d3.scale.linear()
-                .domain([domainMin, Math.max(domainMin + 1, domainMax)])// domain can't be [0,0]
+                .domain([domainMin, domainMax])
                 .range([0, width]);
 
             var ticks = graph.x.ticks(20);
@@ -978,7 +1050,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             for(var x = 0; x < ticks.length; x++){
                 ticks[x] = parseFloat(ticks[x].toFixed(2))
             }
-
 
             graph.x = d3.scale.linear()
                 .domain([ticks[0], ticks[ticks.length - 1]])
@@ -996,6 +1067,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             graph.xAxis = d3.svg.axis()
                 .scale(graph.x)
                 .tickValues(ticks)
+                .tickFormat(d3.format(""))
                 .orient("bottom");
 
             graph.yAxis = d3.svg.axis()
@@ -1035,10 +1107,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 .attr("x", 1)
                 .attr("width", graph.x(graph.data[1].dx + ticks[0]) - 2)
                 .style("fill", colors(i))
-                .style("opacity", 1)
                 .attr("height", function (d) {
                         return graphHeight - graph.y(d.y);
-                });
+                })
+                .on("mouseover", onMouseOver)
+                .on("mouseout", onMouseOut);;
 
             bar.append("text")
                 .attr("dy", ".75em")
@@ -1069,6 +1142,19 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
               .attr("x", -(graphHeight + margin.bottom) / 2)
               .attr("y", -50)
               .text("Data points");
+
+             // Draw grid lines
+            var gridAxis = d3.svg.axis()
+                .scale(graph.y)
+                .orient("left")
+                .tickSize(-width, 0, 0)
+                .tickFormat("");
+
+            //graph.svg.selectAll(".grid").remove();
+            graph.svg.insert("g", ":first-child")
+                .attr("class", "grid")
+                .style({ 'stroke':  'lightgray', 'stroke-width': '1.5px'})
+                .call(gridAxis);
 
             graphs.push(graph);
 
@@ -1140,6 +1226,20 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     d3.select("#x-axis-" + i).call(graphs[i].xAxis);
                     d3.select("#y-axis-" + i).call(graphs[i].yAxis);
 
+                    // Draw new grid lines
+                     var gridAxis = d3.svg.axis()
+                        .scale(graphs[i].y)
+                        .orient("left")
+                        .tickSize(-width, 0, 0)
+                        .tickFormat("")
+                         .ticks(numOfTicks);
+
+                    graphs[i].svg.selectAll(".grid").remove();
+                    graphs[i].svg.insert("g", ":first-child")
+                        .attr("class", "grid")
+                        .style({ 'stroke':  'lightgray', 'stroke-width': '1.5px'})
+                        .call(gridAxis);
+
                     // Append new graph
                     graphs[i].svg.selectAll(".bar").remove();
                     var bar = graphs[i].svg.selectAll(".bar")
@@ -1150,14 +1250,23 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                         return "translate(" + graphs[i].x(d.x) + "," + graphs[i].y(d.y) + ")";
                     });
 
+                    var rectWidth = 0;
+                    for (var x = 0; x < graphs[i].data.length;x++){
+                        if (graphs[i].data[x].length != 0){
+                            rectWidth = graphs[i].x(graphs[i].data[x].dx + ticks[0]) - 2;
+                            break;
+                        }
+                    }
+
                     bar.append("rect")
                         .attr("x", 1)
-                        .attr("width", graphs[i].x(graphs[i].data[1].dx + ticks[0]) - 2)
+                        .attr("width", rectWidth)
                         .style("fill", colors(i))
-                        .style("opacity", 1)
                         .attr("height", function (d) {
                                 return graphHeight - graphs[i].y(d.y);
-                        });
+                        })
+                        .on("mouseover", onMouseOver)
+                        .on("mouseout", onMouseOut);
 
                     bar.append("text")
                         .attr("dy", ".75em")
