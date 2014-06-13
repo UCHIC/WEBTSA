@@ -1103,9 +1103,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     div.transition().duration(500).style("opacity", 0);
                 });
 */
+
+            var rectWidth = 0;
+            for (var x = 0; x < graph.data.length;x++){
+                if (graph.data[x].length != 0){
+                    rectWidth = graph.x(graph.data[x].dx + ticks[0]) - 2;
+                    break;
+                }
+            }
+
             bar.append("rect")
                 .attr("x", 1)
-                .attr("width", graph.x(graph.data[1].dx + ticks[0]) - 2)
+                .attr("width", rectWidth)
                 .style("fill", colors(i))
                 .attr("height", function (d) {
                         return graphHeight - graph.y(d.y);
@@ -1116,7 +1125,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             bar.append("text")
                 .attr("dy", ".75em")
                 .attr("y", 6)
-                .attr("x", graph.x(graph.data[0].dx + ticks[0]) / 2)
+                .attr("x", rectWidth / 2)
                 .attr("text-anchor", "middle")
                 .text(function(d) { return formatCount(d.y);});
 
@@ -1242,6 +1251,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
                     // Append new graph
                     graphs[i].svg.selectAll(".bar").remove();
+
                     var bar = graphs[i].svg.selectAll(".bar")
                     .data(graphs[i].data)
                     .enter().append("g")
@@ -1271,7 +1281,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     bar.append("text")
                         .attr("dy", ".75em")
                         .attr("y", 6)
-                        .attr("x", graphs[i].x(graphs[i].data[0].dx + graphs[i].x.domain()[0]) / 2)
+                        .attr("x", rectWidth / 2)
                         .attr("text-anchor", "middle")
                         .text(function(d) { return formatCount(d.y); });
                 }
