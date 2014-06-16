@@ -689,35 +689,26 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
             if (chosenYAxes.length > 1){
                 var usedAxis = Math.min.apply(null, chosenYAxes);   // select the first axis created for this variable
+
+                var domain = [Infinity, -Infinity];
+
+                domain = [Math.min(domain[0], d3.min(data, function (d) {
+                    if (jQuery.inArray( parseInt(d.key), chosenYAxes ) != -1) {
+                        return d3.min(d.values, function (d) {
+                            return d.val;
+                        });
+                    }
+                    })), Math.max(domain[1], d3.max(data, function (d) {
+                        if (jQuery.inArray( parseInt(d.key), chosenYAxes ) != -1) {
+                            return d3.max(d.values, function (d) {
+                                return d.val;
+                            });
+                        }
+                    }))];
+
                 // update previous axis
-                y[usedAxis].domain([d3.min(data, function (d) {
-                    if (d.key in chosenYAxis) {
-                        return d3.min(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                    }), d3.max(data, function (d) {
-                        if (d.key in chosenYAxes) {
-                            return d3.max(d.values, function (d) {
-                                return d.val;
-                            });
-                        }
-                    })]
-                );
-                y2[usedAxis].domain([d3.min(data, function (d) {
-                    if (d.key in chosenYAxes) {
-                        return d3.min(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                    }), d3.max(data, function (d) {
-                        if (d.key in chosenYAxes) {
-                            return d3.max(d.values, function (d) {
-                                return d.val;
-                            });
-                        }
-                    })]
-                );
+                y[usedAxis].domain(domain);
+                y2[usedAxis].domain(domain);
 
                 // Use a previous axis
                 $("#yAxis-" + usedAxis).attr("style", "fill: #000");
@@ -908,15 +899,21 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             d3.select(this.parentElement).moveToFront();
             d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
 
-            focus.selectAll(".seriesID")[0].forEach(function(path){
-                if (path.getAttribute("opacity") == "0.5"){
-                    path.setAttribute("opacity", "1");
-                    flag = false;
-                }
-                else{
-                    path.setAttribute("opacity", "0.5");
-                }
-            });
+
+            if (this.parentElement.getAttribute("opacity") == "0.5"){
+                focus.selectAll(".seriesID").attr("opacity", "0.5");
+            }
+            else{
+                focus.selectAll(".seriesID")[0].forEach(function(path){
+                    if (path.getAttribute("opacity") == "0.5"){
+                        path.setAttribute("opacity", "1");
+                        flag = false;
+                    }
+                    else{
+                        path.setAttribute("opacity", "0.5");
+                    }
+                });
+            }
 
             this.parentElement.setAttribute("opacity", "1");
 
@@ -928,7 +925,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             }
 
             $('#legendContainer .list-group-item').removeClass("highlight");
-            $('#legendContainer .list-group-item[data-id="'+ id +'"]').addClass("highlight");
+            $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]').addClass("highlight");
             setSummaryStatistics(summary[id]);
         }
 
