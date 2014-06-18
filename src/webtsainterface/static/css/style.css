@@ -390,6 +390,7 @@ line.tick {
 #btnExport{
     width:auto;
     float:right;
+    top: 0px;
 }
 
 .tab-content{

@@ -417,7 +417,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
-        var axisMargin = 60;
         var numOfYAxes = varNames.length;
 
         // Iterate the datasets and see which ones share y-axes

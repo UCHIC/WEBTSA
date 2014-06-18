@@ -173,7 +173,8 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             var id = +dialog.get(0).dataset['series'];
             var series = _(self.data.dataseries).where({seriesid: id}).pop();
 
-            var csvContent = "data:text/csv;charset=utf-8,";
+            var csvContent = "data:text/csv;charset=utf8,";
+
 
             // Append dataset values once the dataset is loaded
             series.loadDataset(function() {
@@ -266,12 +267,13 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                                 + data['censorCode'] + "\n";
                 });
 
-                // Encode the string to avoid escape characters
-                var encodedUri = encodeURI(csvContent);
                 var filename = series.sitecode + " - " + series.variablename + ".csv";
 
                 // Set HTML5 download
-                link.setAttribute("href", encodedUri);
+                var blob = new Blob(["\ufeff", csvContent]);
+                var url = URL.createObjectURL(blob);
+
+                link.setAttribute("href", url);
                 link.setAttribute("download", filename);
                 link.className = "glyphicon glyphicon-file";
                 link.innerHTML = " <span class='container-title'>" + filename + "</span>";
