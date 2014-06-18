@@ -86,7 +86,20 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
         <button data-sitecode='<%= sitecode %>' class='btnViewSeries'>View Dataseries</button>\
     </section>");
 
-    self.renderFacets = function(parent){
+    self.legendTemplate = _.template("<section id='mapLegend'>\
+        <header>\
+            <h4>Legend</h4>\
+            <span class='glyphicon glyphicon-info-sign'></span>\
+        </header>\
+        <ul class='legendItems'></ul>\
+    </section>");
+
+    self.legendItemTemplate = _.template("<li>\
+        <span class='legendIcon <%= cssClass %>'></span>\
+        <span class='legendText'><%= title %></span>\
+    </li>");
+
+    self.renderFacets = function(parent) {
         var data = require('data');
         var facets = [];
         var facetsHtml;

@@ -59,6 +59,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         $(document).on('sitesloaded', function() {
             self.map.loadMarkers();
+            self.map.renderLegend();
         });
 
         $(document).on('plotdataloading', function() {

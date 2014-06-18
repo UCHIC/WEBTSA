@@ -49,6 +49,26 @@ define('map', ['mapLibraries'], function() {
         });
     };
 
+    self.renderLegend = function() {
+        var ui = require('ui');
+        var data = require('data');
+
+        var legendElement = $(ui.legendTemplate());
+        var legendItems = [];
+
+        var uniqueNetworks = _(data.sites).uniq(function(site) { return site.sourcedataserviceid; });
+        var networkIds = _(uniqueNetworks).pluck('sourcedataserviceid');
+
+        networkIds.forEach(function(networkId) {
+            var markerManager = markersManagers[networkId];
+            var itemSettings = { cssClass: markerManager.cssClass, title: markerManager.getTitle() };
+            legendItems.push(ui.legendItemTemplate(itemSettings));
+        });
+
+        legendElement.find('ul.legendItems').append($(legendItems.join('')));
+        self.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legendElement.get(0));
+    };
+
     self.updateSitesMarkers = function() {
         var data = require('data');
         for (var property in markersManagers) {
@@ -76,37 +96,37 @@ define('map', ['mapLibraries'], function() {
         var networks = _.object(networkIds, networkNames);
 
         networkIds.forEach(function(networkId) {
-            var networkMarkersManager = new MarkerClusterer(self.map);
+            var clusterer = new MarkerClusterer(self.map);
             var cssClass = ui.generateClusterClass(networkId);
-            networkMarkersManager.setIgnoreHidden(true);
-            networkMarkersManager.setMinimumClusterSize(4);
-            networkMarkersManager.setClusterClass(networkMarkersManager.getClusterClass() + " " + cssClass);
-            networkMarkersManager.setStyles([{
+            clusterer.cssClass = cssClass;
+            clusterer.setIgnoreHidden(true);
+            clusterer.setMinimumClusterSize(4);
+            clusterer.setClusterClass(clusterer.getClusterClass() + " " + cssClass);
+            clusterer.setStyles([{
                 url: document.getElementById('transparentPixel').src,
                 width: 30, height: 30, textSize: 12, anchorText: [0, -1],
                 fontFamily: '"HelveticaNeue-Light", "Helvetica Neue Light",\
                     "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif'
             }]);
 
-            networkMarkersManager.setCalculator(function (markers) {
+            clusterer.setTitle(networks[networkId]);
+            clusterer.setCalculator(function (markers) {
               return { text: markers.length.toString(), index: 1, title: networks[networkId] };
             });
 
             ui.addColorToClass(cssClass, getMarkerColorMapping(networkId));
-            markersManagers[networkId] = networkMarkersManager;
+            markersManagers[networkId] = clusterer;
         });
     }
 
     function createMarker(site) {
         var color = getMarkerColorMapping(site.sourcedataserviceid).hex;
         var pinImage = new google.maps.MarkerImage('https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%20|' + color);
-        var marker = new google.maps.Marker({
+        return new google.maps.Marker({
             title: site.sitename,
             position: new google.maps.LatLng(site.latitude, site.longitude),
             icon: pinImage
         });
-
-        return marker;
     }
 
     function removeInfoWindows() {
