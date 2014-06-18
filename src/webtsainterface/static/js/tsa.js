@@ -259,9 +259,9 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
                 // Append property values
                 series.dataset.forEach(function(data){
-                     csvContent +=data['date'] + ", "
-                                + data['timeOffset']+ ", "
-                                + data['dateTimeUTC'] + ", "
+                     csvContent += data['date'].replace("T", " ") + ", "
+                                + data['timeOffset'] + ", "
+                                + data['dateTimeUTC'].replace("T", " ") + ", "
                                 + data['value'] + ", "
                                 + data['censorCode'] + "\n";
                 });

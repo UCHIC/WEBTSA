@@ -100,7 +100,9 @@
   shape-rendering: crispEdges;
 }
 
-.focus .seriesID {cursor: pointer}
+.focus .seriesID {
+    cursor: pointer
+}
 
 .line {
   fill: none;

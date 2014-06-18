@@ -436,11 +436,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             }
         }
 
-        var margin = {top: 20, right: 30 + (Math.floor(numOfYAxes / 2)) * axisMargin, bottom:100, left: Math.max(50, (Math.ceil(numOfYAxes / 2)) * axisMargin)},
-            width = $("#graphContainer").width() - margin.left - margin.right,
+        var margin = {top: 20, right: 20, bottom:100, left: 10},
+            width = $("#graphContainer").width();
             height = $("#graphContainer").height() - margin.top - margin.bottom,
             margin2 = {top: height + 63, right: margin.right, bottom: 20, left: margin.left},
-            width2 = $("#graphContainer").width() - margin2.left - margin2.right,
             height2 = 30;
 
         var yAxisCount = 0;     // Counter to keep track of y-axises as we place them
@@ -473,8 +472,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             return d.seriesID;
         }).entries(data);
 
-        var x = d3.time.scale()
-            .domain([d3.min(data, function (d) {
+        var domain = [d3.min(data, function (d) {
                 return d3.min(d.values, function (d) {
                     return d.date;
                 });
@@ -483,22 +481,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     return d3.max(d.values, function (d) {
                         return d.date;
                     });
-                })])
+                })];
+
+        var x = d3.time.scale()
+            .domain(domain)
             .range([0, width])
             .nice(d3.time.day);
 
         var x2 = d3.time.scale()
-            .domain([d3.min(data, function (d) {
-                return d3.min(d.values, function (d) {
-                    return d.date;
-                });
-            }),
-                d3.max(data, function (d) {
-                    return d3.max(d.values, function (d) {
-                        return d.date;
-                    });
-                })])
-            .range([0, width2])
+            .domain(domain)
+            .range([0, width])
             .nice(d3.time.day);
 
         var color = d3.scale.category10()
@@ -512,52 +504,21 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var lines = new Array(data.length);
         var lines2 = new Array(data.length);
 
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(Math.max(1,(width - data.length * 51)/ 60))      // Don't even...
-            .orient("bottom");
-
-        var xAxis2 = d3.svg.axis()
-            .scale(x2)
-            .ticks((width2 - 60) / 60)
-            .orient("bottom");
-
         var svg = d3.select("#graphContainer").append("svg")
-            .attr("width", width + margin.left + margin.right)
+            .attr("width", $("#graphContainer").width())
             .attr("height", height + margin.top + margin.bottom);
-
-        svg.append("defs").append("clipPath")
-            .attr("id", "clip")
-          .append("rect")
-            .attr("width", width)
-            .attr("height", height);
 
         var focus = svg.append("g")
              .attr("class", "focus")
-             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("width", $("#graphContainer").width())
+            .attr("height", height + margin.top + margin.bottom);
+             //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var context = svg.append("g")
-        .attr("class", "context")
-        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-
-        focus.append("g")
-            .attr("class", "x axis")
-            //.attr("width", width  - margin.left - margin.right)
-            .attr("transform", "translate(0," + (height) + ")")
-            .call(xAxis)
-        .append("text")
-          .style("text-anchor", "end")
-          .attr("x", width/2)
-          .attr("y", 35)
-          .text("Date");
-
-
-        context.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + (height2) + ")")
-            .call(xAxis2)
+            .attr("class", "context");
 
         var offset = 0;     // offset for the data array when a dataset is empty
+
         // Append legend
         for (var i = 0; i < self.plottedSeries.length; i++){
             $("#legendContainer ul").append(
@@ -598,25 +559,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
             // y-coordinate for the context view
             y2[i] = d3.scale.linear()
-                .domain([d3.min(data, function (d) {
-                    if (d.key == i) {
-                        return d3.min(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                }), d3.max(data, function (d) {
-                    if (d.key == i) {
-                        return d3.max(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                })])
+                .domain([domainMin, domainMax])
                 .range([height2, 0]);
 
             yAxis[i] = d3.svg.axis()
                 .scale(y[i])
                 //.tickFormat(d3.format(".2f"))
-
 
             if (datasets[i].length == 0){
                 offset++;
@@ -689,7 +637,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
             if (chosenYAxes.length > 1){
                 var usedAxis = Math.min.apply(null, chosenYAxes);   // select the first axis created for this variable
-
                 var domain = [Infinity, -Infinity];
 
                 domain = [Math.min(domain[0], d3.min(data, function (d) {
@@ -706,11 +653,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                         }
                     }))];
 
-                // update previous axis
+                // update previous axis and use it
                 y[usedAxis].domain(domain);
                 y2[usedAxis].domain(domain);
-
-                // Use a previous axis
                 $("#yAxis-" + usedAxis).attr("style", "fill: #000");
                 focus.select("#yAxis-" + usedAxis).call(yAxis[usedAxis]);
 
@@ -745,7 +690,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     .call(yAxis[i])
                     .append("text")
                         .attr("transform", "rotate(-90)")
-                        .attr("y", (getAxisSeparation(i) + 22) * axisProperties[yAxisCount].textdistance)
                         .style("text-anchor", "end")
                         .style("font-size", "14px")
                         .attr("dy", ".71em")
@@ -760,6 +704,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                         textHeight = $(".y.axis[data-id='" + i +"'] > text").text().length * 6.5;
                     }
                     text.attr("x", -(axisHeight - textHeight)/2);
+                    text.attr("y", (getAxisSeparation(i) + 22) * axisProperties[yAxisCount].textdistance)   ;
                     yAxisCount++;
 
                 lines[i] = d3.svg.line()
@@ -783,14 +728,27 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             }
 
             // Update the axis properties
-            if ( yAxisCount - 1 == 0)
+            if ( yAxisCount - 1 == 0){
                 axisProperties[2].xTranslate = - $("#yAxis-" + 0)[0].getBBox().width;
-
-            if (yAxisCount - 1 == 1)
+                margin.left += $("#yAxis-" + 0)[0].getBBox().width;
+            }
+            else if (yAxisCount - 1 == 1){
                 axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-"+ 1)[0].getBBox().width;
-
-            if (yAxisCount - 1 == 2)
+                margin.right += $("#yAxis-"+ 1)[0].getBBox().width;
+            }
+            else if (yAxisCount - 1 == 2){
                 axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
+                margin.left += $("#yAxis-"+ 2)[0].getBBox().width;
+            }
+            else if (yAxisCount - 1 == 3){
+                margin.right += $("#yAxis-"+ 3)[0].getBBox().width;
+            }
+            else if (yAxisCount - 1 == 4){
+                margin.left += $("#yAxis-"+ 4)[0].getBBox().width;
+            }
+
+            focus.attr("transform", "translate(" +  margin.left + "," + margin.top + ")")
+                .attr("width", $("#graphContainer").width() - margin.left - margin.right);
 
             // If the graph contains less than 2 data points, append circles
             if (data[i].values.length < 2){
@@ -813,6 +771,52 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 .attr("r", 3.5);
             }
         }
+
+        // Append x axis
+        width = $("#graphContainer").width() - margin.left - margin.right;
+
+        axisProperties[1].xTranslate  = width;
+        axisProperties[3].xTranslate  = width + 65;
+
+        context.attr("transform", "translate(" + margin.left + "," + margin2.top + ")")
+
+        d3.select("#yAxis-1").attr("transform", "translate(" + (axisProperties[1].xTranslate) + " ,0)")
+        d3.select("#yAxis-3").attr("transform", "translate(" + (axisProperties[3].xTranslate) + " ,0)")
+
+        x.range([0, width]);
+        x2.range([0, width]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .ticks(Math.max(1,(width - data.length * 51)/ 60))      // Don't even...
+            .orient("bottom");
+
+        var xAxis2 = d3.svg.axis()
+            .scale(x2)
+            .ticks(Math.max(1,(width - data.length * 51)/ 60))
+            .orient("bottom");
+
+        focus.append("g")
+            .attr("class", "x axis")
+            //.attr("width", width  - margin.left - margin.right)
+            .attr("transform", "translate(0," + (height) + ")")
+            .call(xAxis)
+            .append("text")
+              .style("text-anchor", "end")
+              .attr("x", width/2)
+              .attr("y", 35)
+              .text("Date");
+
+        context.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + (height2) + ")")
+            .call(xAxis2);
+
+        svg.append("defs").append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+                .attr("width", width)
+                .attr("height", height);
 
 
         $('#legendContainer input[type="checkbox"]').click(function() {
@@ -893,31 +897,44 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
             var flag = true;
 
-            d3.selectAll(".grid").remove();
-            d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
-
             d3.select(this.parentElement).moveToFront();
             d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
-
 
             if (this.parentElement.getAttribute("opacity") == "0.5"){
                 focus.selectAll(".seriesID").attr("opacity", "0.5");
             }
             else{
-                focus.selectAll(".seriesID")[0].forEach(function(path){
-                    if (path.getAttribute("opacity") == "0.5"){
-                        path.setAttribute("opacity", "1");
+                var paths = focus.selectAll(".seriesID")[0];
+
+                if (paths.length > 1){
+                      paths.forEach(function(path){
+                        if (path.getAttribute("opacity") == "0.5"){
+                            path.setAttribute("opacity", "1");
+                            flag = false;
+                        }
+                        else{
+                            path.setAttribute("opacity", "0.5");
+                        }
+                    });
+                }
+                else{
+                    if (focus.selectAll(".grid")[0].length){
+                        d3.selectAll(".grid").remove();
+                        d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
                         flag = false;
                     }
                     else{
-                        path.setAttribute("opacity", "0.5");
+                        d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
+                        paintGridAxis(id);
                     }
-                });
+                }
             }
 
             this.parentElement.setAttribute("opacity", "1");
 
             if (flag){
+                d3.selectAll(".grid").remove();
+            d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
                 paintGridAxis(id);
             }
             else{
