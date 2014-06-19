@@ -899,6 +899,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             d3.select(this.parentElement).moveToFront();
             d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
 
+
+
             if (this.parentElement.getAttribute("opacity") == "0.5"){
                 focus.selectAll(".seriesID").attr("opacity", "0.5");
             }
@@ -930,10 +932,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             }
 
             this.parentElement.setAttribute("opacity", "1");
+            d3.selectAll(".grid").remove();
+            d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
 
             if (flag){
-                d3.selectAll(".grid").remove();
-            d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
+                d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
                 paintGridAxis(id);
             }
             else{
