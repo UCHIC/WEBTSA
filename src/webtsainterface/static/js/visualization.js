@@ -653,10 +653,17 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     }))];
 
                 // update previous axis and use it
-                y[usedAxis].domain(domain);
-                y2[usedAxis].domain(domain);
-                $("#yAxis-" + usedAxis).attr("style", "fill: #000");
-                focus.select("#yAxis-" + usedAxis).call(yAxis[usedAxis]);
+                y[i] = d3.scale.linear()
+                    .domain(domain)
+                    .range([height, 0]);
+
+                // y-coordinate for the context view
+                y2[i] = d3.scale.linear()
+                    .domain(domain)
+                    .range([height2, 0]);
+
+                $(".y.axis[data-id='" + usedAxis + "']").attr("style", "fill: #000");
+                focus.select(".y.axis[data-id='" + usedAxis + "']").call(yAxis[usedAxis]);
 
                 lines[i] = d3.svg.line()
                     .x(function (d) {
@@ -664,7 +671,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     })
                     .y(
                     function (d) {
-                        return y[usedAxis](d.val);
+                        return y[d.seriesID](d.val);
                     });
 
                 lines2[i] = d3.svg.line()
@@ -674,7 +681,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     })
                     .y(
                     function (d) {
-                        return y2[usedAxis](d.val);
+                        return y2[d.seriesID](d.val);
                     });
             }
             else{
@@ -707,13 +714,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     yAxisCount++;
 
                 lines[i] = d3.svg.line()
-                .x(function (d) {
-                    return x(d.date);
-                })
-                .y(
-                function (d) {
-                    return y[d.seriesID](d.val);
-                });
+                    .x(function (d) {
+                        return x(d.date);
+                    })
+                    .y(function (d) {
+                        return y[d.seriesID](d.val);
+                    });
 
                 lines2[i] = d3.svg.line()
                     //.interpolate("basis")
@@ -898,8 +904,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
             d3.select(this.parentElement).moveToFront();
             d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
-
-
 
             if (this.parentElement.getAttribute("opacity") == "0.5"){
                 focus.selectAll(".seriesID").attr("opacity", "0.5");
