@@ -730,30 +730,32 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     function (d) {
                         return y2[d.seriesID](d.val);
                     });
+
+                    // Update the axis properties
+                if ( yAxisCount - 1 == 0){
+                    axisProperties[2].xTranslate = - $("#yAxis-" + 0)[0].getBBox().width;
+                    margin.left += $("#yAxis-" + 0)[0].getBBox().width;
+                }
+                else if (yAxisCount - 1 == 1){
+                    axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-"+ 1)[0].getBBox().width;
+                    margin.right += $("#yAxis-"+ 1)[0].getBBox().width;
+                }
+                else if (yAxisCount - 1 == 2){
+                    axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
+                    margin.left += $("#yAxis-"+ 2)[0].getBBox().width;
+                }
+                else if (yAxisCount - 1 == 3){
+                    margin.right += $("#yAxis-"+ 3)[0].getBBox().width;
+                }
+                else if (yAxisCount - 1 == 4){
+                    margin.left += $("#yAxis-"+ 4)[0].getBBox().width;
+                }
+
+                focus.attr("transform", "translate(" +  margin.left + "," + margin.top + ")")
+                    .attr("width", $("#graphContainer").width() - margin.left - margin.right);
             }
 
-            // Update the axis properties
-            if ( yAxisCount - 1 == 0){
-                axisProperties[2].xTranslate = - $("#yAxis-" + 0)[0].getBBox().width;
-                margin.left += $("#yAxis-" + 0)[0].getBBox().width;
-            }
-            else if (yAxisCount - 1 == 1){
-                axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-"+ 1)[0].getBBox().width;
-                margin.right += $("#yAxis-"+ 1)[0].getBBox().width;
-            }
-            else if (yAxisCount - 1 == 2){
-                axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
-                margin.left += $("#yAxis-"+ 2)[0].getBBox().width;
-            }
-            else if (yAxisCount - 1 == 3){
-                margin.right += $("#yAxis-"+ 3)[0].getBBox().width;
-            }
-            else if (yAxisCount - 1 == 4){
-                margin.left += $("#yAxis-"+ 4)[0].getBBox().width;
-            }
 
-            focus.attr("transform", "translate(" +  margin.left + "," + margin.top + ")")
-                .attr("width", $("#graphContainer").width() - margin.left - margin.right);
 
             // If the graph contains less than 2 data points, append circles
             if (data[i].values.length < 2){
