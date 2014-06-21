@@ -903,9 +903,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             }
 
             var flag = true;
-
+            ".y.axis[data-id=" + 0 +"]"
             d3.select(this.parentElement).moveToFront();
-            d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
+            d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line" ).attr("stroke-width", 2.5);
 
             if (this.parentElement.getAttribute("opacity") == "0.5"){
                 focus.selectAll(".seriesID").attr("opacity", "0.5");
@@ -931,7 +931,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                         flag = false;
                     }
                     else{
-                        d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
+                        d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line" ).attr("stroke-width", 2.5);
                         paintGridAxis(id);
                     }
                 }
@@ -942,7 +942,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
 
             if (flag){
-                d3.selectAll("#yAxis-" + id + " .domain, #yAxis-" + id + " .tick line").attr("stroke-width", 2.5);
+                d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line" ).attr("stroke-width", 2.5);
                 paintGridAxis(id);
             }
             else{
