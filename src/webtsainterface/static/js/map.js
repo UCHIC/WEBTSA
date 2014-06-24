@@ -146,11 +146,12 @@ define('map', ['mapLibraries'], function() {
         var color = getMarkerColorMapping(site.sourcedataserviceid).hex;
         var markerIcon = {
             path: iconPath[iconsMap[site.sitetype]],
-            fillColor: color,
+            fillColor: '#' + color,
             fillOpacity: 0.86,
             scale: 0.4,
             strokeColor: 'black',
-            strokeWeight: 0.5
+            strokeWeight: 1,
+            strokeOpacity: 0.4
         };
         return new google.maps.Marker({
             title: site.sitename,
