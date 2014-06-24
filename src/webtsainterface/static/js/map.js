@@ -146,6 +146,7 @@ define('map', ['mapLibraries'], function() {
         var color = getMarkerColorMapping(site.sourcedataserviceid).hex;
         var markerIcon = {
             path: iconPath[iconsMap[site.sitetype]],
+            anchor: new google.maps.Point(50, 100),
             fillColor: '#' + color,
             fillOpacity: 0.86,
             scale: 0.4,
@@ -169,8 +170,8 @@ define('map', ['mapLibraries'], function() {
     }
 
     function getMarkerColorMapping(number) {
-        var red = Math.floor(Math.exp(number) * 255 * ((Math.sin(number) + 4))) % 255;
-        var green = Math.floor(Math.exp(number) * 255 * ((Math.cos(number) + 4))) % 255;
+        var red = Math.floor(Math.exp(number * 2) * 255 * ((Math.sin(number) + 4))) % 255;
+        var green = Math.floor(Math.exp(number * 3) * 255 * ((Math.cos(number) + 4))) % 255;
         var blue = Math.floor(Math.exp(number) * 255 * ((Math.sin(2 * number) + 4))) % 255;
         return {
             rgb: { red: red, green: green, blue: blue },
