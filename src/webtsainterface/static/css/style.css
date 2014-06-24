@@ -20,19 +20,11 @@
   clip-path: url(#clip);
 }
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
 .brush .extent {
   stroke: #fff;
   fill-opacity: .5;
   shape-rendering: crispEdges;
 }
-
 
 .clearfix:after {
     visibility: hidden;
@@ -164,12 +156,12 @@
   shape-rendering: crispEdges;
 }
 
-.focus .seriesID {cursor: pointer}
+.focus .seriesID {
+    cursor: pointer
+}
 
 .line {
   fill: none;
-  stroke: steelblue;
-  stroke-width: 1px;
 }
 
 /* BOX PLOTS */
@@ -454,6 +446,7 @@ line.tick {
 #btnExport{
     width:auto;
     float:right;
+    top: 0px;
 }
 
 .tab-content{
