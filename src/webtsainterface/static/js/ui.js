@@ -99,6 +99,11 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
         <span class='legendText'><%= title %></span>\
     </li>");
 
+    self.legendIconItemTemplate = _.template("<li>\
+        <svg viewBox='0 0 100 100'><path d='<%= imagePath %>' /></svg>\
+        <span class='legendText'><%= title %></span>\
+    </li>");
+
     self.renderFacets = function(parent) {
         var data = require('data');
         var facets = [];

@@ -81,9 +81,9 @@ define('data', ['jquery'], function() {
     };
 
     function updateFilteredData(facetFiltered) {
-        self.filteredDataseries = self.dataseries;
-        self.filteredSites = self.sites;
+        self.filteredSites = [];
         var filteredFacetSeries = {};
+        self.filteredDataseries = self.dataseries;
 
         // update dataseries
         self.facets.forEach(function(facet) {
@@ -94,9 +94,8 @@ define('data', ['jquery'], function() {
 
         // update sites
         var uniqueSites = _.uniq(self.filteredDataseries, function(series) { return series["sitecode"]; });
-        var siteCodes = _.pluck(uniqueSites, 'sitecode');
-        self.filteredSites = _.filter(self.filteredSites, function(site) {
-            return _.contains(siteCodes, site.sitecode);
+        uniqueSites.forEach(function(site) {
+            self.filteredSites.push(_(self.sites).findWhere({ sitecode: site.sitecode, network: site.network }));
         });
 
         // update filters and filters count

@@ -4,13 +4,34 @@
 
 define('map', ['mapLibraries'], function() {
     var self = {};
-    
     self.map = {};
-
 
     var settings = {};
     var markersManagers = {};
     var infoWindows = [];
+    var iconsMap = {
+        'Stream': 'aquatic', 'Atmosphere': 'climate', 'Land': 'climate',
+        'Canal': 'marker', 'Well': 'marker', 'Test Hole': 'marker'
+    };
+    var iconPath = {
+        marker: 'M75.456,15.919C68.939,9.175,59.939,5,50,5c-9.94,0-18.94,4.175-25.456,10.919C18.03,22.666,14,31.404,14,41.699\
+        c0,10.293,4.03,20.195,10.544,26.943L50,95l25.456-26.357C81.969,61.895,86,51.992,86,41.699C86,31.404,81.969,22.666,75.456,15.919\
+        z M50,65.493c-13.061,0-23.648-10.589-23.648-23.648c0-13.061,10.587-23.648,23.648-23.648c13.06,0,23.648,10.587,23.648,23.648\
+        C73.648,54.904,63.06,65.493,50,65.493z',
+        climate: 'M75.456,15.919C68.939,9.175,59.939,5,50,5c-9.94,0-18.94,4.175-25.456,10.919C18.03,22.666,14,31.404,14,41.699\
+        c0,10.293,4.03,20.195,10.544,26.943L50,95l25.456-26.357C81.969,61.895,86,51.992,86,41.699C86,31.404,81.969,22.666,75.456,15.919\
+        z M71.209,49.727c-0.52,0.729-1.357,1.16-2.25,1.16H29.411c-1.357,0-2.514-0.986-2.728-2.327c-0.065-0.407-0.097-0.786-0.097-1.155\
+        c0-3.127,1.971-5.803,4.738-6.85c-0.12-0.797-0.18-1.602-0.18-2.406c0-9.138,7.436-16.575,16.576-16.575\
+        c6.452,0,12.235,3.725,14.958,9.448c6.014,0.578,10.734,5.661,10.734,11.825C73.414,45.322,72.65,47.701,71.209,49.727z',
+        aquatic: 'M75.456,15.919C68.939,9.175,59.939,5,50,5c-9.94,0-18.94,4.175-25.456,10.919C18.03,22.666,14,31.404,14,41.699\
+        c0,10.293,4.03,20.195,10.544,26.943L50,95l25.456-26.357C81.969,61.895,86,51.992,86,41.699C86,31.404,81.969,22.666,75.456,15.919\
+        z M36.073,26.515c7.458,0,11.22,1.983,14.858,3.901c3.356,1.769,6.525,3.439,12.994,3.439c1.104,0,2,0.896,2,2s-0.896,2-2,2\
+        c-7.458,0-11.221-1.983-14.859-3.901c-3.355-1.769-6.525-3.439-12.994-3.439c-1.104,0-2-0.896-2-2S34.969,26.515,36.073,26.515z\
+         M36.073,36.23c7.458,0,11.221,1.983,14.86,3.901c3.355,1.769,6.525,3.439,12.993,3.439c1.104,0,2,0.896,2,2s-0.896,2-2,2\
+        c-7.457,0-11.22-1.983-14.858-3.9c-3.356-1.769-6.525-3.439-12.995-3.439c-1.104,0-2-0.896-2-2S34.968,36.23,36.073,36.23z\
+         M63.928,57.285c-7.459,0-11.222-1.983-14.86-3.901c-3.356-1.77-6.526-3.44-12.995-3.44c-1.104,0-2-0.896-2-2s0.896-2,2-2\
+        c7.458,0,11.221,1.983,14.86,3.901c3.356,1.769,6.526,3.44,12.995,3.44c1.104,0,2,0.896,2,2S65.032,57.285,63.928,57.285z'
+    };
 
     self.initializeMap = function() {
         var ui = require('ui');
@@ -59,6 +80,10 @@ define('map', ['mapLibraries'], function() {
         var uniqueNetworks = _(data.sites).uniq(function(site) { return site.sourcedataserviceid; });
         var networkIds = _(uniqueNetworks).pluck('sourcedataserviceid');
 
+        legendItems.push(ui.legendIconItemTemplate({ title: 'Aquatic Site', imagePath: iconPath['aquatic'] }));
+        legendItems.push(ui.legendIconItemTemplate({ title: 'Climate Site', imagePath: iconPath['climate'] }));
+        legendItems.push(ui.legendIconItemTemplate({ title: 'Other', imagePath: iconPath['marker'] }));
+
         networkIds.forEach(function(networkId) {
             var markerManager = markersManagers[networkId];
             var itemSettings = { cssClass: markerManager.cssClass, title: markerManager.getTitle() };
@@ -75,9 +100,7 @@ define('map', ['mapLibraries'], function() {
             if (markersManagers.hasOwnProperty(property)) {
                 var markersManager = markersManagers[property];
                 markersManager.getMarkers().forEach(function(marker) {
-                    var siteMarker = _.find(data.filteredSites, function(site) {
-                        return site.sitename === marker.title;
-                    });
+                    var siteMarker = _(data.filteredSites).findWhere({ sitename: marker.title, network: markersManager.getTitle() });
                     marker.setVisible(( (siteMarker)? true: false ));
                 });
                 markersManager.repaint();
@@ -121,11 +144,18 @@ define('map', ['mapLibraries'], function() {
 
     function createMarker(site) {
         var color = getMarkerColorMapping(site.sourcedataserviceid).hex;
-        var pinImage = new google.maps.MarkerImage('https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%20|' + color);
+        var markerIcon = {
+            path: iconPath[iconsMap[site.sitetype]],
+            fillColor: color,
+            fillOpacity: 0.86,
+            scale: 0.4,
+            strokeColor: 'black',
+            strokeWeight: 0.5
+        };
         return new google.maps.Marker({
             title: site.sitename,
             position: new google.maps.LatLng(site.latitude, site.longitude),
-            icon: pinImage
+            icon: markerIcon
         });
     }
 
@@ -146,7 +176,6 @@ define('map', ['mapLibraries'], function() {
             hex: ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)
         };
     }
-
 
 	return self;
 });

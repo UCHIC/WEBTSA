@@ -93,6 +93,15 @@
     padding: 1px 10px;
 }
 
+.legendItems svg {
+    height: 25px;
+    width: 25px;
+    float: left;
+    padding: inherit;
+    margin-left: -2.5px;
+    margin-right: 1px;
+}
+
 .legendText {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -117,12 +126,13 @@
 
 .siteDetails .column {
     float: left;
-    width: 50%;
     padding-bottom: 10px;
+    margin-right: 5px;
 }
 
 .siteDetails .detailItem {
     display: block;
+    white-space: nowrap;
 }
 
 .siteDetails .detailItem span {
