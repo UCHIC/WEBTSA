@@ -13,6 +13,10 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
     self.initializeApplication = function() {
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
+        if (selectedView === 'visualization') {
+            toggleLeftPanel();
+        }
+
         self.ui.loadView(selectedView);
         bindEvents();
         self.map.initializeMap();
@@ -286,10 +290,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             });
         });
 
-        function onDateChange() {
-             $("#dateIntervals button").removeClass("active");
-        }
-
         $('#dpd1').bind('changeDate', onDateChange);
         $('#dpd2').bind('changeDate', onDateChange);
         $('#dpd1').bind('input', onDateChange);
@@ -350,23 +350,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             self.visualization.plotSeries();
         });
 
-        function toggleLeftPanel(){
-            if ($("#btnLeftPanelCollapse")[0].getAttribute("data-enabled") == "true"){
-                $("#leftPanel .panel-group").toggle();
-                isShown = !isShown;
-                google.maps.event.trigger(self.map.map, 'resize');
-            }
-        }
-
-        function toggleLeftPanelButton(){
-            var btn = $("#btnLeftPanelCollapse")[0];
-            btn.setAttribute("data-enabled", "true");
-
-            if (isShown){
-                $("#leftPanel .panel-group").show();
-            }
-        }
-
         $("#btnLeftPanelCollapse").on("click", toggleLeftPanel);
 
         $("#btnHideLeftToolbar").on("click", toggleLeftPanel);
@@ -385,6 +368,27 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
         $("#mapTab").on("click", function() {
             toggleLeftPanelButton();
         });
+    }
+
+    function toggleLeftPanel(){
+        if ($("#btnLeftPanelCollapse")[0].getAttribute("data-enabled") == "true"){
+            $("#leftPanel .panel-group").toggle();
+            isShown = !isShown;
+            google.maps.event.trigger(self.map.map, 'resize');
+        }
+    }
+
+    function toggleLeftPanelButton(){
+        var btn = $("#btnLeftPanelCollapse")[0];
+        btn.setAttribute("data-enabled", "true");
+
+        if (isShown){
+            $("#leftPanel .panel-group").show();
+        }
+    }
+
+    function onDateChange() {
+         $("#dateIntervals button").removeClass("active");
     }
 
     function checkInitialFilters() {
