@@ -6,9 +6,10 @@ define('map', ['mapLibraries'], function() {
     var self = {};
     self.map = {};
 
-    var settings = {};
+    var DEGREE_IN_METERS = 111320;
+    var markers = [];
     var markersManagers = {};
-    var infoWindows = [];
+    var infoWindow = {};
     var iconsMap = {
         'Stream': 'aquatic', 'Atmosphere': 'climate', 'Land': 'climate',
         'Canal': 'marker', 'Well': 'marker', 'Test Hole': 'marker'
@@ -36,12 +37,13 @@ define('map', ['mapLibraries'], function() {
     self.initializeMap = function() {
         var ui = require('ui');
 
-        settings = {
+        var settings = {
             center: new google.maps.LatLng(41.0648701, -111.4622151),
             mapTypeId: google.maps.MapTypeId.TERRAIN,
             zoom: 7
         };
         self.map = new google.maps.Map(ui.getMapCanvas(), settings);
+        infoWindow = new google.maps.InfoWindow();
     };
 
     self.loadMarkers = function() {
@@ -49,23 +51,56 @@ define('map', ['mapLibraries'], function() {
         var data = require('data');
 
         loadMarkerManagers();
+
         data.sites.forEach(function(site) {
             var marker = createMarker(site);
             markersManagers[site.sourcedataserviceid].addMarker(marker);
-            var markerInfoWindow = new google.maps.InfoWindow({ content: ui.siteInfoWindowTemplate({
-                sitecode: site.sitecode, sitename: site.sitename, network: site.network, sitetype: site.sitetype,
-                latitude: site.latitude, longitude: site.longitude, state: site.state, county: site.county})
-            });
+            markers.push(marker);
 
             google.maps.event.addListener(marker, 'click', function() {
-                removeInfoWindows();
-                infoWindows.push(markerInfoWindow);
-                markerInfoWindow.open(self.map, marker);
+                infoWindow.setContent(ui.siteInfoWindowTemplate({
+                    sitecode: site.sitecode, sitename: site.sitename, network: site.network, sitetype: site.sitetype,
+                    latitude: site.latitude, longitude: site.longitude, state: site.state, county: site.county
+                }));
+                infoWindow.open(self.map, marker);
+
                 $('.btnViewSeries').on('click', function() {
                     var siteFacet = _(data.facets).findWhere({ keyfield: 'sitecode' });
                     data.selectOnlyFilter(siteFacet, this.dataset['sitecode']);
                     ui.loadView('datasets');
                 });
+            });
+
+            //separate markers on hover.
+            google.maps.event.addListener(marker, "mouseover", function() {
+                var circle = new google.maps.Circle({
+                    map: self.map,
+                    clickable: false,
+                    radius: 30,
+                    fillColor: '#fff',
+                    fillOpacity: .6,
+                    strokeColor: '#313131',
+                    strokeOpacity: .4,
+                    strokeWeight: .8
+                });
+                circle.setCenter(marker.getPosition());
+                var bounds = circle.getBounds();
+                var closeMarkers = [];
+
+                markers.forEach(function(closeMarker) {
+                    if (marker !== closeMarker && bounds.contains(closeMarker.getPosition())) {
+                        closeMarkers.push(closeMarker);
+                    }
+                });
+                closeMarkers.forEach(function(closeMarker) {
+                    var newLat = closeMarker.getPosition().lat() + (31 / DEGREE_IN_METERS);
+                    closeMarker.setPosition({lat: newLat, lng: closeMarker.getPosition().lng() });
+                });
+            });
+
+            //bring them back together.
+            google.maps.event.addListener(marker, "mouseout", function() {
+
             });
         });
     };
@@ -106,7 +141,7 @@ define('map', ['mapLibraries'], function() {
                 markersManager.repaint();
             }
         }
-        removeInfoWindows();
+        infoWindow.close();
     };
 
     function loadMarkerManagers() {
