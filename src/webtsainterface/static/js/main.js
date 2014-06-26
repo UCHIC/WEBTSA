@@ -30,7 +30,7 @@ requirejs.config({
     }
 });
 
-define('mapLibraries', ['async!https://maps.googleapis.com/maps/api/js?key=AIzaSyANPfBBVteHSTx4o9O-kgjC8RVMuXW0O2o&sensor=false', 'markerclusterer']);
+define('mapLibraries', ['async!https://maps.googleapis.com/maps/api/js?key=AIzaSyANPfBBVteHSTx4o9O-kgjC8RVMuXW0O2o&sensor=false&libraries=geometry', 'markerclusterer']);
 define('datatablesLibraries', ['datatables', 'datatables-colvis', 'datatables-scroller', 'datatables-tabletools', 'datatables_bootstrap']);
 define('generalLibraries', ['jquery', 'jquery_browser', 'underscore', 'bootstrap', 'bootstrap_datepicker']);
 define('d3Libraries', ['d3', 'd3_nvd3', 'd3_box']);

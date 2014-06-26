@@ -7,6 +7,8 @@ define('map', ['mapLibraries'], function() {
     self.map = {};
 
     var DEGREE_IN_METERS = 111320;
+    var MARKERS_OFFSET = 30;
+
     var markers = [];
     var markersManagers = {};
     var infoWindow = {};
@@ -70,37 +72,39 @@ define('map', ['mapLibraries'], function() {
                     ui.loadView('datasets');
                 });
             });
+        });
 
-            //separate markers on hover.
-            google.maps.event.addListener(marker, "mouseover", function() {
-                var circle = new google.maps.Circle({
-                    map: self.map,
-                    clickable: false,
-                    radius: 30,
-                    fillColor: '#fff',
-                    fillOpacity: .6,
-                    strokeColor: '#313131',
-                    strokeOpacity: .4,
-                    strokeWeight: .8
-                });
-                circle.setCenter(marker.getPosition());
-                var bounds = circle.getBounds();
-                var closeMarkers = [];
-
-                markers.forEach(function(closeMarker) {
-                    if (marker !== closeMarker && bounds.contains(closeMarker.getPosition())) {
-                        closeMarkers.push(closeMarker);
-                    }
-                });
-                closeMarkers.forEach(function(closeMarker) {
-                    var newLat = closeMarker.getPosition().lat() + (31 / DEGREE_IN_METERS);
-                    closeMarker.setPosition({lat: newLat, lng: closeMarker.getPosition().lng() });
-                });
+        markers.forEach(function(marker, index) {
+            var distance = google.maps.geometry.spherical.computeDistanceBetween;
+            var closeMarkers = _(markers).filter(function(point) {
+                return distance(marker.getPosition(), point.getPosition()) < MARKERS_OFFSET;
             });
 
-            //bring them back together.
-            google.maps.event.addListener(marker, "mouseout", function() {
+            closeMarkers.forEach(function(point) {
+                if (marker === point) {
+                    return;
+                }
+                var newLat = point.getPosition().lat() + ((MARKERS_OFFSET + 1) / DEGREE_IN_METERS);
+                var newLng = point.getPosition().lng() - ((MARKERS_OFFSET / 2) / (DEGREE_IN_METERS * Math.cos(newLat)));
+                point.setPosition({lat: newLat, lng: newLng });
+            });
 
+            // highlight hovered marker.
+            google.maps.event.addListener(marker, "mouseover", function() {
+                var icon = marker.getIcon();
+                icon.fillOpacity = icon.fillOpacity + 0.07;
+                icon.strokeWeight = icon.strokeWeight + 0.1;
+                marker.setIcon(icon);
+                marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+            });
+
+            //bring it back to normal.
+            google.maps.event.addListener(marker, "mouseout", function() {
+               var icon = marker.getIcon();
+                icon.fillOpacity = icon.fillOpacity - 0.07;
+                icon.strokeWeight = icon.strokeWeight - 0.1;
+                marker.setIcon(icon);
+                marker.setZIndex();
             });
         });
     };
