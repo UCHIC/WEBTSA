@@ -132,6 +132,9 @@ define('data', ['jquery'], function() {
                     url: series.getdataurl
                 }).done(function(data) {
                     var values = data.getElementsByTagName('value');
+                    if (values.length === 0) {
+                        values = data.getElementsByTagName('ns1:value');
+                    }
                     var index = 0;
                     var node;
 
@@ -151,7 +154,6 @@ define('data', ['jquery'], function() {
                         seriesData.dateTimeUTC = node.getAttribute('dateTimeUTC');
                         seriesData.timeOffset = node.getAttribute('timeOffset');
                         seriesData.censorCode = node.getAttribute('censorCode');
-
                         series.dataset.push(seriesData);
                     }})
                     .done(function() {
