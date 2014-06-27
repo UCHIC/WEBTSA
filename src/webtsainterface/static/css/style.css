@@ -490,11 +490,11 @@ table.dataTable {
     text-align: right;
 }
 
-.dataTables_filter {
+.tableFilter {
     float: left !important;
 }
 
-.dataTables_filter input[type="search"] {
+.tableFilter input[type="search"] {
     width: 350px;
     margin-top: 2px;
 }
@@ -547,6 +547,7 @@ table.dataTable {
 
 .ColVis_MasterButton {
     font-family: "Times New Roman";
+    margin-top: 2px;
 }
 
 div.ColVis {
@@ -596,10 +597,21 @@ table.dataTable tbody tr.selected {
     background-color: #b0bed9 !important;
 }
 
-#txtSearch{
-    width:30%;
+#txtTableSearch{
     display:inline;
     margin:5px;
+    height: 28px;
+    margin-top: 7px;
+}
+
+.settings-list .settings-item {
+    display: block;
+    margin-bottom: 3px;
+}
+
+.settings-list .settings-item input[type="checkbox"] {
+    margin-right: 3px;
+    vertical-align: top;
 }
 
 .series-item-field {

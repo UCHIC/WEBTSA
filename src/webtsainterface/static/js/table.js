@@ -10,6 +10,12 @@ define('table', ['datatablesLibraries'], function() {
 
     var tableOffsetY = 125;
 
+    var searchSettings = {
+        exactMatch: false,
+        smartSearch: true,
+        caseSensitive: false
+    };
+
     self.initializeTable = function() {
         var ui = require('ui');
         var data = require('data');
@@ -17,8 +23,8 @@ define('table', ['datatablesLibraries'], function() {
 
         self.dataseriesTable = $('#datasetsTable').dataTable({
             data: data.dataseries,
-            dom: 'TftiS',
-            stateSave: true,
+            dom: 'TtiS',
+            //stateSave: true,
             deferRender: true,
             scrollCollapse: true,
             scrollY: ($('div#datasetsContent').height() - tableOffsetY),
@@ -117,14 +123,12 @@ define('table', ['datatablesLibraries'], function() {
         $.fn.dataTable.ColVis.fnRebuild();
         $(colvis.button()).appendTo('#tableButtons');
 
-        var reDraw = _.debounce(self.reDrawTable, 500);
-
-        $(window).on('resize', function() {
-            reDraw();
+        $(window).on('resize', _.debounce(function() {
+            self.reDrawTable();
             if ($('.ColVis_collection').is(':visible')) {
                 $('.ColVis_catcher').click();
             }
-        });
+        }, 500));
 
         ui.customizeTableStyle();
         self.shouldInitialize = false;
@@ -171,6 +175,19 @@ define('table', ['datatablesLibraries'], function() {
             }
         });
     };
+
+    $('#txtTableSearch').on('input propertychange paste change', _.debounce(function() {
+        var api = self.dataseriesTable.api();
+        var match = searchSettings.exactMatch;
+        var input = this.value.split('"').join('');
+        input = (searchSettings.exactMatch && input)? '"' + input + ' "': input;
+        api.search(input, false, searchSettings.smartSearch, !searchSettings.caseSensitive).draw();
+    }, 500));
+
+    $('.settings-item').find(':checkbox').on('change', function() {
+        searchSettings[this.value] = this.checked;
+        $('#txtTableSearch').trigger('input');
+    });
 
     function renderCheckbox(data, type) {
         var visualization = require('visualization');

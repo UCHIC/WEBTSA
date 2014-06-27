@@ -5,6 +5,12 @@
 
         </div>
 
+        <div id="tableFilter" class="tableFilter">
+            <input id="txtTableSearch" type="search" class="form-control input-sm" aria-controls="datasetsTable" placeholder="Search">
+            <button id="btnSearchSettings" class="btn btn-default glyphicon glyphicon-tasks" title="Search Settings"
+                    data-toggle="modal" data-target="#SearchSettingsDialog"></button>
+        </div>
+
 
         <table class="table display cell-border" id="datasetsTable" cellspacing="0">
             <thead></thead>
@@ -12,9 +18,26 @@
         </table>
     </div>
 
+    <div class="modal fade" id="SearchSettingsDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Search Settings</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-list">
+                        <span class="settings-item"><input type="checkbox" value="exactMatch">Exact Match</span>
+                        <span class="settings-item"><input type="checkbox" value="smartSearch" checked>Smart Search</span>
+                        <span class="settings-item"><input type="checkbox" value="caseSensitive">Case Sensitive</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Dataset Info Modal -->
-    <div class="modal fade" id="InfoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-         aria-hidden="true">
+    <div class="modal fade" id="InfoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
