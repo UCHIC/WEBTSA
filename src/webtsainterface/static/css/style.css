@@ -532,7 +532,7 @@ table.dataTable {
 #tableButtons div {
     display: inline;
     float: right;
-    margin: 1px 4px;
+    margin: 2px 4px 1px 4px;
 }
 
 .dataTables_info {
@@ -547,7 +547,6 @@ table.dataTable {
 
 .ColVis_MasterButton {
     font-family: "Times New Roman";
-    margin-top: 2px;
 }
 
 div.ColVis {

@@ -121,7 +121,7 @@ define('table', ['datatablesLibraries'], function() {
         var colvis = new $.fn.dataTable.ColVis(self.dataseriesTable);
         colvis.s.aiExclude = [0, 1, 2, 3];
         $.fn.dataTable.ColVis.fnRebuild();
-        $(colvis.button()).appendTo('#tableButtons');
+        $(colvis.button()).prependTo('#tableButtons');
 
         $(window).on('resize', _.debounce(function() {
             self.reDrawTable();
@@ -187,6 +187,37 @@ define('table', ['datatablesLibraries'], function() {
     $('.settings-item').find(':checkbox').on('change', function() {
         searchSettings[this.value] = this.checked;
         $('#txtTableSearch').trigger('input');
+    });
+
+    $('#btnShowSelected').click(function() {
+        var tableTools = TableTools.fnGetInstance("datasetsTable");
+        var api = self.dataseriesTable.api();
+
+        var selectedObjects = tableTools.fnGetSelectedData();
+        var idColumn = api.column('seriesid:name');
+        var filterRegex = '(^$)';
+
+        selectedObjects.forEach(function(series) {
+            filterRegex += (filterRegex === '')? '': '|';
+            filterRegex += '(^' + series.seriesid + '$)';
+        });
+        idColumn.search(filterRegex, true, false).draw();
+    });
+
+    $('#btnShowAll').click(function() {
+        var api = self.dataseriesTable.api();
+        api.column('seriesid:name').search('').draw();
+    });
+
+    $('#btnClearSelected').click(function() {
+        var tableTools = TableTools.fnGetInstance("datasetsTable");
+        var api = self.dataseriesTable.api();
+
+        var selectedObjects = tableTools.fnGetSelectedData();
+
+        selectedObjects.forEach(function(series) {
+            self.uncheckSeries(series.seriesid);
+        });
     });
 
     function renderCheckbox(data, type) {
