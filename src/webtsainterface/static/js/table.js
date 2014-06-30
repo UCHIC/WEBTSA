@@ -210,13 +210,13 @@ define('table', ['datatablesLibraries'], function() {
     });
 
     $('#btnClearSelected').click(function() {
+        var visualization = require('visualization');
         var tableTools = TableTools.fnGetInstance("datasetsTable");
-        var api = self.dataseriesTable.api();
 
         var selectedObjects = tableTools.fnGetSelectedData();
 
         selectedObjects.forEach(function(series) {
-            self.uncheckSeries(series.seriesid);
+            visualization.unplotSeries(series.seriesid);
         });
     });
 
