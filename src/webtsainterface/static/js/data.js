@@ -141,6 +141,7 @@ define('data', ['jquery'], function() {
 
         self.dataseries.forEach(function(series) {
             series.dataset = [];
+            series.sitecode = (+series.sitecode)? [+series.sitecode].join(''): series.sitecode;
             series.loadDataset = function(callback) {
                 if (series.dataset.length !== 0) {
                     callback && callback();
