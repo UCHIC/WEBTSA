@@ -6,9 +6,12 @@ define('map', ['mapLibraries'], function() {
     var self = {};
     self.map = {};
 
-    var settings = {};
+    var DEGREE_IN_METERS = 111320;
+    var MARKERS_OFFSET = 30;
+
+    var markers = [];
     var markersManagers = {};
-    var infoWindows = [];
+    var infoWindow = {};
     var iconsMap = {
         'Stream': 'aquatic', 'Atmosphere': 'climate', 'Land': 'climate',
         'Canal': 'marker', 'Well': 'marker', 'Test Hole': 'marker'
@@ -36,12 +39,13 @@ define('map', ['mapLibraries'], function() {
     self.initializeMap = function() {
         var ui = require('ui');
 
-        settings = {
+        var settings = {
             center: new google.maps.LatLng(41.0648701, -111.4622151),
             mapTypeId: google.maps.MapTypeId.TERRAIN,
             zoom: 7
         };
         self.map = new google.maps.Map(ui.getMapCanvas(), settings);
+        infoWindow = new google.maps.InfoWindow();
     };
 
     self.loadMarkers = function() {
@@ -49,23 +53,58 @@ define('map', ['mapLibraries'], function() {
         var data = require('data');
 
         loadMarkerManagers();
+
         data.sites.forEach(function(site) {
             var marker = createMarker(site);
             markersManagers[site.sourcedataserviceid].addMarker(marker);
-            var markerInfoWindow = new google.maps.InfoWindow({ content: ui.siteInfoWindowTemplate({
-                sitecode: site.sitecode, sitename: site.sitename, network: site.network, sitetype: site.sitetype,
-                latitude: site.latitude, longitude: site.longitude, state: site.state, county: site.county})
-            });
+            markers.push(marker);
 
             google.maps.event.addListener(marker, 'click', function() {
-                removeInfoWindows();
-                infoWindows.push(markerInfoWindow);
-                markerInfoWindow.open(self.map, marker);
+                infoWindow.setContent(ui.siteInfoWindowTemplate({
+                    sitecode: site.sitecode, sitename: site.sitename, network: site.network, sitetype: site.sitetype,
+                    latitude: site.latitude, longitude: site.longitude, state: site.state, county: site.county
+                }));
+                infoWindow.open(self.map, marker);
+
                 $('.btnViewSeries').on('click', function() {
                     var siteFacet = _(data.facets).findWhere({ keyfield: 'sitecode' });
                     data.selectOnlyFilter(siteFacet, this.dataset['sitecode']);
                     ui.loadView('datasets');
                 });
+            });
+        });
+
+        markers.forEach(function(marker, index) {
+            var distance = google.maps.geometry.spherical.computeDistanceBetween;
+            var closeMarkers = _(markers).filter(function(point) {
+                return distance(marker.getPosition(), point.getPosition()) < MARKERS_OFFSET;
+            });
+
+            closeMarkers.forEach(function(point) {
+                if (marker === point) {
+                    return;
+                }
+                var newLat = point.getPosition().lat() + ((MARKERS_OFFSET + 1) / DEGREE_IN_METERS);
+                var newLng = point.getPosition().lng() - ((MARKERS_OFFSET / 2) / (DEGREE_IN_METERS * Math.cos(newLat)));
+                point.setPosition({lat: newLat, lng: newLng });
+            });
+
+            // highlight hovered marker.
+            google.maps.event.addListener(marker, "mouseover", function() {
+                var icon = marker.getIcon();
+                icon.fillOpacity = icon.fillOpacity + 0.07;
+                icon.strokeWeight = icon.strokeWeight + 0.1;
+                marker.setIcon(icon);
+                marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+            });
+
+            //bring it back to normal.
+            google.maps.event.addListener(marker, "mouseout", function() {
+               var icon = marker.getIcon();
+                icon.fillOpacity = icon.fillOpacity - 0.07;
+                icon.strokeWeight = icon.strokeWeight - 0.1;
+                marker.setIcon(icon);
+                marker.setZIndex();
             });
         });
     };
@@ -106,7 +145,7 @@ define('map', ['mapLibraries'], function() {
                 markersManager.repaint();
             }
         }
-        removeInfoWindows();
+        infoWindow.close();
     };
 
     function loadMarkerManagers() {
@@ -146,6 +185,7 @@ define('map', ['mapLibraries'], function() {
         var color = getMarkerColorMapping(site.sourcedataserviceid).hex;
         var markerIcon = {
             path: iconPath[iconsMap[site.sitetype]],
+            anchor: new google.maps.Point(50, 100),
             fillColor: '#' + color,
             fillOpacity: 0.86,
             scale: 0.4,
@@ -169,8 +209,8 @@ define('map', ['mapLibraries'], function() {
     }
 
     function getMarkerColorMapping(number) {
-        var red = Math.floor(Math.exp(number) * 255 * ((Math.sin(number) + 4))) % 255;
-        var green = Math.floor(Math.exp(number) * 255 * ((Math.cos(number) + 4))) % 255;
+        var red = Math.floor(Math.exp(number * 2) * 255 * ((Math.sin(number) + 4))) % 255;
+        var green = Math.floor(Math.exp(number * 3) * 255 * ((Math.cos(number) + 4))) % 255;
         var blue = Math.floor(Math.exp(number) * 255 * ((Math.sin(2 * number) + 4))) % 255;
         return {
             rgb: { red: red, green: green, blue: blue },

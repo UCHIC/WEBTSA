@@ -30,7 +30,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         return self.plottedSeries.length + self.unplottedSeries.length < self.plotLimit;
     };
 
-    self.initializeDatePickers = function(){
+    self.initializeDatePickers = function() {
         // Remove the date pickers
         $("#plotOptionsContainer tbody tr:first-child").remove();
         $("#plotOptionsContainer tbody tr:first-child").remove();
@@ -38,7 +38,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         // Add new ones
         $("#plotOptionsContainer tbody").prepend(
             '<tr><td>Begin Date</td><td><input id="dpd1" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>\
-            <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>'
+             <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>'
         );
     };
 

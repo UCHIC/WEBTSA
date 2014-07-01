@@ -93,7 +93,7 @@ define('data', ['jquery'], function() {
         });
 
         // update sites
-        var uniqueSites = _.uniq(self.filteredDataseries, function(series) { return series["sitecode"]; });
+        var uniqueSites = _.uniq(self.filteredDataseries, function(series) { return { sitecode: series.sitecode, network: series.network }; });
         uniqueSites.forEach(function(site) {
             self.filteredSites.push(_(self.sites).findWhere({ sitecode: site.sitecode, network: site.network }));
         });
@@ -132,6 +132,9 @@ define('data', ['jquery'], function() {
                     url: series.getdataurl
                 }).done(function(data) {
                     var values = data.getElementsByTagName('value');
+                    if (values.length === 0) {
+                        values = data.getElementsByTagName('ns1:value');
+                    }
                     var index = 0;
                     var node;
 
@@ -151,7 +154,6 @@ define('data', ['jquery'], function() {
                         seriesData.dateTimeUTC = node.getAttribute('dateTimeUTC');
                         seriesData.timeOffset = node.getAttribute('timeOffset');
                         seriesData.censorCode = node.getAttribute('censorCode');
-
                         series.dataset.push(seriesData);
                     }})
                     .done(function() {

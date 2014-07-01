@@ -243,7 +243,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     self.customizeTableStyle = function() {
         $('.ColVis_MasterButton').removeClass('ColVis_Button').addClass('btn btn-default glyphicon');
 
-        $('#tableButtons').detach().prependTo('#datasetsTable_wrapper');
+        $('#tableButtons, .tableFilter').detach().prependTo('#datasetsTable_wrapper');
 
         if ($.support.placeholder) {
             var filter = $('#datasetsTable_filter');
