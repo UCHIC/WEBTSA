@@ -104,9 +104,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
         });
 
         $('#btnClearAllFilters').click(function() {
-            self.data.facets.forEach(function(facet) {
-                self.data.clearFacetFilters(facet);
-            });
+            self.data.clearAllFilters();
         });
 
         $("#btnAddToPlot").click(function() {
