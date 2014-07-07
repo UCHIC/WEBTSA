@@ -907,43 +907,43 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             d3.select(this.parentElement).moveToFront();
             d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line" ).attr("stroke-width", 2.5);
 
-            if (this.parentElement.getAttribute("opacity") == "0.5"){
-                focus.selectAll(".seriesID").attr("opacity", "0.5");
+            if (this.parentElement.getAttribute("opacity") == "0.4"){
+                focus.selectAll(".seriesID").attr("opacity", "0.4");
             }
             else{
                 var paths = focus.selectAll(".seriesID")[0];
 
                 if (paths.length > 1){
                       paths.forEach(function(path){
-                        if (path.getAttribute("opacity") == "0.5"){
+                        if (path.getAttribute("opacity") == "0.4"){
                             path.setAttribute("opacity", "1");
                             flag = false;
                         }
                         else{
-                            path.setAttribute("opacity", "0.5");
+                            path.setAttribute("opacity", "0.4");
                         }
                     });
                 }
                 else{
                     if (focus.selectAll(".grid")[0].length){
-                        d3.selectAll(".grid").remove();
+                        // d3.selectAll(".grid").remove();
                         d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
                         flag = false;
                     }
                     else{
                         d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line" ).attr("stroke-width", 2.5);
-                        paintGridAxis(id);
+                        // paintGridAxis(id);
                     }
                 }
             }
 
             this.parentElement.setAttribute("opacity", "1");
-            d3.selectAll(".grid").remove();
+            // d3.selectAll(".grid").remove();
             d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
 
             if (flag){
                 d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line" ).attr("stroke-width", 2.5);
-                paintGridAxis(id);
+                // paintGridAxis(id);
             }
             else{
                 d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
@@ -1001,7 +1001,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
             if (this.className == "list-group-item"){
                 $('#legendContainer .list-group-item').removeClass("highlight");
-                d3.selectAll(".grid").remove();
+                // d3.selectAll(".grid").remove();
                 d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
                 d3.selectAll(".seriesID").attr("opacity", "1");
                 this.className="list-group-item highlight";
