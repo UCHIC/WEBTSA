@@ -190,9 +190,11 @@ define('table', ['datatablesLibraries'], function() {
     });
 
     $('#btnShowSelected').click(function() {
+        var data = require('data');
         var tableTools = TableTools.fnGetInstance("datasetsTable");
         var api = self.dataseriesTable.api();
 
+        data.clearAllFilters();
         var selectedObjects = tableTools.fnGetSelectedData();
         var idColumn = api.column('seriesid:name');
         var filterRegex = '(^$)';
@@ -205,7 +207,10 @@ define('table', ['datatablesLibraries'], function() {
     });
 
     $('#btnShowAll').click(function() {
+        var data = require('data');
         var api = self.dataseriesTable.api();
+
+        data.clearAllFilters();
         api.column('seriesid:name').search('').draw();
     });
 

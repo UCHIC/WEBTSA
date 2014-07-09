@@ -7,7 +7,6 @@ define('map', ['mapLibraries'], function() {
     self.map = {};
 
     var DEGREE_IN_METERS = 111320;
-    var MARKERS_OFFSET = 30;
 
     var markers = [];
     var markersManagers = {};
@@ -44,8 +43,47 @@ define('map', ['mapLibraries'], function() {
             mapTypeId: google.maps.MapTypeId.TERRAIN,
             zoom: 7
         };
-        self.map = new google.maps.Map(ui.getMapCanvas(), settings);
+
         infoWindow = new google.maps.InfoWindow();
+        self.map = new google.maps.Map(ui.getMapCanvas(), settings);
+
+        google.maps.event.addListener(self.map, 'zoom_changed', function() {
+            var getDistance = google.maps.geometry.spherical.computeDistanceBetween;
+            var maxOffset = 500;
+            var pixelOffset = 3;
+
+            // If the offset is going to be more than 500 meters, don't do it.
+            var zoomOffset = pixelOffset * getMapScale();
+            if (zoomOffset > maxOffset) {
+                return;
+            }
+
+            // Only get markers in the current map bounds.
+            var mapBounds = self.map.getBounds();
+            var markersInViewport = _(markers).filter(function(marker) {
+                return mapBounds.contains(marker.getPosition());
+            });
+
+            // Reset the markers position.
+            markersInViewport.forEach(function(marker) {
+                marker.setPosition({ lat: marker.site.latitude, lng: marker.site.longitude });
+            });
+
+            markersInViewport.forEach(function(marker) {
+                var closeMarkers = _(markersInViewport).filter(function(point) {
+                    if (point === marker) {
+                        return false;
+                    }
+                    return getDistance(marker.getPosition(), point.getPosition()) < zoomOffset;
+                });
+
+                closeMarkers.forEach(function(point) {
+                    var newLat = point.getPosition().lat() + ((zoomOffset) / DEGREE_IN_METERS);
+                    var newLng = point.getPosition().lng() - ((zoomOffset / 2) / (DEGREE_IN_METERS * Math.cos(newLat)));
+                    point.setPosition({lat: newLat, lng: newLng });
+                });
+            });
+        });
     };
 
     self.loadMarkers = function() {
@@ -56,6 +94,7 @@ define('map', ['mapLibraries'], function() {
 
         data.sites.forEach(function(site) {
             var marker = createMarker(site);
+            marker.site = site;
             markersManagers[site.sourcedataserviceid].addMarker(marker);
             markers.push(marker);
 
@@ -75,20 +114,6 @@ define('map', ['mapLibraries'], function() {
         });
 
         markers.forEach(function(marker, index) {
-            var distance = google.maps.geometry.spherical.computeDistanceBetween;
-            var closeMarkers = _(markers).filter(function(point) {
-                return distance(marker.getPosition(), point.getPosition()) < MARKERS_OFFSET;
-            });
-
-            closeMarkers.forEach(function(point) {
-                if (marker === point) {
-                    return;
-                }
-                var newLat = point.getPosition().lat() + ((MARKERS_OFFSET + 1) / DEGREE_IN_METERS);
-                var newLng = point.getPosition().lng() - ((MARKERS_OFFSET / 2) / (DEGREE_IN_METERS * Math.cos(newLat)));
-                point.setPosition({lat: newLat, lng: newLng });
-            });
-
             // highlight hovered marker.
             google.maps.event.addListener(marker, "mouseover", function() {
                 var icon = marker.getIcon();
@@ -100,7 +125,7 @@ define('map', ['mapLibraries'], function() {
 
             //bring it back to normal.
             google.maps.event.addListener(marker, "mouseout", function() {
-               var icon = marker.getIcon();
+                var icon = marker.getIcon();
                 icon.fillOpacity = icon.fillOpacity - 0.07;
                 icon.strokeWeight = icon.strokeWeight - 0.1;
                 marker.setIcon(icon);
@@ -216,6 +241,11 @@ define('map', ['mapLibraries'], function() {
             rgb: { red: red, green: green, blue: blue },
             hex: ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)
         };
+    }
+
+    function getMapScale() {
+        var circumference = 40075040;
+        return (circumference * -Math.cos(self.map.getCenter().lat()) / Math.pow(2, self.map.getZoom() + 8));
     }
 
 	return self;

@@ -67,9 +67,28 @@ define('data', ['jquery'], function() {
         updateFilteredData(facet);
     };
 
+    self.clearAllFilters = function() {
+        self.filteredSites = self.sites;
+        self.filteredDataseries = self.dataseries;
+
+        self.facets.forEach(function(facet) {
+            if (!facet.isFiltered()) {
+                return;
+            }
+            facet.filters.forEach(function(filter) {
+                filter.applied = false;
+                filter.dataseriesCount = filter.filteredSeries.length;
+           });
+           facet.updateFacetSeries();
+        });
+        $(document).trigger(dataFiltered);
+    };
 
     self.clearFacetFilters = function(facet) {
-       self.selectOnlyFilter(facet);
+       facet.filters.forEach(function(filter) {
+            filter.applied = false;
+       });
+       updateFilteredData(facet);
     };
 
     self.selectOnlyFilter = function(facet, savedFilter) {
@@ -122,6 +141,7 @@ define('data', ['jquery'], function() {
 
         self.dataseries.forEach(function(series) {
             series.dataset = [];
+            series.sitecode = (+series.sitecode)? [+series.sitecode].join(''): series.sitecode;
             series.loadDataset = function(callback) {
                 if (series.dataset.length !== 0) {
                     callback && callback();
