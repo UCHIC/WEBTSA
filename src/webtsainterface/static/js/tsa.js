@@ -188,7 +188,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             var id = +dialog.get(0).dataset['series'];
             var series = _(self.data.dataseries).where({seriesid: id}).pop();
 
-            var csvContent = "data:text/csv;charset=utf8,";
+            var csvContent = "";
 
 
             // Append dataset values once the dataset is loaded
@@ -241,7 +241,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                                 "# ---------------------------\n" +
                                 "# MethodDescription: " + series['methoddescription'] + "\n" +
                                 "# MethodLink: " + series['sitecode'] + "\n#\n";
-
 
                 // Append Series Information
                 csvContent +=   "# Series Information\n" +
