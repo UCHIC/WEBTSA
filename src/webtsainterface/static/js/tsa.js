@@ -398,14 +398,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
 
-//        if (selectedNetwork && selectedSite && selectedVariable && shouldPlot) {
-//            var series = _(self.data.dataseries).findWhere({
-//                network: selectedNetwork,
-//                sitecode: selectedSite,
-//                selectedVariable
-//            });
-//        }
-
         self.data.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
         self.data.toggleFilter('sitecode', selectedSite);
         self.data.toggleFilter('variablecode', selectedVariable);
@@ -413,7 +405,12 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         if (self.data.filteredDataseries.length === 1 && shouldPlot) {
             var dataseries = _(self.data.filteredDataseries).first();
+            if (!dataseries) {
+                return;
+            }
+
             self.visualization.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
+            self.table.toSelect = true;
             self.visualization.prepareSeries(dataseries);
         }
     }

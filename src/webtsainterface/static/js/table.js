@@ -7,6 +7,7 @@ define('table', ['datatablesLibraries'], function() {
 
     self.dataseriesTable = {};
     self.shouldInitialize = true;
+    self.toSelect;
 
     var tableOffsetY = 125;
 
@@ -133,6 +134,13 @@ define('table', ['datatablesLibraries'], function() {
         ui.customizeTableStyle();
         self.shouldInitialize = false;
         self.updateDataseries();
+
+        if (self.toSelect) {
+            var tableTools = TableTools.fnGetInstance("datasetsTable");
+            var row = self.dataseriesTable.api().row({filter: 'applied'}).node();
+            $(row).find('input[type="checkbox"]').attr('checked', true);
+            tableTools.fnSelect(row);
+        }
     };
 
     self.reDrawTable = function() {
