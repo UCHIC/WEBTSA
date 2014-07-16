@@ -176,8 +176,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             var id = +dialog.get(0).dataset['series'];
             var series = _(self.data.dataseries).where({seriesid: id}).pop();
 
-            var csvContent = "";
-
+            var csvContent = "csv;base64,";
 
             // Append dataset values once the dataset is loaded
             series.loadDataset(function() {
