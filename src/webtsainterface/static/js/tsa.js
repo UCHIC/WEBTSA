@@ -7,14 +7,16 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
     self.visualization = visualization;
     
     var r =0, dir=false;
-    var isShown = true;
+
+    var visibleFacetsPanel = true;
     self.initialParameters = {};
     
     self.initializeApplication = function() {
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
         if (selectedView === 'visualization') {
-            toggleLeftPanel();
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = false;
+            hideFacetsPanel();
         }
 
         self.ui.loadView(selectedView);
@@ -86,21 +88,31 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
         });
 
         $(document).on('shown.bs.tab', 'a[href="#mapContent"]', function() {
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = true;
             google.maps.event.trigger(self.map.map, 'resize');
+            if (visibleFacetsPanel) {
+                showFacetsPanel();
+            }
         });
 
         $(document).on('shown.bs.tab', 'a[href="#datasetsContent"]', function() {
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = true;
             if (self.table.shouldInitialize) {
                 self.table.initializeTable();
+            }
+            if (visibleFacetsPanel) {
+                showFacetsPanel();
             }
         });
 
         $(document).on('shown.bs.tab', 'a[href="#visualizationContent"]', function() {
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = false;
             if (self.visualization.unplottedSeries.length || self.visualization.shouldPlot) {
                 self.ui.endPlotAnimation();
                 self.visualization.plotSeries();
             }
             self.visualization.doPlot = true;
+            hideFacetsPanel();
         });
 
         $('#btnClearAllFilters').click(function() {
@@ -346,41 +358,29 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             self.visualization.plotSeries();
         });
 
-        $("#btnLeftPanelCollapse").on("click", toggleLeftPanel);
-
-        $("#btnHideLeftToolbar").on("click", toggleLeftPanel);
-
-        $("#visualizationTab").on("click", function(){
-            $("#leftPanel .panel-group").hide();
-
-            var btn = $("#btnLeftPanelCollapse")[0];
-            btn.setAttribute("data-enabled", "false");
+        $("#btnLeftPanelCollapse").on("click", function() {
+            if ($("#btnLeftPanelCollapse").get(0).dataset.enabled === 'true') {
+                toggleFacetsPanel();
+            }
         });
 
-        $("#datasetsTab").on("click", function(){
-            toggleLeftPanelButton();
-        });
-
-        $("#mapTab").on("click", function() {
-            toggleLeftPanelButton();
+        $("#btnHideLeftToolbar").on("click", function() {
+            toggleFacetsPanel();
         });
     }
 
-    function toggleLeftPanel(){
-        if ($("#btnLeftPanelCollapse")[0].getAttribute("data-enabled") == "true"){
-            $("#leftPanel .panel-group").toggle();
-            isShown = !isShown;
-            google.maps.event.trigger(self.map.map, 'resize');
-        }
+    function toggleFacetsPanel() {
+        $("#leftPanel .panel-group").is(':hidden') ? showFacetsPanel(): hideFacetsPanel();
+        visibleFacetsPanel = !visibleFacetsPanel;
     }
 
-    function toggleLeftPanelButton(){
-        var btn = $("#btnLeftPanelCollapse")[0];
-        btn.setAttribute("data-enabled", "true");
+    function hideFacetsPanel() {
+        $("#leftPanel .panel-group").hide();
+    }
 
-        if (isShown){
-            $("#leftPanel .panel-group").show();
-        }
+    function showFacetsPanel() {
+        $("#leftPanel .panel-group").show();
+        google.maps.event.trigger(self.map.map, 'resize');
     }
 
     function onDateChange() {
@@ -404,7 +404,12 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         if (self.data.filteredDataseries.length === 1 && shouldPlot) {
             var dataseries = _(self.data.filteredDataseries).first();
+            if (!dataseries) {
+                return;
+            }
+
             self.visualization.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
+            self.table.toSelect = true;
             self.visualization.prepareSeries(dataseries);
         }
     }
