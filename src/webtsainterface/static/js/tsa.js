@@ -188,7 +188,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             var id = +dialog.get(0).dataset['series'];
             var series = _(self.data.dataseries).where({seriesid: id}).pop();
 
-            var csvContent = "csv;base64,";
+            var csvContent = "";
 
             // Append dataset values once the dataset is loaded
             series.loadDataset(function() {
@@ -283,7 +283,8 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 var filename = series.sitecode + " - " + series.variablename + ".csv";
 
                 // Set HTML5 download
-                var blob = new Blob(["\ufeff", csvContent]);
+                var blob = new Blob(["", csvContent]);
+
                 var url = URL.createObjectURL(blob);
 
                 link.setAttribute("href", url);
