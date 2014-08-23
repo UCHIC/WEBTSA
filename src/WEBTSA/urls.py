@@ -26,6 +26,5 @@ BASE_URL = settings.SITE_URL[1:]
 urlpatterns = patterns('',
     url(r'^' + BASE_URL + '$', TsaView.as_view(), name='tsa-application'),
     url(r'^' + BASE_URL + 'admin/', include(admin.site.urls)),
-    url(r'^' + BASE_URL + 'api/', include(v1_api.urls)),
-	url(r'^' + BASE_URL + 'debug$', DebugView.as_view(), name='tsa-debug')
+    url(r'^' + BASE_URL + 'api/', include(v1_api.urls))
 )

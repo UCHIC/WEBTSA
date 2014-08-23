@@ -112,9 +112,10 @@ define('data', ['jquery'], function() {
         });
 
         // update sites
-        var uniqueSites = _.uniq(self.filteredDataseries, function(series) { return { sitecode: series.sitecode, network: series.network }; });
-        uniqueSites.forEach(function(site) {
-            self.filteredSites.push(_(self.sites).findWhere({ sitecode: site.sitecode, network: site.network }));
+        self.sites.forEach(function(site) {
+            if (_(self.filteredDataseries).findWhere({ sitecode: site.sitecode, sourcedataserviceid: site.sourcedataserviceid })) {
+                self.filteredSites.push(site);
+            }
         });
 
         // update filters and filters count
