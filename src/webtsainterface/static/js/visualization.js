@@ -246,11 +246,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             sortedValues[i].sort();
 
             // Quantiles
-            summary[i].quantile10 = d3.quantile(sortedValues[i],.1).toFixed(2);
-            summary[i].quantile25 = d3.quantile(sortedValues[i],.25).toFixed(2);
-            summary[i].median = d3.quantile(sortedValues[i],.5).toFixed(2);
-            summary[i].quantile75 = d3.quantile(sortedValues[i],.75).toFixed(2);
-            summary[i].quantile90 = d3.quantile(sortedValues[i],.9).toFixed(2);
+            summary[i].quantile10 = d3.quantile(sortedValues[i],.09).toFixed(2);
+            summary[i].quantile25 = d3.quantile(sortedValues[i],.249).toFixed(2);
+            summary[i].median = d3.quantile(sortedValues[i],.49).toFixed(2);
+            summary[i].quantile75 = d3.quantile(sortedValues[i],.749).toFixed(2);
+            summary[i].quantile90 = d3.quantile(sortedValues[i],.89).toFixed(2);
 
             // Number of observations
             summary[i].observations = data[i].length;
