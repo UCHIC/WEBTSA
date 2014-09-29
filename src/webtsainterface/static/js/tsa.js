@@ -227,7 +227,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                                 "# VariableUnitsName: " + series['variableunitsname'] + "\n" +
                                 "# VariableUnitsType: " + series['variableunitstype'] + "\n" +
                                 "# VariableUnitsAbbreviation: " + series['variableunitsabbreviation'] + "\n" +
-                                "# NoDataValue:" + series.dataset['noDataValue'] + "\n" +
+                                "# NoDataValue: " + series.dataset['noDataValue'] + "\n" +
                                 //"# IsRegular:" + series['isregular'] + "\n" +                                         // Not found
                                 "# TimeSupport: " + series['timesupport'] + "\n" +
                                 "# TimeSupportUnitsAbbreviation: " + series['timesupportunitsabbreviation'] + "\n" +
