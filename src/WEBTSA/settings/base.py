@@ -28,8 +28,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'django_pyodbc',
-	'tastypie',
+    'django_pyodbc',
+    'tastypie',
     'webtsaservices',
     'webtsainterface'
 )

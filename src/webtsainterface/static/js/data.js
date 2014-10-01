@@ -49,6 +49,10 @@ define('data', ['jquery'], function() {
             self.dataseries = data.objects;
             extendDataseries();
             extendFilters();
+            var facets = _(self.facets).filter(function(facet) { return facet.selected !== ""; });
+            facets.forEach(function(facet) {
+                updateFilteredData(facet);
+            });
             dataLoader.loadedData++;
             $(document).trigger(dataseriesLoaded);
         });
@@ -224,7 +228,7 @@ define('data', ['jquery'], function() {
                 _.extend(filter, {
                     filteredSeries: series,
                     dataseriesCount: series.length,
-                    applied: false
+                    applied: ((filter[facet.keyfield] === facet.selected)? true: false)
                 });
                 facet.filters.push(filter);
             });

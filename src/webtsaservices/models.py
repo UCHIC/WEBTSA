@@ -12,6 +12,7 @@ import re
 
 
 class SearchFacet(models.Model):
+    name = models.CharField(max_length=255)
     keyfield = models.CharField(max_length=128)
     namefields = models.CharField(max_length=128, validators=[
         RegexValidator(
@@ -20,7 +21,7 @@ class SearchFacet(models.Model):
             code='invalid_values'
         ),
     ])
-    name = models.CharField(max_length=255)
+    selected = models.CharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -51,6 +52,7 @@ class DataSeries(models.Model):
     sitetype = models.CharField(db_column='SiteType', max_length=50)
     variablecode = models.CharField(db_column='VariableCode', max_length=50)
     variablename = models.CharField(db_column='VariableName', max_length=255)
+    variablelevel = models.CharField(db_column='VariableLevel', max_length=50)
     methoddescription = models.CharField(db_column='MethodDescription', max_length=500)
     variableunitsname = models.CharField(db_column='VariableUnitsName', max_length=255, null=True, blank=True)
     variableunitstype = models.CharField(db_column='VariableUnitsType', max_length=50, null=True, blank=True)
