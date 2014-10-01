@@ -398,13 +398,16 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
 
-        var facets = _(self.data.facets).filter(function(facet) { return facet.selected !== ""; });
-        facets.forEach(function(facet){
-            var defaultFilters = _(facet.filters).filter(function(filter){ return filter.applied });
-            defaultFilters.forEach(function(filter){
-                self.data.toggleFilter(facet.keyfield, filter[facet.keyfield]);
+        if (shouldPlot) {
+            var facets = _(self.data.facets).filter(function(facet) { return facet.selected !== ""; });
+            facets.forEach(function(facet){
+                var defaultFilters = _(facet.filters).filter(function(filter){ return filter.applied });
+                defaultFilters.forEach(function(filter){
+                    self.data.toggleFilter(facet.keyfield, filter[facet.keyfield]);
+                });
             });
-        });
+        }
+
         self.data.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
         self.data.toggleFilter('sitecode', selectedSite);
         self.data.toggleFilter('variablecode', selectedVariable);
