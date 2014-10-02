@@ -4,19 +4,54 @@
 
 requirejs.config({
     paths: {
-        async: '//cdnjs.cloudflare.com/ajax/libs/requirejs-async/0.1.1/async',
-        jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min',
-        jquery_browser: '//cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.6/jquery.browser.min',
-        datatables: '//cdn.datatables.net/1.10.0/js/jquery.dataTables.min',
-        'datatables-colvis': '//cdn.datatables.net/colvis/1.1.0/js/dataTables.colVis.min',
-        'datatables-scroller': '//cdn.datatables.net/scroller/1.2.1/js/dataTables.scroller.min',
-        'datatables-tabletools': '//cdn.datatables.net/tabletools/2.2.1/js/dataTables.tableTools.min',
-        datatables_bootstrap: '//cdn.datatables.net/plug-ins/e9421181788/integration/bootstrap/3/dataTables.bootstrap',
-        underscore: '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
-        bootstrap: '//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min',
+        async: [
+            '//cdnjs.cloudflare.com/ajax/libs/requirejs-async/0.1.1/async',
+            'vendor/requirejs/async'
+        ],
+        jquery: [
+            '//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min',
+            'vendor/jquery/jquery.min'
+        ],
+        jquery_browser: [
+            '//cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.6/jquery.browser.min',
+            'vendor/jquery/jquery.browser.min'
+        ],
+        datatables: [
+            '//cdn.datatables.net/1.10.0/js/jquery.dataTables.min',
+            'vendor/jquery/dataTables/jquery.dataTables.min'
+        ],
+        'datatables-colvis': [
+            '//cdn.datatables.net/colvis/1.1.0/js/dataTables.colVis.min',
+            'vendor/jquery/dataTables/dataTables.colVis.min'
+        ],
+        'datatables-scroller': [
+            '//cdn.datatables.net/scroller/1.2.1/js/dataTables.scroller.min',
+            'vendor/jquery/dataTables/dataTables.scroller.min'
+        ],
+        'datatables-tabletools': [
+            '//cdn.datatables.net/tabletools/2.2.1/js/dataTables.tableTools.min',
+            'vendor/jquery/dataTables/dataTables.tableTools.min'
+        ],
+        datatables_bootstrap: [
+            '//cdn.datatables.net/plug-ins/e9421181788/integration/bootstrap/3/dataTables.bootstrap',
+            'vendor/jquery/dataTables/dataTables.bootstrap'
+        ],
+        underscore: [
+            '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
+            'vendor/underscore/underscore-min'
+        ],
+        bootstrap: [
+            '//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min',
+            'vendor/bootstrap/bootstrap.min'
+        ],
         bootstrap_datepicker: 'vendor/bootstrap/bootstrap-datepicker',
-        d3: '//cdnjs.cloudflare.com/ajax/libs/d3/3.4.6/d3.min',
-        d3_nvd3: '//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min',
+        d3: ['//cdnjs.cloudflare.com/ajax/libs/d3/3.4.6/d3.min1',
+            'vendor/d3/d3.min'
+        ],
+        d3_nvd3: [
+            '//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min',
+            'vendor/d3/nv.d3.min'
+        ],
         d3_box: 'vendor/d3/box',
         markerclusterer: 'vendor/maps/markerclusterer'
     },
