@@ -11,10 +11,7 @@ define('map', ['mapLibraries'], function() {
     var markers = [];
     var markersManagers = {};
     var infoWindow = {};
-    var iconsMap = {
-        'Stream': 'aquatic', 'Atmosphere': 'climate', 'Land': 'climate',
-        'Canal': 'marker', 'Well': 'marker', 'Test Hole': 'marker'
-    };
+
     var iconPath = {
         marker: 'M75.456,15.919C68.939,9.175,59.939,5,50,5c-9.94,0-18.94,4.175-25.456,10.919C18.03,22.666,14,31.404,14,41.699\
         c0,10.293,4.03,20.195,10.544,26.943L50,95l25.456-26.357C81.969,61.895,86,51.992,86,41.699C86,31.404,81.969,22.666,75.456,15.919\
@@ -34,6 +31,16 @@ define('map', ['mapLibraries'], function() {
          M63.928,57.285c-7.459,0-11.222-1.983-14.86-3.901c-3.356-1.77-6.526-3.44-12.995-3.44c-1.104,0-2-0.896-2-2s0.896-2,2-2\
         c7.458,0,11.221,1.983,14.86,3.901c3.356,1.769,6.526,3.44,12.995,3.44c1.104,0,2,0.896,2,2S65.032,57.285,63.928,57.285z'
     };
+
+    function getIconType(sitetype) {
+        var icon = 'marker';
+        if (sitetype === 'Stream') {
+            icon = 'aquatic';
+        } else if (sitetype === 'Atmosphere' || sitetype === 'Land') {
+            icon = 'climate';
+        }
+        return icon;
+    }
 
     self.initializeMap = function() {
         var ui = require('ui');
@@ -209,7 +216,7 @@ define('map', ['mapLibraries'], function() {
     function createMarker(site) {
         var color = getMarkerColorMapping(site.sourcedataserviceid).hex;
         var markerIcon = {
-            path: iconPath[iconsMap[site.sitetype]],
+            path: iconPath[getIconType(site.sitetype)],
             anchor: new google.maps.Point(50, 100),
             fillColor: '#' + color,
             fillOpacity: 0.86,
