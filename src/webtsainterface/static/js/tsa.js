@@ -398,6 +398,11 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
 
+        self.data.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
+        self.data.toggleFilter('sitecode', selectedSite);
+        self.data.toggleFilter('variablecode', selectedVariable);
+        self.data.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
+
         if (shouldPlot) {
             var facets = _(self.data.facets).filter(function(facet) { return facet.selected !== ""; });
             facets.forEach(function(facet){
@@ -406,22 +411,19 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                     self.data.toggleFilter(facet.keyfield, filter[facet.keyfield]);
                 });
             });
-        }
 
-        self.data.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
-        self.data.toggleFilter('sitecode', selectedSite);
-        self.data.toggleFilter('variablecode', selectedVariable);
-        self.data.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
-
-        if (self.data.filteredDataseries.length === 1 && shouldPlot) {
-            var dataseries = _(self.data.filteredDataseries).first();
-            if (!dataseries) {
+            var dataseries = _(self.data.filteredDataseries).first(require('visualization').plotLimit);
+            if (dataseries.length == 0) {
                 return;
             }
 
             self.visualization.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
+
             self.table.toSelect = true;
-            self.visualization.prepareSeries(dataseries);
+            dataseries.forEach(function(series) {
+                self.visualization.prepareSeries(series);
+            });
+
         }
     }
 
