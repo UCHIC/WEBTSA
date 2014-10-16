@@ -305,6 +305,14 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
         });
 
          $("#btnExportSelected").click(function(){
+            // Feature detection
+            var link = document.createElement("a");
+
+            if(link.download === undefined) {
+                // Needs to implement server side download
+                alert("We're sorry, your browser does not support HTML5 download. Please use Chrome, Firefox or Opera to download.")
+            }
+
             var series = [];
 
             for (var i = 0; i < self.visualization.plottedSeries.length; i++){
@@ -409,7 +417,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                             // OnEnd
                             // The zip is ready prepare download link
                             model.getBlobURL(function(url) {
-                                var link = document.createElement("a");
                                 // var link = document.getElementById("downloadLink");
                                 link.setAttribute("href", url);
                                 link.setAttribute("download", "TSA collection.zip");
