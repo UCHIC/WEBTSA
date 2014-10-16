@@ -1,4 +1,5 @@
-define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'], function(data, map, table, ui, visualization) {
+var obj = this;
+define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries', 'zipLibraries'], function(data, map, table, ui, visualization) {
     var self = {};
     self.ui = ui;
     self.map = map;
@@ -163,36 +164,9 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             self.ui.loadView('visualization');
         });
 
-        $("#btnExport").click(function() {
-            $(".modal-header").find(".alert").remove();
-            $(".modal-header").append(
-                '<div class="alert alert-info alert-dismissable">\
-                    Compiling file. Please wait... \
-                </div>'
-            );
-
-            var link = document.createElement("a");
-
-            // feature detection
-            if(link.download === undefined) {
-              // it needs to implement server side export
-              $(".modal-header").find(".alert").empty();
-              $(".modal-header").find(".alert").removeClass("alert-info");
-              $(".modal-header").find(".alert").addClass("alert-danger");
-              $(".modal-header").find(".alert").append("<strong>We're sorry, your browser does not support HTML5 download. </strong>" +
-                                                        "<br>Please use Chrome, Firefox or Opera to download.");
-              return;
-            }
-
-            var dialog = $("#InfoDialog");
-            var id = +dialog.get(0).dataset['series'];
-            var series = _(self.data.dataseries).where({seriesid: id}).pop();
-
+        function getCSVContent(series){
             var csvContent = "";
-
-            // Append dataset values once the dataset is loaded
-            series.loadDataset(function() {
-                    // Append header
+                                // Append header
                 csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
                                 "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
                                 "# on the condition that neither iUTAH may be held liable for any damages resulting from\n" +
@@ -280,6 +254,37 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                                 + data['censorCode'] + "\n";
                 });
 
+                return csvContent;
+        }
+
+        $("#btnExport").click(function() {
+            $(".modal-header").find(".alert").remove();
+            $(".modal-header").append(
+                '<div class="alert alert-info alert-dismissable">\
+                    Compiling file. Please wait... \
+                </div>'
+            );
+
+            var link = document.createElement("a");
+
+            // feature detection
+            if(link.download === undefined) {
+              // it needs to implement server side export
+              $(".modal-header").find(".alert").empty();
+              $(".modal-header").find(".alert").removeClass("alert-info");
+              $(".modal-header").find(".alert").addClass("alert-danger");
+              $(".modal-header").find(".alert").append("<strong>We're sorry, your browser does not support HTML5 download. </strong>" +
+                                                        "<br>Please use Chrome, Firefox or Opera to download.");
+              return;
+            }
+
+            var dialog = $("#InfoDialog");
+            var id = +dialog.get(0).dataset['series'];
+            var series = _(self.data.dataseries).where({seriesid: id}).pop();
+
+            // Append dataset values once the dataset is loaded
+            series.loadDataset(function() {
+                var csvContent = getCSVContent(series);
                 var filename = series.sitecode + " - " + series.variablename + ".csv";
 
                 // Set HTML5 download
@@ -298,6 +303,127 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 $(".modal-header").find(".alert").append(link);
             });
         });
+
+         $("#btnExportSelected").click(function(){
+            var series = [];
+
+            for (var i = 0; i < self.visualization.plottedSeries.length; i++){
+                series.push(self.visualization.plottedSeries[i])
+            }
+            for (var i = 0; i < self.visualization.unplottedSeries.length; i++){
+                series.push(self.visualization.unplottedSeries[i])
+            }
+
+            if (series.length == 0){
+                return;
+            }
+
+            $("#btnExportSelected span").text("Compiling files...");
+            $("#btnExportSelected").prop('disabled', true);
+
+            var jobs = self.visualization.unplottedSeries.length + self.visualization.plottedSeries.length - 1;
+
+            series.forEach(function(mSeries){
+                 mSeries.loadDataset(function() {  // Needs to be changed to a callback with all series loaded
+                    if (jobs > 0){
+                        jobs--;
+                        return;
+                    }
+
+                    var files = [];
+
+                    for(var i = 0; i < series.length; i++){
+                        var filename = series[i].sitecode + " - " + series[i].variablename + ".csv";
+                        var blobFile = new Blob(["", getCSVContent(series[i])]);
+                        files.push({name:filename, data:blobFile});
+                    }
+
+                     // Zip model that will compress the file
+                    var model = (function() {
+                        var zipFileEntry, zipWriter, writer, creationMethod, URL = obj.webkitURL || obj.mozURL || obj.URL;
+                        return {
+                            setCreationMethod : function(method) {
+                                creationMethod = method;
+                            },
+                            addFiles : function addFiles(files, oninit, onadd, onprogress, onend) {
+                                var addIndex = 0;
+
+                                function nextFile() {
+                                    var file = files[addIndex];
+                                    onadd(file);
+                                    zipWriter.add(file.name, new zip.BlobReader(file.data), function() {
+                                        addIndex++;
+                                        if (addIndex < files.length)
+                                            nextFile();
+                                        else
+                                            onend();
+                                    }, onprogress);
+                                }
+
+                                function createZipWriter() {
+                                    zip.createWriter(writer, function(writer) {
+                                        zipWriter = writer;
+                                        oninit();
+                                        nextFile();
+                                    }, onerror);
+                                }
+
+                                if (zipWriter)
+                                    nextFile();
+                                else if (creationMethod == "Blob") {
+                                    writer = new zip.BlobWriter();
+                                    createZipWriter();
+                                } else {
+                                    createTempFile(function(fileEntry) {
+                                        zipFileEntry = fileEntry;
+                                        writer = new zip.FileWriter(zipFileEntry);
+                                        createZipWriter();
+                                    });
+                                }
+                            },
+                            getBlobURL : function(callback) {
+                                zipWriter.close(function(blob) {
+                                    var blobURL = creationMethod == "Blob" ? URL.createObjectURL(blob) : zipFileEntry.toURL();
+                                    callback(blobURL);
+                                    zipWriter = null;
+                                });
+                            }
+                        };
+                    })();
+
+                    // Set the mode
+                    model.setCreationMethod("Blob");
+
+                    // Add the files to the zip
+                    model.addFiles(files,
+                        function() {
+                            // Initialise Method
+                            //console.log("Initialise");
+                        }, function(file) {
+                            // OnAdd
+                            //console.log("Added file");
+                        }, function(current, total) {
+                            // OnProgress
+                            //console.log("%s %s", current, total);
+                        }, function() {
+                            // OnEnd
+                            // The zip is ready prepare download link
+                            model.getBlobURL(function(url) {
+                                var link = document.createElement("a");
+                                // var link = document.getElementById("downloadLink");
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", "TSA collection.zip");
+                                link.innerHTML = " <span class='container-title'>" + "TSA collection.zip" + "</span>";
+                                link.click();
+                                $("#btnExportSelected span").text("Export selected (.zip)");
+                                $("#btnExportSelected").prop('disabled', false);
+                            });
+                        });
+                  });
+             });
+
+
+         });
 
         $('#dpd1').bind('changeDate', onDateChange);
         $('#dpd2').bind('changeDate', onDateChange);
@@ -427,3 +553,4 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
     return self;
 });
+

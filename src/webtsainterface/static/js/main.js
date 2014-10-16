@@ -53,6 +53,7 @@ requirejs.config({
             'vendor/d3/nv.d3.min'
         ],
         d3_box: 'vendor/d3/box',
+        zip: 'vendor/zip/zip',
         markerclusterer: 'vendor/maps/markerclusterer'
     },
     shim: {
@@ -69,6 +70,7 @@ define('mapLibraries', ['async!https://maps.googleapis.com/maps/api/js?v=3&key=A
 define('datatablesLibraries', ['datatables', 'datatables-colvis', 'datatables-scroller', 'datatables-tabletools', 'datatables_bootstrap']);
 define('generalLibraries', ['jquery', 'jquery_browser', 'underscore', 'bootstrap', 'bootstrap_datepicker']);
 define('d3Libraries', ['d3', 'd3_nvd3', 'd3_box']);
+define('zipLibraries', ['zip']);
 
 define('d3_global', ['d3'], function(d3Module) {
     window.d3 = d3Module;
