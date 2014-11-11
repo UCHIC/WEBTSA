@@ -421,15 +421,25 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                                 link.setAttribute("href", url);
                                 link.setAttribute("download", "TSA collection.zip");
                                 link.innerHTML = " <span class='container-title'>" + "TSA collection.zip" + "</span>";
-                                link.click();
+                                if (ui.getBrowserName.substr(0,7) == "Firefox"){    // Workaround for Firefox
+                                    var myEvt = document.createEvent('MouseEvents');
+                                    myEvt.initEvent(
+                                       'click'      // event type
+                                       ,true      // can bubble?
+                                       ,true      // cancelable?
+                                    );
+                                    link.dispatchEvent(myEvt);
+                                }
+                                else{
+                                    link.click();   // This is how real browsers do it, hell yeah!
+                                }
+
                                 $("#btnExportSelected span").text("Export selected (.zip)");
                                 $("#btnExportSelected").prop('disabled', false);
                             });
                         });
                   });
              });
-
-
          });
 
         $('#dpd1').bind('changeDate', onDateChange);
