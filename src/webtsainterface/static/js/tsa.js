@@ -566,7 +566,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             dataseries.forEach(function(series) {
                 self.visualization.prepareSeries(series);
             });
-
         }
     }
 

@@ -75,7 +75,7 @@ define('table', ['datatablesLibraries'], function() {
                 { title: 'Time Support Units Name', data: 'timesupportunitsname', name: 'timesupportunitsname', visible: false },
                 { title: 'Time Support Units Type', data: 'timesupportunitstype', name: 'timesupportunitstype', visible: false },
                 { title: 'Time Support Units Abbreviation', data: 'timesupportunitsabbreviation', name: 'timesupportunitsabbreviation', visible: false },
-                { title: 'Quality Control Level', data: 'qualitycontrolleveldefinition', name: 'qualitycontrolleveldefinition', visible: false },
+                { title: 'Quality Control Level', data: 'qualitycontrolleveldefinition', name: 'qualitycontrolleveldefinition' },
                 { title: 'Source Organization', data: 'sourceorganization', name: 'sourceorganization', visible: false },
                 { title: 'Source Description', data: 'sourcedescription', name: 'sourcedescription', visible: false },
                 { title: 'Begin DateTime', data: 'begindatetime', name: 'begindatetime', visible: false },
