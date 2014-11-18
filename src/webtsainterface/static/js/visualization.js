@@ -418,6 +418,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var datasets = getDatasetsAfterFilters();
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
         var numOfYAxes = varNames.length;
+        var qualityControlLevels =  _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
 
         // Iterate the datasets and see which ones share y-axes
         for (var i = 0; i < varNames.length; i++){
@@ -525,7 +526,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     '<input type="checkbox" checked="" data-id="' + i + '">' +
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + color(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
-                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
+                    '<span class="caption text-center">' + qualityControlLevels[i] + '</span></li>'
+            );
         }
 
         // This loop builds and draws each time series
@@ -1027,6 +1030,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var siteNames = _(self.plottedSeries).pluck('sitename');
         var siteCodes = _(self.plottedSeries).pluck('sitecode');
         var varCodes = _(self.plottedSeries).pluck('variablecode');
+        var qualityControlLevels =  _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
         var summary = calcSummaryStatistics(datasets);
@@ -1063,7 +1067,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 '<li class="list-group-item" data-id="' + i + '">' +
                 '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                 '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
-                '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+                '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>'+
+                '<span class="caption text-center">' + qualityControlLevels[i] + '</span></li>'
+            );
 
             // Bind unplot button event
             $('#legendContainer').find('button.close').click(function() {
@@ -1398,6 +1404,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var siteCodes = _(self.plottedSeries).pluck('sitecode');
         var varCodes = _(self.plottedSeries).pluck('variablecode');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
+        var qualityControlLevels =  _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
         var observations = getDatasetsAfterFilters()
         var summary = calcSummaryStatistics(observations);
 
@@ -1528,7 +1535,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     '<li class="list-group-item" data-id="' + i + '">' +
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
-                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
+                    '<span class="caption text-center">' + qualityControlLevels[i] + '</span></li>'
+                );
 
                 // Bind unplot button event
                 $('#legendContainer').find('button.close').click(function() {
