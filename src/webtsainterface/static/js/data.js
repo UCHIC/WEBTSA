@@ -188,6 +188,7 @@ define('data', ['jquery'], function() {
                         seriesData.dateTimeUTC = node.getAttribute('dateTimeUTC');
                         seriesData.timeOffset = node.getAttribute('timeOffset');
                         seriesData.censorCode = node.getAttribute('censorCode');
+                        seriesData.qualifiers = node.getAttribute('qualifiers');
                         series.dataset.push(seriesData);
                     }})
                     .done(function() {

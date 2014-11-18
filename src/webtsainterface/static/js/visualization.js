@@ -796,6 +796,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         x.range([0, width]);
         x2.range([0, width]);
 
+
         var xAxis = d3.svg.axis()
             .scale(x)
             .ticks(Math.max(1,(width - data.length * 51)/ 60))      // Don't even...

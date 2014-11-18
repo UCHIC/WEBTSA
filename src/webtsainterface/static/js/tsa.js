@@ -250,7 +250,8 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             csvContent += "TimeOffset, ";
             csvContent += "DateTimeUTC, ";
             csvContent += "Value, ";
-            csvContent += "CensorCode";
+            csvContent += "CensorCode, ";
+            csvContent += "QualifierCode";
             csvContent += "\n";
 
             // Append property values
@@ -259,7 +260,8 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                             + data['timeOffset'] + ", "
                             + data['dateTimeUTC'].replace("T", " ") + ", "
                             + data['value'] + ", "
-                            + data['censorCode'] + "\n";
+                            + data['censorCode'] + ", "
+                            + (data['qualifiers'] == null ? "" : data['qualifiers']) + "\n";
             });
 
             return csvContent;
