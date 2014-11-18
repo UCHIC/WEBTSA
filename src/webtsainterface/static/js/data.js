@@ -166,10 +166,19 @@ define('data', ['jquery'], function() {
                     var verticalDatumNode = data.getElementsByTagName('verticalDatum').item(0);
                     var elevationNode = data.getElementsByTagName('elevation_m').item(0);
                     var noDataValueNode = data.getElementsByTagName('noDataValue').item(0);
+                    var qualifierNodes = data.getElementsByTagName('qualifier');
 
                     series.dataset.noDataValue = noDataValueNode && +noDataValueNode.textContent;
                     series.dataset.verticalDatum = verticalDatumNode && verticalDatumNode.textContent;
                     series.dataset.elevation = elevationNode && +elevationNode.textContent;
+                    series.dataset.qualifierCodes = [];
+                    series.dataset.qualifierDescriptions = [];
+                    for (var i = 0; i < qualifierNodes.length; i++){
+                        var code = qualifierNodes.item(i).getElementsByTagName("qualifierCode").item(0);
+                        var description = qualifierNodes.item(i).getElementsByTagName("qualifierDescription").item(0);
+                        series.dataset.qualifierCodes.push(code && code.textContent);
+                        series.dataset.qualifierDescriptions.push(description && description.textContent);
+                    }
 
                     while (node = values[index++]) {
                         var seriesData = {};

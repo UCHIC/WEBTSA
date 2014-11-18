@@ -167,94 +167,102 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
         function getCSVContent(series){
             var csvContent = "";
                                 // Append header
-                csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
-                                "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
-                                "# on the condition that neither iUTAH may be held liable for any damages resulting from\n" +
-                                "# its use. The following metadata describe the data in this file:\n" +
-                                "# ------------------------------------------------------------------------------------------\n#\n";
+            csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
+                            "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
+                            "# on the condition that neither iUTAH may be held liable for any damages resulting from\n" +
+                            "# its use. The following metadata describe the data in this file:\n" +
+                            "# ------------------------------------------------------------------------------------------\n#\n";
 
-                // Append Site Information
-                csvContent +=   "# Site Information\n" +
-                                "# ---------------------------\n" +
-                                "# Network: " + series['network'] + "\n" +
-                                "# SiteCode: " + series['sitecode'] + "\n" +
-                                "# SiteName: " + series['sitename'] + "\n" +
-                                "# IsActive: " + series['isactive'] + "\n" +
-                                "# Latitude: " + series['latitude'] + "\n" +
-                                "# Longitude: " + series['longitude'] + "\n" +
-                                "# Elevation: " + series.dataset.elevation + "\n" +
-                                "# VerticalDatum: " + series.dataset['verticalDatum'] + "\n" +
-                                "# State: " + series['state'] + "\n" +
-                                "# County: " + series['county'] + "\n" +
-                                //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not found
-                                "# SiteType: " + series['sitetype'] + "\n#\n";
+            // Append Site Information
+            csvContent +=   "# Site Information\n" +
+                            "# ---------------------------\n" +
+                            "# Network: " + series['network'] + "\n" +
+                            "# SiteCode: " + series['sitecode'] + "\n" +
+                            "# SiteName: " + series['sitename'] + "\n" +
+                            "# IsActive: " + series['isactive'] + "\n" +
+                            "# Latitude: " + series['latitude'] + "\n" +
+                            "# Longitude: " + series['longitude'] + "\n" +
+                            "# Elevation: " + series.dataset.elevation + "\n" +
+                            "# VerticalDatum: " + series.dataset['verticalDatum'] + "\n" +
+                            "# State: " + series['state'] + "\n" +
+                            "# County: " + series['county'] + "\n" +
+                            //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not found
+                            "# SiteType: " + series['sitetype'] + "\n#\n";
 
-                // Append Variable Information
-                csvContent +=   "# Variable Information\n" +
-                                "# ---------------------------\n" +
-                                "# VariableCode: " + series['variablecode'] + "\n" +
-                                "# VariableName: " + series['variablename'] + "\n" +
-                                "# ValueType: " + series['valuetype'] + "\n" +
-                                "# DataType: " + series['datatype'] + "\n" +
-                                "# GeneralCategory: " + series['generalcategory'] + "\n" +
-                                "# SampleMedium: " + series['samplemedium'] + "\n" +
-                                "# VariableUnitsName: " + series['variableunitsname'] + "\n" +
-                                "# VariableUnitsType: " + series['variableunitstype'] + "\n" +
-                                "# VariableUnitsAbbreviation: " + series['variableunitsabbreviation'] + "\n" +
-                                "# NoDataValue: " + series.dataset['noDataValue'] + "\n" +
-                                //"# IsRegular:" + series['isregular'] + "\n" +                                         // Not found
-                                "# TimeSupport: " + series['timesupport'] + "\n" +
-                                "# TimeSupportUnitsAbbreviation: " + series['timesupportunitsabbreviation'] + "\n" +
-                                "# TimeSupportUnitsName: " + series['timesupportunitsname'] + "\n" +
-                                "# TimeSupportUnitsType: " + series['timesupportunitstype'] + "\n#\n";
-                                //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not found
+            // Append Variable Information
+            csvContent +=   "# Variable Information\n" +
+                            "# ---------------------------\n" +
+                            "# VariableCode: " + series['variablecode'] + "\n" +
+                            "# VariableName: " + series['variablename'] + "\n" +
+                            "# ValueType: " + series['valuetype'] + "\n" +
+                            "# DataType: " + series['datatype'] + "\n" +
+                            "# GeneralCategory: " + series['generalcategory'] + "\n" +
+                            "# SampleMedium: " + series['samplemedium'] + "\n" +
+                            "# VariableUnitsName: " + series['variableunitsname'] + "\n" +
+                            "# VariableUnitsType: " + series['variableunitstype'] + "\n" +
+                            "# VariableUnitsAbbreviation: " + series['variableunitsabbreviation'] + "\n" +
+                            "# NoDataValue: " + series.dataset['noDataValue'] + "\n" +
+                            //"# IsRegular:" + series['isregular'] + "\n" +                                         // Not found
+                            "# TimeSupport: " + series['timesupport'] + "\n" +
+                            "# TimeSupportUnitsAbbreviation: " + series['timesupportunitsabbreviation'] + "\n" +
+                            "# TimeSupportUnitsName: " + series['timesupportunitsname'] + "\n" +
+                            "# TimeSupportUnitsType: " + series['timesupportunitstype'] + "\n#\n";
+                            //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not found
 
-                // Append Method Information
-                csvContent +=   "# Method Information\n" +
-                                "# ---------------------------\n" +
-                                "# MethodDescription: " + series['methoddescription'] + "\n" +
-                                "# MethodLink: " + series['sitecode'] + "\n#\n";
+            // Append Method Information
+            csvContent +=   "# Method Information\n" +
+                            "# ---------------------------\n" +
+                            "# MethodDescription: " + series['methoddescription'] + "\n" +
+                            "# MethodLink: " + series['sitecode'] + "\n#\n";
 
-                // Append Series Information
-                csvContent +=   "# Series Information\n" +
-                                "# ---------------------------\n" +
-                                "# BeginDateTime: " + series['begindatetime'] + "\n" +
-                                "# EndDateTime: " + series['enddatetime'] + "\n" +
-                                "# DateLastUpdated: " + series['datelastupdated'] + "\n" +
-                                "# NumberOfObservations: " + series['numberobservations'] + "\n" +
-                                "# QualityControlLevelCode: " + series['qualitycontrollevelcode'] + "\n" +
-                                "# QualityControllLevelDefinition: " + series['qualitycontrolleveldefinition'] + "\n" +
-                                "# QualityControlLevelExplanation: " + series['qualitycontrollevelexplanation'] + "\n" +
-                                "# GetDataUrl: " + series['getdataurl'] + "\n#\n";
+            // Append Qualifier Information
+            csvContent +=   "# Qualifier Information\n" +
+                            "# ---------------------------\n";
+            for (var i = 0; i < series.dataset['qualifierCodes'].length; i++){
+                csvContent += "# " + series.dataset['qualifierCodes'][i] + " - " + series.dataset['qualifierDescriptions'][i] + "\n";
+            }
+            csvContent +=   "#\n"
 
-                // Append Source Information
-                csvContent +=   "# Source Information\n" +
-                                "# ---------------------------\n" +
-                                "# SourceOrganization: " + series['sourceorganization'] + "\n" +
-                                "# SourceDescription: " + series['sourcedescription'] + "\n#\n";
-                                //"# ContactName:" + series['contactname'] + "\n" +                   // Not found
-                                //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not found
-                                //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not found
-                                //"# Citation:" + series['citation'] + "\n";                          // Not found
+            // Append Series Information
+            csvContent +=   "# Series Information\n" +
+                            "# ---------------------------\n" +
+                            "# BeginDateTime: " + series['begindatetime'] + "\n" +
+                            "# EndDateTime: " + series['enddatetime'] + "\n" +
+                            "# DateLastUpdated: " + series['datelastupdated'] + "\n" +
+                            "# NumberOfObservations: " + series['numberobservations'] + "\n" +
+                            "# QualityControlLevelCode: " + series['qualitycontrollevelcode'] + "\n" +
+                            "# QualityControllLevelDefinition: " + series['qualitycontrolleveldefinition'] + "\n" +
+                            "# QualityControlLevelExplanation: " + series['qualitycontrollevelexplanation'] + "\n" +
+                            "# GetDataUrl: " + series['getdataurl'] + "\n#\n";
 
-                // Append property names
-                csvContent += "DateTime, ";
-                csvContent += "TimeOffset, ";
-                csvContent += "DateTimeUTC, ";
-                csvContent += "Value, ";
-                csvContent += "CensorCode";
-                csvContent += "\n";
+            // Append Source Information
+            csvContent +=   "# Source Information\n" +
+                            "# ---------------------------\n" +
+                            "# SourceOrganization: " + series['sourceorganization'] + "\n" +
+                            "# SourceDescription: " + series['sourcedescription'] + "\n#\n";
+                            //"# ContactName:" + series['contactname'] + "\n" +                   // Not found
+                            //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not found
+                            //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not found
+                            //"# Citation:" + series['citation'] + "\n";                          // Not found
 
-                // Append property values
-                series.dataset.forEach(function(data){
-                     csvContent += data['date'].replace("T", " ") + ", "
-                                + data['timeOffset'] + ", "
-                                + data['dateTimeUTC'].replace("T", " ") + ", "
-                                + data['value'] + ", "
-                                + data['censorCode'] + "\n";
-                });
+            // Append property names
+            csvContent += "DateTime, ";
+            csvContent += "TimeOffset, ";
+            csvContent += "DateTimeUTC, ";
+            csvContent += "Value, ";
+            csvContent += "CensorCode";
+            csvContent += "\n";
 
-                return csvContent;
+            // Append property values
+            series.dataset.forEach(function(data){
+                 csvContent += data['date'].replace("T", " ") + ", "
+                            + data['timeOffset'] + ", "
+                            + data['dateTimeUTC'].replace("T", " ") + ", "
+                            + data['value'] + ", "
+                            + data['censorCode'] + "\n";
+            });
+
+            return csvContent;
         }
 
         $("#btnExport").click(function() {
