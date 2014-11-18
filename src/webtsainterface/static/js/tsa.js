@@ -218,8 +218,8 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             // Append Qualifier Information
             csvContent +=   "# Qualifier Information\n" +
                             "# ---------------------------\n";
-            for (var i = 0; i < series.dataset['qualifierCodes'].length; i++){
-                csvContent += "# " + series.dataset['qualifierCodes'][i] + " - " + series.dataset['qualifierDescriptions'][i] + "\n";
+            for (var i = 0; i < series['qualifierCodes'].length; i++){
+                csvContent += "# " + series['qualifierCodes'][i] + " - " + series['qualifierDescriptions'][i] + "\n";
             }
             csvContent +=   "#\n"
 

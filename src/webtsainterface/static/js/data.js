@@ -171,13 +171,13 @@ define('data', ['jquery'], function() {
                     series.dataset.noDataValue = noDataValueNode && +noDataValueNode.textContent;
                     series.dataset.verticalDatum = verticalDatumNode && verticalDatumNode.textContent;
                     series.dataset.elevation = elevationNode && +elevationNode.textContent;
-                    series.dataset.qualifierCodes = [];
-                    series.dataset.qualifierDescriptions = [];
+                    series.qualifierCodes = [];
+                    series.qualifierDescriptions = [];
                     for (var i = 0; i < qualifierNodes.length; i++){
                         var code = qualifierNodes.item(i).getElementsByTagName("qualifierCode").item(0);
                         var description = qualifierNodes.item(i).getElementsByTagName("qualifierDescription").item(0);
-                        series.dataset.qualifierCodes.push(code && code.textContent);
-                        series.dataset.qualifierDescriptions.push(description && description.textContent);
+                        series.qualifierCodes.push(code && code.textContent);
+                        series.qualifierDescriptions.push(description && description.textContent);
                     }
 
                     while (node = values[index++]) {
