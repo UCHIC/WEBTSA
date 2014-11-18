@@ -52,6 +52,10 @@ define('table', ['datatablesLibraries'], function() {
                     title: 'Quality Control Level Code', data: 'qualitycontrollevelcode',
                     name: 'qualitycontrollevelcode', visible: false, orderable: false
                 },
+                {
+                    title: 'Variable Level', data: 'variablelevel',
+                    name: 'variablelevel', visible: false, orderable: false
+                },
                 { title: 'Series',  data: 'seriesid', name: 'seriesid', type: 'numeric' },
                 { title: 'Network',  data: 'network',  name: 'network' },
                 { title: 'Site Code', data: 'sitecode', name: 'sitecode' },
