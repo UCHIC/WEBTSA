@@ -15,11 +15,15 @@ Dependencies
 -------------
 
 The python environment needs these libraries installed for the Time Series Analyst to run properly.
+To install them, open a command line in the project root folder and run: pip install -r requirements.txt
 
 | Name | Version
 | ------------- | ------------
 | Django     | 1.6.5
-| Django     | 1.6.5
+| pyodbc     | 3.0.7
+| django-pyodbc     | 0.2.4
+| django-tastypie     | 0.11.0
+| pytz     | 2014.3
 
 
 Here is a list of the javascript libraries the Time Series Analyst uses. These libraries are included in the source.
