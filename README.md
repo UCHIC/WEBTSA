@@ -11,6 +11,21 @@ This project is receiving or has received support from a number of agencies and 
 
 This material is based on work supported by the National Science Foundation Grant EPS 1208732 awarded to Utah State University.  Additional support was previously provided by National Science Foundation grant EAR 0622374.  Any opinions, findings, and conclusions or recommendations expressed are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
 
+Dependencies
+-------------
+
+| Name |  URL
+| ------------- | ----------- 
+| RequireJS     | http://requirejs.org/
+| jQuery        | http://jquery.com/
+| jQuery.browser           | http://api.jquery.com/jquery.browser/
+| DataTables            | http://www.datatables.net/
+| Underscore           | http://underscorejs.org/
+| Bootstrap           | http://getbootstrap.com/
+| bootstrap-datepicker           | https://bootstrap-datepicker.readthedocs.org/en/release/
+| D3.js           | http://d3js.org/
+| zip.js           | http://gildas-lormeau.github.io/zip.js/
+
 Copying and License
 ----------------------------
 
