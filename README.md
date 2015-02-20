@@ -14,17 +14,27 @@ This material is based on work supported by the National Science Foundation Gran
 Dependencies
 -------------
 
-| Name |  URL
-| ------------- | ----------- 
-| RequireJS     | http://requirejs.org/
-| jQuery        | http://jquery.com/
-| jQuery.browser           | http://api.jquery.com/jquery.browser/
-| DataTables            | http://www.datatables.net/
-| Underscore           | http://underscorejs.org/
-| Bootstrap           | http://getbootstrap.com/
-| bootstrap-datepicker           | https://bootstrap-datepicker.readthedocs.org/en/release/
-| D3.js           | http://d3js.org/
-| zip.js           | http://gildas-lormeau.github.io/zip.js/
+The python environment needs these libraries installed for the Time Series Analyst to run properly.
+
+| Name | Version
+| ------------- | ------------
+| Django     | 1.6.5
+| Django     | 1.6.5
+
+
+Here is a list of the javascript libraries the Time Series Analyst uses. These libraries are included in the source.
+
+| Name | Version |  URL
+| ------------- | ------------ | ----------- 
+| RequireJS     | 2.1.11     | http://requirejs.org/
+| jQuery        | 2.1.1     | http://jquery.com/
+| jQuery.browser           | 0.0.6     | http://api.jquery.com/jquery.browser/
+| DataTables            | 1.10.0     | http://www.datatables.net/
+| Underscore           | 1.6.0     | http://underscorejs.org/
+| Bootstrap           | 3.1.1     | http://getbootstrap.com/
+| bootstrap-datepicker           | N/A     | https://bootstrap-datepicker.readthedocs.org/en/release/
+| D3.js           | 3.4.6     | http://d3js.org/
+| zip.js           | N/A     | http://gildas-lormeau.github.io/zip.js/
 
 Copying and License
 ----------------------------
