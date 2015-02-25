@@ -1,5 +1,4 @@
 {% load staticfiles %}
-{% load ganalytics %}
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -10,8 +9,9 @@
           m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
           })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-          ga('create', '{{ GANALYTICS_TRACKING_CODE }}', 'auto');
+          ga('create', 'UA-39768655-2', 'auto');
           ga('send', 'pageview');
+
         </script>
         <title>Time Series Analyst</title>
         <meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
