@@ -169,8 +169,8 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                                 // Append header
             csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
                             "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
-                            "# on the condition that neither iUTAH may be held liable for any damages resulting from\n" +
-                            "# its use. The following metadata describe the data in this file:\n" +
+                            "# on the condition that neither iUTAH nor any of its participants may be held liable for any\n" +
+                            "# damages resulting from thier use. The following metadata describe the data in this file:\n" +
                             "# ------------------------------------------------------------------------------------------\n#\n";
 
             // Append Site Information
