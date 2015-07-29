@@ -1,30 +1,5 @@
 from __future__ import unicode_literals
 from django.db import models
-from django.core.validators import RegexValidator
-import re
-
-# class DataSeriesField(models.Model):
-#     fieldname = models.CharField(db_column='FieldName', max_length=128, primary_key=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'DataSeriesFields'
-
-
-class SearchFacet(models.Model):
-    keyfield = models.CharField(max_length=128)
-    namefields = models.CharField(max_length=128, validators=[
-        RegexValidator(
-            regex=re.compile(r"^\w+(,\w+)*$"),
-            message=u'Value must be a comma separated value.',
-            code='invalid_values'
-        ),
-    ])
-    name = models.CharField(max_length=255)
-
-    def __unicode__(self):
-        return self.name
-
 
 class SourcesDataService(models.Model):
     sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID', primary_key=True)
@@ -51,6 +26,7 @@ class DataSeries(models.Model):
     sitetype = models.CharField(db_column='SiteType', max_length=50)
     variablecode = models.CharField(db_column='VariableCode', max_length=50)
     variablename = models.CharField(db_column='VariableName', max_length=255)
+    variablelevel = models.CharField(db_column='VariableLevel', max_length=50)
     methoddescription = models.CharField(db_column='MethodDescription', max_length=500)
     variableunitsname = models.CharField(db_column='VariableUnitsName', max_length=255, null=True, blank=True)
     variableunitstype = models.CharField(db_column='VariableUnitsType', max_length=50, null=True, blank=True)
@@ -75,6 +51,12 @@ class DataSeries(models.Model):
     datelastupdated = models.DateTimeField(db_column='DateLastUpdated')
     isactive = models.BigIntegerField(db_column='IsActive')
     getdataurl = models.CharField(db_column='GetDataURL', max_length=500)
+
+    def __unicode__(self):
+        return self.seriesid
+
+    def __str__(self):
+        return self.seriesid
 
     class Meta:
         managed = False

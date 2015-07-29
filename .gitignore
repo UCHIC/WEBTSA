@@ -1,16 +1,12 @@
+# Python compiled sources and objects
 *.py[cod]
-
-# C extensions
-*.so
 
 # Packages
 *.egg
-*.egg-info
 dist
 build
 eggs
 parts
-bin
 var
 sdist
 develop-eggs
@@ -34,4 +30,9 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# PyCharm
 .idea
+
+# Settings data file
+src/WEBTSA/settings/settings.json
