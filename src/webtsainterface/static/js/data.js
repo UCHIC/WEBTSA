@@ -201,7 +201,6 @@ define('data', ['jquery'], function() {
 
     function extendFacets() {
         self.facets.forEach(function(facet) {
-            facet.namefields = facet.namefields.split(',');
             facet.filteredFacetSeries = [];
             facet.filters = [];
 
