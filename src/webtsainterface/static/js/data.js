@@ -203,8 +203,8 @@ define('data', ['jquery'], function() {
                         seriesData.censorCode = node.getAttribute('censorCode');
                         seriesData.qualifiers = node.getAttribute('qualifiers');
                         series.dataset.push(seriesData);
-                        callback && callback();
                     }
+                    callback && callback();
                 });
             };
         });
