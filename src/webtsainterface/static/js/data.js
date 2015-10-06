@@ -145,6 +145,7 @@ define('data', ['jquery'], function() {
         var dateRegex = /^(\d{4}\-\d\d\-\d\d([tT][\d:]*)?)/;
 
         self.dataseries.forEach(function(series) {
+            var data;
             series.dataset = [];
             series.sitecode = (+series.sitecode)? [+series.sitecode].join(''): series.sitecode;
             series.loadDataset = function(callback) {
@@ -155,7 +156,19 @@ define('data', ['jquery'], function() {
 
                 $.ajax({
                     url: series.getdataurl
-                }).done(function(data) {
+                }).done(function(xml) {
+                    data = xml;
+                }).fail(function(failedData) {
+                    console.log('data failed to load.');
+                    if (window.DOMParser) {
+                        var parser = new DOMParser();
+                        data = parser.parseFromString(failedData.responseText,"text/xml");
+                    } else {
+                        data = new ActiveXObject("Microsoft.XMLDOM");
+                        data.async = false;
+                        data.loadXML(failedData.responseText);
+                    }
+                }).always(function() {
                     var values = data.getElementsByTagName('value');
                     if (values.length === 0) {
                         values = data.getElementsByTagName('ns1:value');
@@ -190,11 +203,9 @@ define('data', ['jquery'], function() {
                         seriesData.censorCode = node.getAttribute('censorCode');
                         seriesData.qualifiers = node.getAttribute('qualifiers');
                         series.dataset.push(seriesData);
-                    }})
-                    .done(function() {
                         callback && callback();
                     }
-                );
+                });
             };
         });
     }
