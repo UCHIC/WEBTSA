@@ -277,7 +277,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
             var link = document.createElement("a");
             link.on('click', function() {
-                _gaq.push(['_trackEvent', 'Download', 'CVS Dataset', this.href]);
+                ga('send', 'event', 'PDF', 'Download', 'Deposit Form – PDF Download');
             });
 
             // feature detection
