@@ -48,6 +48,13 @@ define('map', ['mapLibraries'], function() {
         var settings = {
             center: new google.maps.LatLng(41.0648701, -111.4622151),
             mapTypeId: google.maps.MapTypeId.TERRAIN,
+            streetViewControlOptions: {
+                position: google.maps.ControlPosition.LEFT_TOP
+            },
+            zoomControlOptions: {
+                position: google.maps.ControlPosition.LEFT_TOP
+            },
+
             zoom: 7
         };
 

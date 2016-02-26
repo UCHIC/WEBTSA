@@ -78,6 +78,7 @@
     display: inline-block;
     line-height: 2em;
     width: 33.3333%;
+    vertical-align: text-top;
 }
 
 .legendIcon {
