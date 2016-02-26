@@ -276,6 +276,9 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             );
 
             var link = document.createElement("a");
+            link.on('click', function() {
+                _gaq.push(['_trackEvent', 'Download', 'CVS Dataset', this.href]);
+            });
 
             // feature detection
             if(link.download === undefined) {
@@ -429,7 +432,6 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                             model.getBlobURL(function(url) {
                                 // var link = document.getElementById("downloadLink");
                                 link.setAttribute("href", url);
-                                link.setAttribute("onclick", "_gaq.push(['_trackEvent', 'Download', 'CVS Dataset', this.href]);");
                                 link.setAttribute("download", "TSA collection.zip");
                                 link.innerHTML = " <span class='container-title'>" + "TSA collection.zip" + "</span>";
                                 if (ui.getBrowserName.substr(0,7) == "Firefox"){    // Workaround for Firefox
