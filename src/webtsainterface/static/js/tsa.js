@@ -275,9 +275,9 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 </div>'
             );
 
-            var link = document.createElement("a");
+            var link = $('<a></a>');
             link.on('click', function() {
-                ga('send', 'event', 'CVS', 'Download', 'Dataset – CVS Download');
+                ga('send', 'event', 'CVS', 'Download', 'Dataset ï¿½ CVS Download');
             });
 
             // feature detection
