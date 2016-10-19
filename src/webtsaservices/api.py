@@ -1,7 +1,24 @@
+from __future__ import unicode_literals
+
+import six
 from tastypie.api import Api
+from tastypie.fields import CharField
 from tastypie.resources import Resource, ModelResource
 
 from webtsaservices.models import DataSeries, Site, SourcesDataService, VariableCategory, Variable, QualityControlLevel
+
+
+class UnicodeCharField(CharField):
+    """
+    A text field of arbitrary length, ignoring unicode errors.
+
+    """
+
+    def convert(self, value):
+        if value is None:
+            return None
+
+        return six.text_type(value, 'utf8', 'ignore')
 
 
 class PossibleValuesResource(Resource):
@@ -37,6 +54,8 @@ class SourcesDataServicesResource(ModelResource):
 
 
 class DataSeriesResource(ModelResource):
+    methoddescription = UnicodeCharField()
+
     class Meta:
         queryset = DataSeries.objects.all()
         resource_name = 'dataseries'
