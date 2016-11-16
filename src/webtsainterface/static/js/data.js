@@ -35,12 +35,14 @@ define('data', ['jquery'], function() {
 		$.getJSON(window.location.pathname + "api/v1/facets/?limit=0").done(function(data) {
             self.facets = data.objects;
             extendFacets();
+            
             dataLoader.loadedData++;
             $(document).trigger(facetsLoaded);
         });
 
 		$.getJSON(window.location.pathname + "api/v1/sites/?limit=0").done(function(data) {
             self.sites = data.objects;
+            
             dataLoader.loadedData++;
             $(document).trigger(sitesLoaded);
         });
@@ -48,13 +50,17 @@ define('data', ['jquery'], function() {
         $.getJSON(window.location.pathname + "api/v1/dataseries/?limit=0").done(function(data) {
             self.dataseries = data.objects;
             extendDataseries();
-            extendFilters();
-            var facets = _(self.facets).filter(function(facet) { return facet.selected !== ""; });
-            facets.forEach(function(facet) {
-                updateFilteredData(facet);
-            });
+            
             dataLoader.loadedData++;
             $(document).trigger(dataseriesLoaded);
+        });
+    };
+    
+    self.createFilters = function() {
+        extendFilters();
+        var facets = _(self.facets).filter(function(facet) { return facet.selected !== ""; });
+        facets.forEach(function(facet) {
+            updateFilteredData(facet);
         });
     };
 
@@ -248,7 +254,7 @@ define('data', ['jquery'], function() {
                 _.extend(filter, {
                     filteredSeries: series,
                     dataseriesCount: series.length,
-                    applied: ((filter[facet.keyfield] === facet.selected)? true: false)
+                    applied: filter[facet.keyfield] === facet.selected
                 });
                 facet.filters.push(filter);
             });

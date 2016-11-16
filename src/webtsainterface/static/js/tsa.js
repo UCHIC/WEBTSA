@@ -47,6 +47,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         $(document).on('dataloaded', function() {
             self.ui.renderFilterItems();
+            self.data.createFilters();
             checkInitialFilters();
 
             if (self.ui.getActiveView() !== 'datasets') {
