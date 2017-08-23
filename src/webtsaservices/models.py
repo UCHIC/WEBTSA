@@ -53,10 +53,10 @@ class DataSeries(models.Model):
     getdataurl = models.CharField(db_column='GetDataURL', max_length=500)
 
     def __unicode__(self):
-        return self.seriesid
+        return unicode(self.seriesid)
 
     def __str__(self):
-        return self.seriesid
+        return str(self.seriesid)
 
     class Meta:
         managed = False
