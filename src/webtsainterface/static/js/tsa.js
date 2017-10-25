@@ -234,7 +234,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                             "# QualityControlLevelCode: " + series['qualitycontrollevelcode'] + "\n" +
                             "# QualityControllLevelDefinition: " + series['qualitycontrolleveldefinition'] + "\n" +
                             "# QualityControlLevelExplanation: " + series['qualitycontrollevelexplanation'] + "\n" +
-                            "# GetDataUrl: " + series['getdataurl'] + "\n#\n";
+                            "# GetDataUrl: " + series['getdatainflux'] + "\n#\n";
 
             // Append Source Information
             csvContent +=   "# Source Information\n" +
