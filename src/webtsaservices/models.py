@@ -43,20 +43,20 @@ class DataSeries(models.Model):
     qualitycontrolleveldefinition = models.CharField(db_column='QualityControlLevelDefinition', max_length=500)
     qualitycontrollevelexplanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500, null=True, blank=True)
     sourceorganization = models.CharField(db_column='SourceOrganization', max_length=255)
-    sourcedescription = models.CharField(db_column='SourceDescription', max_length=500)
+    sourcedescription = models.CharField(db_column='SourceDescription', max_length=500, blank=True, null=True)
     begindatetime = models.DateTimeField(db_column='BeginDateTime')
-    enddatetime = models.DateTimeField(db_column='EndDateTime')
+    enddatetime = models.DateTimeField(db_column='EndDateTime', blank=True, null=True)
     utcoffset = models.IntegerField(db_column='UTCOffset', null=True, blank=True)
     numberobservations = models.IntegerField(db_column='NumberObservations')
-    datelastupdated = models.DateTimeField(db_column='DateLastUpdated')
+    datelastupdated = models.DateTimeField(db_column='DateLastUpdated', blank=True, null=True)
     isactive = models.BigIntegerField(db_column='IsActive')
     getdataurl = models.CharField(db_column='GetDataURL', max_length=500)
 
     def __unicode__(self):
-        return self.seriesid
+        return unicode(self.seriesid)
 
     def __str__(self):
-        return self.seriesid
+        return str(self.seriesid)
 
     class Meta:
         managed = False
