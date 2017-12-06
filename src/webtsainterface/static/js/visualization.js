@@ -22,8 +22,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
     var plotFinished = jQuery.Event("plotfinished");
 
     $(window).resize(_.debounce(function(){
-        if ($("#visualizationTab").hasClass("active"))
-            self.plotSeries();
+        if ($("#visualizationTab").hasClass("active")) {
+             self.plotSeries();
+             var offset = $("#graphArea").width() - $("#panel-right").position().left;
+             $("#graphContainer").width("calc(100% - " + offset + "px)");
+        }
     }, 500));
 
     self.canPlot = function() {
@@ -82,7 +85,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         assignSeriesId();
         self.currentPlot();
         $(document).trigger(plotFinished);
-        //TODO: if not in visualization tab, make it redraw the plot.
     };
 
     self.unplotSeries = function(seriesid) {
