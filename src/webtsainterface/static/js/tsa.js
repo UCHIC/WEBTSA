@@ -135,6 +135,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         $("#btnPlotDataset").click(function() {
             var dialog = $("#InfoDialog");
+            hideFacetsPanel();
             var id = +dialog.get(0).dataset['series'];
 
             // Clear checkboxes

@@ -9,13 +9,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     var defaultView = 'map';
 
     self.loadView = function(view) {
-        view = ($('.nav-tabs').find('li[id*="' + view + '"]').length === 0)? 'map': view;
-        if ($('#' + view + 'Tab').hasClass(visibleViewClass)) {
-            return;
-        }
-
-        var contentLink = $("a[href='#" + view + "Content']");
-        contentLink.click();
+        $("#" + view + "Tab a").tab('show');
     };
 
     self.getActiveView = function() {

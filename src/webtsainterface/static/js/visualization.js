@@ -103,14 +103,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         }
 
         self.plotSeries(); //TODO: remove it from the plot without re-plotting.
-
     };
 
     self.clearGraph = function(){
         $("#graphContainer").empty();
         $("#legendContainer").find("ul").empty();
         $("#statisticsTable tbody").empty();
-
     };
 
     // Adds commas to numbers in thousand intervals
@@ -409,6 +407,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
     function drawMultiseries() {
         self.clearGraph();
+
         var ui = require('ui');
         var varNames = _(self.plottedSeries).pluck('variablename');
         var siteNames = _(self.plottedSeries).pluck('sitename');
@@ -437,7 +436,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         }
 
         var margin = {top: 20, right: 20, bottom:100, left: 10},
-            width = $("#graphContainer").width();
+            width = $("#graphContainer").width() + $("#leftPanel").width(),
             height = $("#graphContainer").height() - margin.top - margin.bottom,
             margin2 = {top: height + 63, right: margin.right, bottom: 20, left: margin.left},
             height2 = 30;
@@ -505,13 +504,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var lines2 = new Array(data.length);
 
         var svg = d3.select("#graphContainer").append("svg")
-            .attr("width", $("#graphContainer").width())
-            .attr("height", height + margin.top + margin.bottom);
+            .attr("width", "100%")
+            .attr("height", "100%");
 
         var focus = svg.append("g")
              .attr("class", "focus")
-            .attr("width", $("#graphContainer").width())
-            .attr("height", height + margin.top + margin.bottom);
+            .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
+            .attr("height", "100%");
              //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var context = svg.append("g")

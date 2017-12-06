@@ -175,10 +175,6 @@ svg.box{
     width:auto;
 }
 
-svg{
-    height:auto;
-}
-
 .left{
     float:left;
 }
@@ -767,8 +763,11 @@ table.dataTable tbody tr.selected {
 }
 
 #dateIntervals{
-    margin-left: 20px;
-    margin-top: 5px;
+    padding: 5px;
+}
+
+#dateIntervals > button {
+    width: 33%;
 }
 
 .container-title{
@@ -776,7 +775,7 @@ table.dataTable tbody tr.selected {
     font-size: 14px;
 }
 #plotOptionsContainer td{
-    border-top:0px;
+    border-top:0;
     vertical-align: middle;
     padding-bottom: 2px;
 }
