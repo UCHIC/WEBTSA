@@ -175,27 +175,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
     // Returns the length of the longest tick in characters
     function getAxisSeparation(id) {
-        var ui = require('ui');
-        var browser = ui.getBrowserName;
         var ticks = $(".y.axis[data-id='" + id + "'] .tick text");
         var max = 0;
-        if (browser.substring(0, 7) == "Firefox" || browser.substr(0, 2) == "IE") {               // Firefox and IE do not support width() for elements inside an svg. Must calculate it using the textContent and font size (12)
-            for (var index = 0; index < ticks.length; index++) {
-                var a = ticks[index].textContent.length * 6.5;
-                if (max < a) {
-                    max = a;
-                }
+
+        for (var index = 0; index < ticks.length; index++) {
+            var a = $(ticks[index])[0].getBBox().width;
+            if (max < a) {
+                max = a;
             }
         }
-        else {
-            for (var index = 0; index < ticks.length; index++) {
-                var a = $(ticks[index]);
-                if (max < a.width()) {
-                    max = a.width();
-                }
-            }
-        }
-        return max;
+        return max + 10;
     }
 
     function calcSummaryStatistics(data) {
@@ -712,23 +701,19 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .style("fill", color(i))
                     .attr("transform", "translate(" + (axisProperties[yAxisCount].xTranslate) + " ,0)")
                     .call(yAxis[i])
-                    .append("text")
-                    .attr("transform", "rotate(-90)")
-                    .style("text-anchor", "end")
-                    .style("font-size", "14px")
-                    .attr("dy", ".71em")
-                    .text(varNames[i] + " (" + varUnits[i] + ")");
+                        .append("text")
+                        .attr("transform", "rotate(-90)")
+                        .style("text-anchor", "end")
+                        .style("font-weight", "bold")
+                        .style("font-size", "14px")
+                        .attr("dy", ".71em")
+                        .text(varNames[i] + " (" + varUnits[i] + ")");
 
                 var axisHeight = $(".y.axis[data-id=" + 0 + "]")[0].getBBox().height;
-                var textHeight = $(".y.axis[data-id='" + i + "'] > text").width();
+                var textHeight = $(".y.axis[data-id='" + i + "'] > text").text().length * 6.5;
 
-                // the width() method does not work in Firefox for elements inside an svg. Must calculate it
-                var browser = ui.getBrowserName;
-                if (browser.substring(0, 7) == "Firefox" || browser.substr(0, 2) == "IE") {
-                    textHeight = $(".y.axis[data-id='" + i + "'] > text").text().length * 6.5;
-                }
                 text.attr("x", -(axisHeight - textHeight) / 2);
-                text.attr("y", (getAxisSeparation(i) + 22) * axisProperties[yAxisCount].textdistance);
+                text.attr("y", (getAxisSeparation(i) + 15) * axisProperties[yAxisCount].textdistance);
                 yAxisCount++;
 
                 lines[i] = d3.svg.line()
@@ -744,28 +729,27 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .x(function (d) {
                         return x2(d.date);
                     })
-                    .y(
-                        function (d) {
-                            return y2[d.seriesID](d.val);
-                        });
+                    .y(function (d) {
+                        return y2[d.seriesID](d.val);
+                    });
 
                 // Update the axis properties
-                if (yAxisCount - 1 == 0) {
+                if (yAxisCount - 1 === 0) {
                     axisProperties[2].xTranslate = -$("#yAxis-" + 0)[0].getBBox().width;
                     margin.left += $("#yAxis-" + 0)[0].getBBox().width;
                 }
-                else if (yAxisCount - 1 == 1) {
+                else if (yAxisCount - 1 === 1) {
                     axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-" + 1)[0].getBBox().width;
                     margin.right += $("#yAxis-" + 1)[0].getBBox().width;
                 }
-                else if (yAxisCount - 1 == 2) {
+                else if (yAxisCount - 1 === 2) {
                     axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
                     margin.left += $("#yAxis-" + 2)[0].getBBox().width;
                 }
-                else if (yAxisCount - 1 == 3) {
+                else if (yAxisCount - 1 === 3) {
                     margin.right += $("#yAxis-" + 3)[0].getBBox().width;
                 }
-                else if (yAxisCount - 1 == 4) {
+                else if (yAxisCount - 1 === 4) {
                     margin.left += $("#yAxis-" + 4)[0].getBBox().width;
                 }
 
@@ -774,7 +758,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
 
             // If the graph contains less than 2 data points, append circles
-            if (data[i].values.length < 2) {
+            if (data[i] && data[i].values.length < 2) {
                 focus.selectAll("circle.line")
                     .data(data[i]['values'])
                     .enter().append("svg:circle")
@@ -809,7 +793,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         x.range([0, width]);
         x2.range([0, width]);
 
-
         var xAxis = d3.svg.axis()
             .scale(x)
             .ticks(Math.max(1, (width - data.length * 51) / 60))      // Don't even...
@@ -841,7 +824,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .append("rect")
             .attr("width", width)
             .attr("height", height);
-
 
         $('#legendContainer input[type="checkbox"]').click(function () {
             var that = this;
@@ -1011,12 +993,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             var id = this.getAttribute("data-id");
 
-            if (this.className != "list-group-item") {
+            if (this.className !== "list-group-item") {
                 var path = d3.select("#path" + id + " path");
                 path.each(onPathClick);
             }
 
-            if (this.className == "list-group-item") {
+            if (this.className === "list-group-item") {
                 $('#legendContainer .list-group-item').removeClass("highlight");
                 // d3.selectAll(".grid").remove();
                 d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
@@ -1179,7 +1161,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             var rectWidth = 0;
             for (var x = 0; x < graph.data.length; x++) {
-                if (graph.data[x].length != 0) {
+                if (graph.data[x].length !== 0) {
                     rectWidth = graph.x(graph.data[x].dx + ticks[0]) - 2;
                     break;
                 }
@@ -1216,7 +1198,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 })
                 .attr("text-anchor", "middle")
                 .text(function (d) {
-                    if (formatCount(d.y) != "0") {
+                    if (formatCount(d.y) !== "0") {
                         return formatCount(d.y);
                     }
                 });
@@ -1577,18 +1559,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
 
             var axisHeight = height;
-            var textHeight = $("svg[data-id=" + i + "] .yAxisLabel").width();
-            var textWidth = $("svg[data-id='" + i + "'] .tick:last text").width();
-            var tickWidth = $("svg[data-id='" + i + "'] text.box").width();
-
-            // Reposition y-axis label
-            // the width() method does not work in Firefox for elements inside an svg. Must calculate it
-            var browser = ui.getBrowserName;
-            if (browser.substring(0, 7) == "Firefox" || browser.substr(0, 2) == "IE") {
-                textHeight = $("svg[data-id=" + i + "] .yAxisLabel").text().length * 7;
-                textWidth = $("svg[data-id='" + i + "'] .tick:last text").text().length * 7;
-                tickWidth = $("svg[data-id='" + i + "'] text.box")[0].textContent.length * 7;
-            }
+            var textHeight = $("svg[data-id=" + i + "] .yAxisLabel")[0].getBBox().width;
+            var textWidth = $("svg[data-id='" + i + "'] .tick:last text")[0].getBBox().width;
+            var tickWidth = $("svg[data-id='" + i + "'] text.box")[0].getBBox().width;
 
             // Reposition x-axis
             $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-tickWidth - 40) + "," + height + ")");
@@ -1597,7 +1570,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             $("svg[data-id='" + i + "'] .y.axis").attr("transform", "translate(" + (-tickWidth - 40) + "," + (0) + ")");
 
             text.attr("x", -(axisHeight - textHeight) / 2);
-            text.attr("y", -textWidth - 26)
+            text.attr("y", -textWidth - 26);
 
             // Update size
             self.boxWhiskerSvgs[i].attr("height", height);
@@ -1628,7 +1601,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var id = that.getAttribute("data-id");
             if (that.className == "list-group-item") {
                 $('#legendContainer .list-group-item').removeClass("highlight");
-                this.className = "list-group-item highlight"
+                this.className = "list-group-item highlight";
 
                 // Set summary statistics
                 setSummaryStatistics(summary[id]);
