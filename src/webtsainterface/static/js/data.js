@@ -162,6 +162,7 @@ define('data', ['jquery'], function() {
 
                 $.ajax({
                     url: series.getdataurl
+                    // getdatainflux
                 }).done(function(xml) {
                     data = xml;
                 }).fail(function(failedData) {
