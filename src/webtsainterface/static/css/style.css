@@ -431,6 +431,7 @@ line.tick {
 
 .navbar-brand img {
     max-height: 70px;
+    margin-top: 7px;
 }
 
 .navbar-brand {
