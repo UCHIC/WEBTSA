@@ -1,6 +1,3 @@
-/**
- * Created by Juan on 4/6/14.
- */
 
 define('data', ['jquery'], function() {
     var self = {};
@@ -148,8 +145,6 @@ define('data', ['jquery'], function() {
     }
 
     function extendDataseries() {
-        var dateRegex = /^(\d{4}\-\d\d\-\d\d([tT][\d:]*)?)/;
-
         self.dataseries.forEach(function(series) {
             var data;
             series.dataset = [];
@@ -159,58 +154,26 @@ define('data', ['jquery'], function() {
                     callback && callback();
                     return;
                 }
-
                 $.ajax({
-                    url: series.getdataurl
-                    // getdatainflux
-                }).done(function(xml) {
-                    data = xml;
+                    url: series.getdatainflux
+                }).done(function(influx_data) {
+                    var resultSet = influx_data.results.shift();
+                    if (resultSet.series && resultSet.series.length) {
+                        var influxSeries = resultSet.series.shift();
+                        series.dataset = influxSeries.values.map(function(influxValue) {
+                            return {
+                                date: influxValue[0].match(/^(\d{4}\-\d\d\-\d\d([tT][\d:]*)?)/).shift(),
+                                value: influxValue[1],
+                                timeOffset: influxValue[2]
+                            }
+                        });
+                    } else {
+                         console.error('No data values were found for this site');
+                         console.info(series.getdatainflux);
+                    }
                 }).fail(function(failedData) {
                     console.log('data failed to load.');
-                    if (window.DOMParser) {
-                        var parser = new DOMParser();
-                        data = parser.parseFromString(failedData.responseText,"text/xml");
-                    } else {
-                        data = new ActiveXObject("Microsoft.XMLDOM");
-                        data.async = false;
-                        data.loadXML(failedData.responseText);
-                    }
                 }).always(function() {
-                    var values = data.getElementsByTagName('value');
-                    if (values.length === 0) {
-                        values = data.getElementsByTagName('ns1:value');
-                    }
-                    var index = 0;
-                    var node;
-
-                    var verticalDatumNode = data.getElementsByTagName('verticalDatum').item(0);
-                    var elevationNode = data.getElementsByTagName('elevation_m').item(0);
-                    var noDataValueNode = data.getElementsByTagName('noDataValue').item(0);
-                    var qualifierNodes = data.getElementsByTagName('qualifier');
-
-                    series.dataset.noDataValue = noDataValueNode && +noDataValueNode.textContent;
-                    series.dataset.verticalDatum = verticalDatumNode && verticalDatumNode.textContent;
-                    series.dataset.elevation = elevationNode && +elevationNode.textContent;
-                    series.qualifierCodes = [];
-                    series.qualifierDescriptions = [];
-                    for (var i = 0; i < qualifierNodes.length; i++){
-                        var code = qualifierNodes.item(i).getElementsByTagName("qualifierCode").item(0);
-                        var description = qualifierNodes.item(i).getElementsByTagName("qualifierDescription").item(0);
-                        series.qualifierCodes.push(code && code.textContent);
-                        series.qualifierDescriptions.push(description && description.textContent);
-                    }
-
-                    while (node = values[index++]) {
-                        var seriesData = {};
-                        seriesData.date = node.getAttribute('dateTime').match(dateRegex).shift();
-                        seriesData.value = node.textContent;
-                        seriesData.variable = series.variablename;
-                        seriesData.dateTimeUTC = node.getAttribute('dateTimeUTC');
-                        seriesData.timeOffset = node.getAttribute('timeOffset');
-                        seriesData.censorCode = node.getAttribute('censorCode');
-                        seriesData.qualifiers = node.getAttribute('qualifiers');
-                        series.dataset.push(seriesData);
-                    }
                     callback && callback();
                 });
             };

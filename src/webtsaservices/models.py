@@ -1,4 +1,7 @@
 from __future__ import unicode_literals
+
+import uuid
+
 from django.db import models
 
 class SourcesDataService(models.Model):
@@ -15,6 +18,8 @@ class SourcesDataService(models.Model):
 
 class DataSeries(models.Model):
     seriesid = models.IntegerField(db_column='SeriesID', primary_key=True)
+    resultuuid = models.UUIDField(default=uuid.uuid4, editable=False, db_column='ResultUUID', unique=True)
+    influxidentifier = models.TextField(db_column='InfluxIdentifier')
     sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID')
     network = models.CharField(db_column='Network', max_length=50)
     sitecode = models.CharField(db_column='SiteCode', max_length=50)
@@ -51,6 +56,7 @@ class DataSeries(models.Model):
     datelastupdated = models.DateTimeField(db_column='DateLastUpdated', blank=True, null=True)
     isactive = models.BigIntegerField(db_column='IsActive')
     getdataurl = models.CharField(db_column='GetDataURL', max_length=500)
+    getdatainflux = models.TextField(db_column='GetDataInflux')
 
     def __unicode__(self):
         return unicode(self.seriesid)
