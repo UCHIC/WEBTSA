@@ -530,7 +530,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                 '<font color=' + color(i) + '> ■ ' + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
                 '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
-                '<span class="caption text-center">' + qualityControlLevels[i] + '</span></li>'
+                '<span class="caption">' + qualityControlLevels[i] + '</span></li>'
             );
         }
 
@@ -1066,7 +1066,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                 '<font color=' + colors(i) + '> ■ ' + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
                 '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
-                '<span class="caption text-center">' + qualityControlLevels[i] + '</span></li>'
+                '<span class="caption">' + qualityControlLevels[i] + '</span></li>'
             );
 
             // Bind unplot button event
@@ -1546,7 +1546,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
                     '<font color=' + colors(i) + '> ■ ' + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
                     '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
-                    '<span class="caption text-center">' + qualityControlLevels[i] + '</span></li>'
+                    '<span class="caption">' + qualityControlLevels[i] + '</span></li>'
                 );
 
                 // Bind unplot button event
@@ -1560,7 +1560,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             var axisHeight = height;
             var textHeight = $("svg[data-id=" + i + "] .yAxisLabel")[0].getBBox().width;
-            var textWidth = $("svg[data-id='" + i + "'] .tick:last text")[0].getBBox().width;
+            if ($("svg[data-id='" + i + "'] .tick:last text").length) {
+                var textWidth = $("svg[data-id='" + i + "'] .tick:last text")[0].getBBox().width;
+            }
+
             var tickWidth = $("svg[data-id='" + i + "'] text.box")[0].getBBox().width;
 
             // Reposition x-axis
