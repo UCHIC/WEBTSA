@@ -213,7 +213,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
         dialog.find("#btnAddToPlot").prop('disabled',
             !visualization.canPlot() || isAlreadyPlotted);
         dialog.modal('show');
-    }
+    };
 
     self.updateTabsFilteredCount = function() {
         var data = require('data');

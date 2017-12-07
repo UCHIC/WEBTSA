@@ -5,7 +5,11 @@
 define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
     var self = {};
 
-    self.plotTypes = {histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot};
+    self.plotTypes = {
+        histogram: drawHistogram,
+        multiseries: drawMultiseries,
+        box: drawBoxPlot
+    };
     self.currentPlot = self.plotTypes.multiseries;
     self.plotLimit = 5;
     self.doPlot = true;
@@ -28,6 +32,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             $("#graphContainer").width("calc(100% - " + offset + "px)");
         }
     }, 500));
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        if ($(e.target).parent().attr("id") == "visualizationTab") {
+            $("#leftPanel .panel-group").hide();
+            // self.plotSeries();
+        } // newly activated tab
+    });
 
     self.canPlot = function () {
         return self.plottedSeries.length + self.unplottedSeries.length < self.plotLimit;
@@ -84,6 +95,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         self.unplottedSeries.length = 0;
         assignSeriesId();
         self.currentPlot();
+        // console.log("Drawing Plot");
         $(document).trigger(plotFinished);
     };
 
@@ -1162,7 +1174,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 div.transition().duration(500).style("opacity", 0);
             });
 */
-
             var rectWidth = 0;
             for (var x = 0; x < graph.data.length; x++) {
                 if (graph.data[x].length !== 0) {
@@ -1387,7 +1398,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 while (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length && graphs[i].numberOfBins > minTicks && graphs[i].numberOfBins < maxTicks);
             });
         }
-
 
         setSummaryStatistics(summary[0]);                                               // Set the first summary statistics by default
 
