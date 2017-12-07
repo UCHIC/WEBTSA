@@ -135,6 +135,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         $("#btnPlotDataset").click(function() {
             var dialog = $("#InfoDialog");
+            hideFacetsPanel();
             var id = +dialog.get(0).dataset['series'];
 
             // Clear checkboxes
@@ -497,23 +498,26 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             }
         });
 
-        $("#btnCollapseToggle").click(function() {
+        $("#btnCollapseToggle").click(function () {
             dir = !dir;
             var slideDistance = 307;
-            r = dir? -slideDistance : 0;
-            $("#panel-right").stop().animate({right: r+'px'}, 0);
-            $("#btnCollapseToggle span").removeClass();
-            if (!dir){
-                //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);    // animation
-                $("#graphContainer").width($("#graphContainer").width() - slideDistance);           // no animation
-                $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-right");
-            }
-            else{
-                //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);    // animation
-                $("#graphContainer").width($("#graphContainer").width() + slideDistance);           // no animation
-                $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
-            }
-            self.visualization.plotSeries();
+            r = dir ? -slideDistance : 0;
+            $("#panel-right").stop().animate({right: r + 'px'}, 200,
+                function () {
+                    $("#btnCollapseToggle span").removeClass();
+                    if (!dir) {
+                        //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);    // animation
+                        $("#graphContainer").width($("#graphContainer").width() - slideDistance);           // no animation
+                        $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-right");
+                    }
+                    else {
+                        //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);    // animation
+                        $("#graphContainer").width($("#graphContainer").width() + slideDistance);           // no animation
+                        $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
+                    }
+                    self.visualization.plotSeries();
+                }
+            );
         });
 
         $("#btnLeftPanelCollapse").on("click", function() {

@@ -9,13 +9,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     var defaultView = 'map';
 
     self.loadView = function(view) {
-        view = ($('.nav-tabs').find('li[id*="' + view + '"]').length === 0)? 'map': view;
-        if ($('#' + view + 'Tab').hasClass(visibleViewClass)) {
-            return;
-        }
-
-        var contentLink = $("a[href='#" + view + "Content']");
-        contentLink.click();
+        $("#" + view + "Tab a").tab('show');
     };
 
     self.getActiveView = function() {
@@ -197,17 +191,20 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
 
     };
 
-    self.showDataseriesDialog = function(series) {
+    self.showDataseriesDialog = function (series) {
         var visualization = require('visualization');
         var dialog = $('#InfoDialog');
         var plottedSeries = visualization.plottedSeries;
         var isAlreadyPlotted = _(_(plottedSeries).pluck('seriesid')).contains(series.seriesid);
 
-         $(".modal-header").find(".alert").remove();    // Clear previous download links
+        $(".modal-header").find(".alert").remove();    // Clear previous download links
 
         dialog.get(0).dataset['series'] = series.seriesid;
-        dialog.find("#series-active-info").text((series.isactive? "Active": "Not Active"));
-        dialog.find(".series-item-value").each(function(index, item) {
+        dialog.find("#series-active-info").text((series.isactive ? "Active" : "Not Active"));
+        dialog.find("#series-active-info").removeClass();
+        dialog.find("#series-active-info").addClass((series.isactive ? "label label-success" : "label label-danger"));
+
+        dialog.find(".series-item-value").each(function (index, item) {
             if (series.hasOwnProperty(item.dataset.field)) {
                 $(item).text(series[item.dataset.field]);
             }
