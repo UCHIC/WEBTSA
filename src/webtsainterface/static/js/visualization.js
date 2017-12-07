@@ -5,7 +5,11 @@
 define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
     var self = {};
 
-    self.plotTypes = {histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot};
+    self.plotTypes = {
+        histogram: drawHistogram,
+        multiseries: drawMultiseries,
+        box: drawBoxPlot
+    };
     self.currentPlot = self.plotTypes.multiseries;
     self.plotLimit = 5;
     self.doPlot = true;
@@ -28,6 +32,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             $("#graphContainer").width("calc(100% - " + offset + "px)");
         }
     }, 500));
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        if ($(e.target).parent().attr("id") == "visualizationTab") {
+            $("#leftPanel .panel-group").hide();
+            // self.plotSeries();
+        } // newly activated tab
+    });
 
     self.canPlot = function () {
         return self.plottedSeries.length + self.unplottedSeries.length < self.plotLimit;
@@ -84,6 +95,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         self.unplottedSeries.length = 0;
         assignSeriesId();
         self.currentPlot();
+        // console.log("Drawing Plot");
         $(document).trigger(plotFinished);
     };
 
@@ -247,10 +259,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             // Maximum and Minimum
             summary[i].maximum = d3.max(data[i], function (d) {
                 return parseFloat(d.value);
-            });
+            }).toFixed(2);
             summary[i].minimum = d3.min(data[i], function (d) {
                 return parseFloat(d.value);
-            });
+            }).toFixed(2);
 
             // Arithmetic Mean
             summary[i].arithmeticMean = d3.mean(data[i], function (d) {
@@ -411,7 +423,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
     function drawMultiseries() {
         self.clearGraph();
 
-        var ui = require('ui');
         var varNames = _(self.plottedSeries).pluck('variablename');
         var siteNames = _(self.plottedSeries).pluck('sitename');
         var siteCodes = _(self.plottedSeries).pluck('sitecode');
@@ -429,6 +440,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 continue;
             }
         }
+
         for (var i = 0; i < varNames.length - 1; i++) {
             for (var j = i + 1; j < varNames.length; j++) {
                 if (varNames[i] == varNames[j] && varUnits[i] == varUnits[j] && datasets[i].length > 0) {
@@ -444,17 +456,17 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             margin2 = {top: height + 63, right: margin.right, bottom: 20, left: margin.left},
             height2 = 30;
 
-        var yAxisCount = 0;     // Counter to keep track of y-axises as we place them
+        var yAxisCount = 0;     // Counter to keep track of y-axes as we place them
 
-        // Properties for the five vertical axises.
+        // Properties for the five vertical axes.
         // even: f(n) = n * 10
         // odd: f(n) = width - (n-1) * 10
         var axisProperties = [
             {xTranslate: 0, orient: "left", textdistance: -1},
-            {xTranslate: width, orient: "right", textdistance: 1},
-            {xTranslate: -65, orient: "left", textdistance: -1},
-            {xTranslate: width + 65, orient: "right", textdistance: 1},
-            {xTranslate: -130, orient: "left", textdistance: -1}
+            {xTranslate: 0, orient: "right", textdistance: 1},
+            {xTranslate: 0, orient: "left", textdistance: -1},
+            {xTranslate: 0, orient: "right", textdistance: 1},
+            {xTranslate: 0, orient: "left", textdistance: -1}
         ];
 
         var summary = calcSummaryStatistics(datasets);
@@ -660,36 +672,37 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 }))];
 
                 // update previous axis and use it
-                y[i] = d3.scale.linear()
+                y[usedAxis] = d3.scale.linear()
                     .domain(domain)
                     .range([height, 0]);
 
                 // y-coordinate for the context view
-                y2[i] = d3.scale.linear()
+                y2[usedAxis] = d3.scale.linear()
                     .domain(domain)
                     .range([height2, 0]);
 
                 $(".y.axis[data-id='" + usedAxis + "']").attr("style", "fill: #000");
+
+                yAxis[usedAxis].scale(y[usedAxis]);
+
                 focus.select(".y.axis[data-id='" + usedAxis + "']").call(yAxis[usedAxis]);
 
                 lines[i] = d3.svg.line()
                     .x(function (d) {
                         return x(d.date);
                     })
-                    .y(
-                        function (d) {
-                            return y[d.seriesID](d.val);
-                        });
+                    .y(function (d) {
+                        return y[usedAxis](d.val);
+                    });
 
                 lines2[i] = d3.svg.line()
                 //.interpolate("basis")
                     .x(function (d) {
                         return x2(d.date);
                     })
-                    .y(
-                        function (d) {
-                            return y2[d.seriesID](d.val);
-                        });
+                    .y(function (d) {
+                        return y2[usedAxis](d.val);
+                    });
             }
             else {
                 // Create a new axis
@@ -704,12 +717,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                         .append("text")
                         .attr("transform", "rotate(-90)")
                         .style("text-anchor", "end")
-                        .style("font-weight", "bold")
                         .style("font-size", "14px")
                         .attr("dy", ".71em")
                         .text(varNames[i] + " (" + varUnits[i] + ")");
 
-                var axisHeight = $(".y.axis[data-id=" + 0 + "]")[0].getBBox().height;
+                var axisHeight = $(".y.axis[data-id=" + i + "]")[0].getBBox().height;
                 var textHeight = $(".y.axis[data-id='" + i + "'] > text").text().length * 6.5;
 
                 text.attr("x", -(axisHeight - textHeight) / 2);
@@ -734,23 +746,24 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     });
 
                 // Update the axis properties
+                var axisSpacing = 10;
                 if (yAxisCount - 1 === 0) {
-                    axisProperties[2].xTranslate = -$("#yAxis-" + 0)[0].getBBox().width;
-                    margin.left += $("#yAxis-" + 0)[0].getBBox().width;
+                    axisProperties[2].xTranslate = -($("#yAxis-" + 0)[0].getBBox().width + axisSpacing);
+                    margin.left += $("#yAxis-" + 0)[0].getBBox().width + axisSpacing;
                 }
                 else if (yAxisCount - 1 === 1) {
-                    axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-" + 1)[0].getBBox().width;
-                    margin.right += $("#yAxis-" + 1)[0].getBBox().width;
+                    axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-" + 1)[0].getBBox().width + axisSpacing;
+                    margin.right += $("#yAxis-" + 1)[0].getBBox().width + axisSpacing;
                 }
                 else if (yAxisCount - 1 === 2) {
-                    axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
-                    margin.left += $("#yAxis-" + 2)[0].getBBox().width;
+                    axisProperties[4].xTranslate = axisProperties[2].xTranslate - ($("#yAxis-" + 2)[0].getBBox().width + axisSpacing);
+                    margin.left += $("#yAxis-" + 2)[0].getBBox().width + axisSpacing;
                 }
                 else if (yAxisCount - 1 === 3) {
-                    margin.right += $("#yAxis-" + 3)[0].getBBox().width;
+                    margin.right += $("#yAxis-" + 3)[0].getBBox().width + axisSpacing;
                 }
                 else if (yAxisCount - 1 === 4) {
-                    margin.left += $("#yAxis-" + 4)[0].getBBox().width;
+                    margin.left += $("#yAxis-" + 4)[0].getBBox().width + axisSpacing;
                 }
 
                 focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
@@ -782,8 +795,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         // Append x axis
         width = $("#graphContainer").width() - margin.left - margin.right;
 
+        // Axes to the right
         axisProperties[1].xTranslate = width;
-        axisProperties[3].xTranslate = width + 65;
+        axisProperties[3].xTranslate += width;
 
         context.attr("transform", "translate(" + margin.left + "," + margin2.top + ")");
 
@@ -891,20 +905,22 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         }
 
         function onPathClick() {
-            var id = 0;
+            var id = $(this).parent().attr("data-id");
+
+            var axisID = 0;
             var varName = varNames[this.parentElement.getAttribute("data-id")];
             var varUnit = varUnits[this.parentElement.getAttribute("data-id")];
             for (var x = 0; x < varNames.length; x++) {
                 if (varName == varNames[x] && varUnit == varUnits[x]) {
-                    id = x;
+                    axisID = x;
                     break;
                 }
             }
 
             var flag = true;
-            ".y.axis[data-id=" + 0 + "]"
+
             d3.select(this.parentElement).moveToFront();
-            d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line").attr("stroke-width", 2.5);
+            d3.selectAll(".y.axis[data-id='" + axisID + "'] .domain," + ".y.axis[data-id='" + axisID + "'] .domain .tick line").attr("stroke-width", 2.5);
 
             if (this.parentElement.getAttribute("opacity") == "0.4") {
                 focus.selectAll(".seriesID").attr("opacity", "0.4");
@@ -941,7 +957,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
 
             if (flag) {
-                d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line").attr("stroke-width", 2.5);
+                d3.selectAll(".y.axis[data-id='" + axisID + "'] .domain," + ".y.axis[data-id='" + axisID + "'] .domain .tick line").attr("stroke-width", 2.5);
                 // paintGridAxis(id);
             }
             else {
@@ -1158,7 +1174,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 div.transition().duration(500).style("opacity", 0);
             });
 */
-
             var rectWidth = 0;
             for (var x = 0; x < graph.data.length; x++) {
                 if (graph.data[x].length !== 0) {
@@ -1383,7 +1398,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 while (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length && graphs[i].numberOfBins > minTicks && graphs[i].numberOfBins < maxTicks);
             });
         }
-
 
         setSummaryStatistics(summary[0]);                                               // Set the first summary statistics by default
 
