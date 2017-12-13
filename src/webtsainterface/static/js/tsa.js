@@ -218,12 +218,15 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                             "# MethodLink: " + series['sitecode'] + "\n#\n";
 
             // Append Qualifier Information
-            csvContent +=   "# Qualifier Information\n" +
-                            "# ---------------------------\n";
-            for (var i = 0; i < series['qualifierCodes'].length; i++){
-                csvContent += "# " + series['qualifierCodes'][i] + " - " + series['qualifierDescriptions'][i] + "\n";
+            if (series['qualifierCodes']) {
+                csvContent += "# Qualifier Information\n" +
+                    "# ---------------------------\n";
+                for (var i = 0; i < series['qualifierCodes'].length; i++) {
+                    csvContent += "# " + series['qualifierCodes'][i] + " - " + series['qualifierDescriptions'][i] + "\n";
+                }
+                csvContent += "#\n";
             }
-            csvContent +=   "#\n"
+
 
             // Append Series Information
             csvContent +=   "# Series Information\n" +
@@ -260,10 +263,10 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             series.dataset.forEach(function(data){
                  csvContent += data['date'].replace("T", " ") + ", "
                             + data['timeOffset'] + ", "
-                            + data['dateTimeUTC'].replace("T", " ") + ", "
+                            + (data['dateTimeUTC'] === undefined ? "" : data['dateTimeUTC'].replace("T", " ")) + ", "
                             + data['value'] + ", "
                             + data['censorCode'] + ", "
-                            + (data['qualifiers'] == null ? "" : data['qualifiers']) + "\n";
+                            + (data['qualifiers'] === undefined ? "" : data['qualifiers']) + "\n";
             });
 
             return csvContent;
@@ -277,8 +280,8 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 </div>'
             );
 
-            var link = $('<a></a>');
-            link.on('click', function() {
+            var link = document.createElement("a");
+            link.click(function() {
                 ga('send', 'event', 'CVS', 'Download', 'Dataset � CVS Download');
             });
 
@@ -325,7 +328,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
             if(link.download === undefined) {
                 // Needs to implement server side download
-                alert("We're sorry, your browser does not support HTML5 download. Please use Chrome, Firefox or Opera to download.")
+                alert("We are sorry, your browser does not support HTML5 download. Please use Chrome, Firefox or Opera to download.")
             }
 
             var series = [];
