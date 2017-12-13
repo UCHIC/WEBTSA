@@ -318,6 +318,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 $(".modal-header").find(".alert").empty();
                 $(".modal-header").find(".alert").removeClass("alert-info");
                 $(".modal-header").find(".alert").addClass("alert-success");
+                $(".modal-header").find(".alert").append('<div>Click to download:</div>');
                 $(".modal-header").find(".alert").append(link);
             });
         });
@@ -340,7 +341,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 series.push(self.visualization.unplottedSeries[i])
             }
 
-            if (series.length == 0){
+            if (series.length === 0){
                 return;
             }
 
@@ -359,7 +360,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                     var files = [];
 
                     for(var i = 0; i < series.length; i++){
-                        var filename = series[i].sitecode + " - " + series[i].variablename + ".csv";
+                        var filename = series[i].sitecode.trim() + " - " + series[i].variablecode.trim() + " - " + series[i].variablename.trim() + ".csv";
                         var blobFile = new Blob(["", getCSVContent(series[i])]);
                         files.push({name:filename, data:blobFile});
                     }
