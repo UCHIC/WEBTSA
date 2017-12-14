@@ -654,16 +654,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
 
             if (chosenYAxes.length > 1) {
-                var usedAxis = Math.min.apply(null, chosenYAxes);   // select the first axis created for this variable
-                var domain = [Infinity, -Infinity];
+                let usedAxis = Math.min.apply(null, chosenYAxes);   // select the first axis created for this variable
+                var newDomain = [Infinity, -Infinity];
 
-                domain = [Math.min(domain[0], d3.min(data, function (d) {
+                newDomain = [Math.min(newDomain[0], d3.min(data, function (d) {
                     if (jQuery.inArray(parseInt(d.key), chosenYAxes) != -1) {
                         return d3.min(d.values, function (d) {
                             return d.val;
                         });
                     }
-                })), Math.max(domain[1], d3.max(data, function (d) {
+                })), Math.max(newDomain[1], d3.max(data, function (d) {
                     if (jQuery.inArray(parseInt(d.key), chosenYAxes) != -1) {
                         return d3.max(d.values, function (d) {
                             return d.val;
@@ -672,13 +672,15 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 }))];
 
                 // update previous axis and use it
+                var currentDomain = y[usedAxis].domain();
+                var combinedDomain = [Math.min(newDomain[0], currentDomain[0]), Math.max(newDomain[1], currentDomain[1])]
                 y[usedAxis] = d3.scale.linear()
-                    .domain(domain)
+                    .domain(combinedDomain)
                     .range([height, 0]);
 
                 // y-coordinate for the context view
                 y2[usedAxis] = d3.scale.linear()
-                    .domain(domain)
+                    .domain(combinedDomain)
                     .range([height2, 0]);
 
                 $(".y.axis[data-id='" + usedAxis + "']").attr("style", "fill: #000");
