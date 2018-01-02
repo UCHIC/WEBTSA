@@ -57,6 +57,7 @@ class DataSeries(models.Model):
     isactive = models.BigIntegerField(db_column='IsActive')
     getdataurl = models.CharField(db_column='GetDataURL', max_length=500)
     getdatainflux = models.TextField(db_column='GetDataInflux')
+    nodatavalue = models.BigIntegerField(db_column='NoDataValue', default=-9999)
 
     def __unicode__(self):
         return unicode(self.seriesid)
