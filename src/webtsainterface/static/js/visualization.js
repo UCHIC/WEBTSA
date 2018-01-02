@@ -505,8 +505,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var lines2 = new Array(data.length);
 
         var svg = d3.select("#graphContainer").append("svg")
-            .attr("width", $("#graphContainer").width())
-            .attr("height", height + margin.top + margin.bottom);
+            .style("width", $("#graphContainer").width())
+            .style("height", (height + margin.top + margin.bottom) + "px");
 
         var focus = svg.append("g")
              .attr("class", "focus")
