@@ -167,6 +167,7 @@ define('data', ['jquery'], function() {
                                 timeOffset: influxValue[2]
                             }
                         });
+
                     } else {
                          console.error('No data values were found for this site');
                          console.info(series.getdatainflux);
@@ -175,7 +176,7 @@ define('data', ['jquery'], function() {
                     console.log('data failed to load.');
                 }).always(function() {
                     callback && callback();
-                });
+                }); 
             };
         });
     }
