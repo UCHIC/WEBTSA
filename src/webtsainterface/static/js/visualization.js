@@ -322,7 +322,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var minDate = new Date(8640000000000000);
         var maxDate = new Date(-8640000000000000);
         var datasets = _(self.plottedSeries).pluck('dataset');
-        var noDataValues = _(datasets).pluck('noDataValue');
+        var noDataValues = _(self.plottedSeries).pluck('nodatavalue');
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
 
         for (var i = 0; i < datasets.length; i++) {
@@ -520,8 +520,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var lines2 = new Array(data.length);
 
         var svg = d3.select("#graphContainer").append("svg")
-            .attr("width", "100%")
-            .attr("height", height + margin.top + margin.bottom);
+            .style("width", $("#graphContainer").width())
+            .style("height", (height + margin.top + margin.bottom) + "px");
 
         var focus = svg.append("g")
             .attr("class", "focus")
