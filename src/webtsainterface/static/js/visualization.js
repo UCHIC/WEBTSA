@@ -1430,7 +1430,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var varCodes = _(self.plottedSeries).pluck('variablecode');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var qualityControlLevels = _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
-        var observations = getDatasetsAfterFilters()
+        var observations = getDatasetsAfterFilters();
         var summary = calcSummaryStatistics(observations);
 
         observations = observations.map(function (dataset) {
@@ -1591,13 +1591,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             text.attr("y", -textWidth - 26);
 
             // Update size
-            self.boxWhiskerSvgs[i].attr("height", height);
+            self.boxWhiskerSvgs[i].style("height", height + "px");
             var browser = ui.getBrowserName;
             if (browser.substr(0, 2) == "IE") {
-                $(self.boxWhiskerSvgs[i][0][0].parentNode).css("height", height + margin.bottom + margin.top + "px");
+                $(self.boxWhiskerSvgs[i][0][0].parentNode).css("height", (height + margin.bottom + margin.top) + "px");
             }
             else {
-                self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top);
+                self.boxWhiskerSvgs[i][0][0].parentElement.style.height = (height + margin.bottom + margin.top) + "px";
             }
 
             $("svg").css("margin-left", margin.left + "px");
