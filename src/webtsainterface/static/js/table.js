@@ -7,8 +7,15 @@ define('table', ['datatablesLibraries'], function() {
 
     self.dataseriesTable = {};
     self.shouldInitialize = true;
+    self.toSelect;
 
     var tableOffsetY = 125;
+
+    var searchSettings = {
+        exactMatch: false,
+        smartSearch: true,
+        caseSensitive: false
+    };
 
     self.initializeTable = function() {
         var ui = require('ui');
@@ -17,7 +24,7 @@ define('table', ['datatablesLibraries'], function() {
 
         self.dataseriesTable = $('#datasetsTable').dataTable({
             data: data.dataseries,
-            dom: 'TftiS',
+            dom: 'TtiS',
             //stateSave: true,
             deferRender: true,
             scrollCollapse: true,
@@ -45,6 +52,10 @@ define('table', ['datatablesLibraries'], function() {
                     title: 'Quality Control Level Code', data: 'qualitycontrollevelcode',
                     name: 'qualitycontrollevelcode', visible: false, orderable: false
                 },
+                {
+                    title: 'Variable Level', data: 'variablelevel',
+                    name: 'variablelevel', visible: false, orderable: false
+                },
                 { title: 'Series',  data: 'seriesid', name: 'seriesid', type: 'numeric' },
                 { title: 'Network',  data: 'network',  name: 'network' },
                 { title: 'Site Code', data: 'sitecode', name: 'sitecode' },
@@ -68,7 +79,7 @@ define('table', ['datatablesLibraries'], function() {
                 { title: 'Time Support Units Name', data: 'timesupportunitsname', name: 'timesupportunitsname', visible: false },
                 { title: 'Time Support Units Type', data: 'timesupportunitstype', name: 'timesupportunitstype', visible: false },
                 { title: 'Time Support Units Abbreviation', data: 'timesupportunitsabbreviation', name: 'timesupportunitsabbreviation', visible: false },
-                { title: 'Quality Control Level', data: 'qualitycontrolleveldefinition', name: 'qualitycontrolleveldefinition', visible: false },
+                { title: 'Quality Control Level', data: 'qualitycontrolleveldefinition', name: 'qualitycontrolleveldefinition' },
                 { title: 'Source Organization', data: 'sourceorganization', name: 'sourceorganization', visible: false },
                 { title: 'Source Description', data: 'sourcedescription', name: 'sourcedescription', visible: false },
                 { title: 'Begin DateTime', data: 'begindatetime', name: 'begindatetime', visible: false },
@@ -115,18 +126,25 @@ define('table', ['datatablesLibraries'], function() {
         var colvis = new $.fn.dataTable.ColVis(self.dataseriesTable);
         colvis.s.aiExclude = [0, 1, 2, 3];
         $.fn.dataTable.ColVis.fnRebuild();
-        $(colvis.button()).appendTo('#tableButtons');
+        $(colvis.button()).prependTo('#tableButtons');
 
-        $(window).on('resize', function() {
-            _.debounce(self.reDrawTable, 500);
+        $(window).on('resize', _.debounce(function() {
+            self.reDrawTable();
             if ($('.ColVis_collection').is(':visible')) {
                 $('.ColVis_catcher').click();
             }
-        });
+        }, 500));
 
         ui.customizeTableStyle();
         self.shouldInitialize = false;
         self.updateDataseries();
+
+        if (self.toSelect) {
+            var tableTools = TableTools.fnGetInstance("datasetsTable");
+            var row = self.dataseriesTable.api().row({filter: 'applied'}).node();
+            $(row).find('input[type="checkbox"]').attr('checked', true);
+            tableTools.fnSelect(row);
+        }
     };
 
     self.reDrawTable = function() {
@@ -169,6 +187,55 @@ define('table', ['datatablesLibraries'], function() {
             }
         });
     };
+
+    $('#txtTableSearch').on('input propertychange paste change', _.debounce(function() {
+        var api = self.dataseriesTable.api();
+        var match = searchSettings.exactMatch;
+        var input = this.value.split('"').join('');
+        input = (searchSettings.exactMatch && input)? '"' + input + ' "': input;
+        api.search(input, false, searchSettings.smartSearch, !searchSettings.caseSensitive).draw();
+    }, 500));
+
+    $('.settings-item').find(':checkbox').on('change', function() {
+        searchSettings[this.value] = this.checked;
+        $('#txtTableSearch').trigger('input');
+    });
+
+    $('#btnShowSelected').click(function() {
+        var data = require('data');
+        var tableTools = TableTools.fnGetInstance("datasetsTable");
+        var api = self.dataseriesTable.api();
+
+        data.clearAllFilters();
+        var selectedObjects = tableTools.fnGetSelectedData();
+        var idColumn = api.column('seriesid:name');
+        var filterRegex = '(^$)';
+
+        selectedObjects.forEach(function(series) {
+            filterRegex += (filterRegex === '')? '': '|';
+            filterRegex += '(^' + series.seriesid + '$)';
+        });
+        idColumn.search(filterRegex, true, false).draw();
+    });
+
+    $('#btnShowAll').click(function() {
+        var data = require('data');
+        var api = self.dataseriesTable.api();
+
+        data.clearAllFilters();
+        api.column('seriesid:name').search('').draw();
+    });
+
+    $('#btnClearSelected').click(function() {
+        var visualization = require('visualization');
+        var tableTools = TableTools.fnGetInstance("datasetsTable");
+
+        var selectedObjects = tableTools.fnGetSelectedData();
+
+        selectedObjects.forEach(function(series) {
+            visualization.unplotSeries(series.seriesid);
+        });
+    });
 
     function renderCheckbox(data, type) {
         var visualization = require('visualization');

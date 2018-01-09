@@ -1,4 +1,7 @@
 from __future__ import unicode_literals
+
+import uuid
+
 from django.db import models
 
 class SourcesDataService(models.Model):
@@ -15,6 +18,8 @@ class SourcesDataService(models.Model):
 
 class DataSeries(models.Model):
     seriesid = models.IntegerField(db_column='SeriesID', primary_key=True)
+    resultuuid = models.UUIDField(default=uuid.uuid4, editable=False, db_column='ResultUUID', unique=True)
+    influxidentifier = models.TextField(db_column='InfluxIdentifier')
     sourcedataserviceid = models.IntegerField(db_column='SourceDataServiceID')
     network = models.CharField(db_column='Network', max_length=50)
     sitecode = models.CharField(db_column='SiteCode', max_length=50)
@@ -43,20 +48,22 @@ class DataSeries(models.Model):
     qualitycontrolleveldefinition = models.CharField(db_column='QualityControlLevelDefinition', max_length=500)
     qualitycontrollevelexplanation = models.CharField(db_column='QualityControlLevelExplanation', max_length=500, null=True, blank=True)
     sourceorganization = models.CharField(db_column='SourceOrganization', max_length=255)
-    sourcedescription = models.CharField(db_column='SourceDescription', max_length=500)
+    sourcedescription = models.CharField(db_column='SourceDescription', max_length=500, blank=True, null=True)
     begindatetime = models.DateTimeField(db_column='BeginDateTime')
-    enddatetime = models.DateTimeField(db_column='EndDateTime')
+    enddatetime = models.DateTimeField(db_column='EndDateTime', blank=True, null=True)
     utcoffset = models.IntegerField(db_column='UTCOffset', null=True, blank=True)
     numberobservations = models.IntegerField(db_column='NumberObservations')
-    datelastupdated = models.DateTimeField(db_column='DateLastUpdated')
+    datelastupdated = models.DateTimeField(db_column='DateLastUpdated', blank=True, null=True)
     isactive = models.BigIntegerField(db_column='IsActive')
     getdataurl = models.CharField(db_column='GetDataURL', max_length=500)
+    getdatainflux = models.TextField(db_column='GetDataInflux')
+    nodatavalue = models.BigIntegerField(db_column='NoDataValue', default=-9999)
 
     def __unicode__(self):
-        return self.seriesid
+        return unicode(self.seriesid)
 
     def __str__(self):
-        return self.seriesid
+        return str(self.seriesid)
 
     class Meta:
         managed = False

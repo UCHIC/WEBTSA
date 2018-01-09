@@ -1,4 +1,5 @@
-define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'], function(data, map, table, ui, visualization) {
+var obj = this;
+define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries', 'zipLibraries'], function(data, map, table, ui, visualization) {
     var self = {};
     self.ui = ui;
     self.map = map;
@@ -7,12 +8,18 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
     self.visualization = visualization;
     
     var r =0, dir=false;
-    var isShown = true;
+
+    var visibleFacetsPanel = true;
     self.initialParameters = {};
     
     self.initializeApplication = function() {
         self.initialParameters = getUrlParameters();
         var selectedView = self.initialParameters['view'] || 'map';
+        if (selectedView === 'visualization') {
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = false;
+            hideFacetsPanel();
+        }
+
         self.ui.loadView(selectedView);
         bindEvents();
         self.map.initializeMap();
@@ -29,10 +36,18 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
     function bindEvents() {
         $(document).on('facetsloaded', function() {
             self.ui.renderFacets($("#leftPanel .facets-container"));
+            $('.clear-filter').click(function() {
+                if (!this.dataset.facet) {
+                    return;
+                }
+                var facet = _(self.data.facets).findWhere({ keyfield: this.dataset.facet });
+                self.data.clearFacetFilters(facet);
+            });
         });
 
         $(document).on('dataloaded', function() {
             self.ui.renderFilterItems();
+            self.data.createFilters();
             checkInitialFilters();
 
             if (self.ui.getActiveView() !== 'datasets') {
@@ -52,6 +67,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         $(document).on('sitesloaded', function() {
             self.map.loadMarkers();
+            self.map.renderLegend();
         });
 
         $(document).on('plotdataloading', function() {
@@ -74,21 +90,35 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
         });
 
         $(document).on('shown.bs.tab', 'a[href="#mapContent"]', function() {
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = true;
             google.maps.event.trigger(self.map.map, 'resize');
+            if (visibleFacetsPanel) {
+                showFacetsPanel();
+            }
         });
 
         $(document).on('shown.bs.tab', 'a[href="#datasetsContent"]', function() {
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = true;
             if (self.table.shouldInitialize) {
                 self.table.initializeTable();
+            }
+            if (visibleFacetsPanel) {
+                showFacetsPanel();
             }
         });
 
         $(document).on('shown.bs.tab', 'a[href="#visualizationContent"]', function() {
+            $("#btnLeftPanelCollapse").get(0).dataset.enabled = false;
             if (self.visualization.unplottedSeries.length || self.visualization.shouldPlot) {
                 self.ui.endPlotAnimation();
                 self.visualization.plotSeries();
             }
             self.visualization.doPlot = true;
+            hideFacetsPanel();
+        });
+
+        $('#btnClearAllFilters').click(function() {
+            self.data.clearAllFilters();
         });
 
         $("#btnAddToPlot").click(function() {
@@ -105,6 +135,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
 
         $("#btnPlotDataset").click(function() {
             var dialog = $("#InfoDialog");
+            hideFacetsPanel();
             var id = +dialog.get(0).dataset['series'];
 
             // Clear checkboxes
@@ -135,6 +166,112 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             self.ui.loadView('visualization');
         });
 
+        function getCSVContent(series){
+            var csvContent = "";
+                                // Append header
+            csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
+                            "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
+                            "# on the condition that neither iUTAH nor any of its participants may be held liable for any\n" +
+                            "# damages resulting from thier use. The following metadata describe the data in this file:\n" +
+                            "# ------------------------------------------------------------------------------------------\n#\n";
+
+            // Append Site Information
+            csvContent +=   "# Site Information\n" +
+                            "# ---------------------------\n" +
+                            "# Network: " + series['network'] + "\n" +
+                            "# SiteCode: " + series['sitecode'] + "\n" +
+                            "# SiteName: " + series['sitename'] + "\n" +
+                            "# IsActive: " + series['isactive'] + "\n" +
+                            "# Latitude: " + series['latitude'] + "\n" +
+                            "# Longitude: " + series['longitude'] + "\n" +
+                            "# Elevation: " + series.dataset.elevation + "\n" +
+                            "# VerticalDatum: " + series.dataset['verticalDatum'] + "\n" +
+                            "# State: " + series['state'] + "\n" +
+                            "# County: " + series['county'] + "\n" +
+                            //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not found
+                            "# SiteType: " + series['sitetype'] + "\n#\n";
+
+            // Append Variable Information
+            csvContent +=   "# Variable Information\n" +
+                            "# ---------------------------\n" +
+                            "# VariableCode: " + series['variablecode'] + "\n" +
+                            "# VariableName: " + series['variablename'] + "\n" +
+                            "# ValueType: " + series['valuetype'] + "\n" +
+                            "# DataType: " + series['datatype'] + "\n" +
+                            "# GeneralCategory: " + series['generalcategory'] + "\n" +
+                            "# SampleMedium: " + series['samplemedium'] + "\n" +
+                            "# VariableUnitsName: " + series['variableunitsname'] + "\n" +
+                            "# VariableUnitsType: " + series['variableunitstype'] + "\n" +
+                            "# VariableUnitsAbbreviation: " + series['variableunitsabbreviation'] + "\n" +
+                            "# NoDataValue: " + series.dataset['noDataValue'] + "\n" +
+                            //"# IsRegular:" + series['isregular'] + "\n" +                                         // Not found
+                            "# TimeSupport: " + series['timesupport'] + "\n" +
+                            "# TimeSupportUnitsAbbreviation: " + series['timesupportunitsabbreviation'] + "\n" +
+                            "# TimeSupportUnitsName: " + series['timesupportunitsname'] + "\n" +
+                            "# TimeSupportUnitsType: " + series['timesupportunitstype'] + "\n#\n";
+                            //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not found
+
+            // Append Method Information
+            csvContent +=   "# Method Information\n" +
+                            "# ---------------------------\n" +
+                            "# MethodDescription: " + series['methoddescription'] + "\n" +
+                            "# MethodLink: " + series['sitecode'] + "\n#\n";
+
+            // Append Qualifier Information
+            if (series['qualifierCodes']) {
+                csvContent += "# Qualifier Information\n" +
+                    "# ---------------------------\n";
+                for (var i = 0; i < series['qualifierCodes'].length; i++) {
+                    csvContent += "# " + series['qualifierCodes'][i] + " - " + series['qualifierDescriptions'][i] + "\n";
+                }
+                csvContent += "#\n";
+            }
+
+
+            // Append Series Information
+            csvContent +=   "# Series Information\n" +
+                            "# ---------------------------\n" +
+                            "# BeginDateTime: " + series['begindatetime'] + "\n" +
+                            "# EndDateTime: " + series['enddatetime'] + "\n" +
+                            "# DateLastUpdated: " + series['datelastupdated'] + "\n" +
+                            "# NumberOfObservations: " + series['numberobservations'] + "\n" +
+                            "# QualityControlLevelCode: " + series['qualitycontrollevelcode'] + "\n" +
+                            "# QualityControllLevelDefinition: " + series['qualitycontrolleveldefinition'] + "\n" +
+                            "# QualityControlLevelExplanation: " + series['qualitycontrollevelexplanation'] + "\n" +
+                            "# GetDataUrl: " + series['getdatainflux'] + "\n#\n";
+
+            // Append Source Information
+            csvContent +=   "# Source Information\n" +
+                            "# ---------------------------\n" +
+                            "# SourceOrganization: " + series['sourceorganization'] + "\n" +
+                            "# SourceDescription: " + series['sourcedescription'] + "\n#\n";
+                            //"# ContactName:" + series['contactname'] + "\n" +                   // Not found
+                            //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not found
+                            //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not found
+                            //"# Citation:" + series['citation'] + "\n";                          // Not found
+
+            // Append property names
+            csvContent += "DateTime, ";
+            csvContent += "TimeOffset, ";
+            csvContent += "DateTimeUTC, ";
+            csvContent += "Value, ";
+            csvContent += "CensorCode, ";
+            csvContent += "QualifierCode";
+            csvContent += "\n";
+
+            // Append property values
+            series.dataset.forEach(function(data){
+                 csvContent += data['date'].replace("T", " ") + ", "
+                            + data['timeOffset'] + ", "
+                            + (data['dateTimeUTC'] === undefined ? "" : data['dateTimeUTC'].replace("T", " ")) + ", "
+                            + data['value'] + ", "
+                            + data['censorCode'] + ", "
+                            + (data['qualifiers'] === undefined ? "" : data['qualifiers']) + "\n";
+            });
+
+            return csvContent;
+        }
+
         $("#btnExport").click(function() {
             $(".modal-header").find(".alert").remove();
             $(".modal-header").append(
@@ -144,6 +281,9 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             );
 
             var link = document.createElement("a");
+            link.click(function() {
+                ga('send', 'event', 'CVS', 'Download', 'Dataset � CVS Download');
+            });
 
             // feature detection
             if(link.download === undefined) {
@@ -160,105 +300,17 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             var id = +dialog.get(0).dataset['series'];
             var series = _(self.data.dataseries).where({seriesid: id}).pop();
 
-            var csvContent = "data:text/csv;charset=utf-8,";
-
             // Append dataset values once the dataset is loaded
             series.loadDataset(function() {
-                    // Append header
-                csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
-                                "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
-                                "# on the condition that neither iUTAH may be held liable for any damages resulting from\n" +
-                                "# its use. The following metadata describe the data in this file:\n" +
-                                "# ------------------------------------------------------------------------------------------\n#\n";
-
-                // Append Site Information
-                csvContent +=   "# Site Information\n" +
-                                "# ---------------------------\n" +
-                                "# Network: " + series['network'] + "\n" +
-                                "# SiteCode: " + series['sitecode'] + "\n" +
-                                "# SiteName: " + series['sitename'] + "\n" +
-                                "# IsActive: " + series['isactive'] + "\n" +
-                                "# Latitude: " + series['latitude'] + "\n" +
-                                "# Longitude: " + series['longitude'] + "\n" +
-                                "# Elevation: " + series.dataset.elevation + "\n" +
-                                "# VerticalDatum: " + series.dataset['verticalDatum'] + "\n" +
-                                "# State: " + series['state'] + "\n" +
-                                "# County: " + series['county'] + "\n" +
-                                //"# SiteComments:" + series['sitecomments'] + "\n" +                 // Not found
-                                "# SiteType: " + series['sitetype'] + "\n#\n";
-
-                // Append Variable Information
-                csvContent +=   "# Variable Information\n" +
-                                "# ---------------------------\n" +
-                                "# VariableCode: " + series['variablecode'] + "\n" +
-                                "# VariableName: " + series['variablename'] + "\n" +
-                                "# ValueType: " + series['valuetype'] + "\n" +
-                                "# DataType: " + series['datatype'] + "\n" +
-                                "# GeneralCategory: " + series['generalcategory'] + "\n" +
-                                "# SampleMedium: " + series['samplemedium'] + "\n" +
-                                "# VariableUnitsName: " + series['variableunitsname'] + "\n" +
-                                "# VariableUnitsType: " + series['variableunitstype'] + "\n" +
-                                "# VariableUnitsAbbreviation: " + series['variableunitsabbreviation'] + "\n" +
-                                "# NoDataValue:" + series.dataset['noDataValue'] + "\n" +
-                                //"# IsRegular:" + series['isregular'] + "\n" +                                         // Not found
-                                "# TimeSupport: " + series['timesupport'] + "\n" +
-                                "# TimeSupportUnitsAbbreviation: " + series['timesupportunitsabbreviation'] + "\n" +
-                                "# TimeSupportUnitsName: " + series['timesupportunitsname'] + "\n" +
-                                "# TimeSupportUnitsType: " + series['timesupportunitstype'] + "\n#\n";
-                                //"# Speciation:" + series['speciation'] + "\n#\n";                                     // Not found
-
-                // Append Method Information
-                csvContent +=   "# Method Information\n" +
-                                "# ---------------------------\n" +
-                                "# MethodDescription: " + series['methoddescription'] + "\n" +
-                                "# MethodLink: " + series['sitecode'] + "\n#\n";
-
-
-                // Append Series Information
-                csvContent +=   "# Series Information\n" +
-                                "# ---------------------------\n" +
-                                "# BeginDateTime: " + series['begindatetime'] + "\n" +
-                                "# EndDateTime: " + series['enddatetime'] + "\n" +
-                                "# DateLastUpdated: " + series['datelastupdated'] + "\n" +
-                                "# NumberOfObservations: " + series['numberobservations'] + "\n" +
-                                "# QualityControlLevelCode: " + series['qualitycontrollevelcode'] + "\n" +
-                                "# QualityControllLevelDefinition: " + series['qualitycontrolleveldefinition'] + "\n" +
-                                "# QualityControlLevelExplanation: " + series['qualitycontrollevelexplanation'] + "\n" +
-                                "# GetDataUrl: " + series['getdataurl'] + "\n#\n";
-
-                // Append Source Information
-                csvContent +=   "# Source Information\n" +
-                                "# ---------------------------\n" +
-                                "# SourceOrganization: " + series['sourceorganization'] + "\n" +
-                                "# SourceDescription: " + series['sourcedescription'] + "\n#\n";
-                                //"# ContactName:" + series['contactname'] + "\n" +                   // Not found
-                                //"# ContactEmail:" + series['contactemail'] + "\n" +                 // Not found
-                                //"# ContactPhone:" + series['contactphone'] + "\n" +                 // Not found
-                                //"# Citation:" + series['citation'] + "\n";                          // Not found
-
-                // Append property names
-                csvContent += "DateTime, ";
-                csvContent += "TimeOffset, ";
-                csvContent += "DateTimeUTC, ";
-                csvContent += "Value, ";
-                csvContent += "CensorCode";
-                csvContent += "\n";
-
-                // Append property values
-                series.dataset.forEach(function(data){
-                     csvContent +=data['date'] + ", "
-                                + data['timeOffset']+ ", "
-                                + data['dateTimeUTC'] + ", "
-                                + data['value'] + ", "
-                                + data['censorCode'] + "\n";
-                });
-
-                // Encode the string to avoid escape characters
-                var encodedUri = encodeURI(csvContent);
+                var csvContent = getCSVContent(series);
                 var filename = series.sitecode + " - " + series.variablename + ".csv";
 
                 // Set HTML5 download
-                link.setAttribute("href", encodedUri);
+                var blob = new Blob(["", csvContent]);
+
+                var url = URL.createObjectURL(blob);
+
+                link.setAttribute("href", url);
                 link.setAttribute("download", filename);
                 link.className = "glyphicon glyphicon-file";
                 link.innerHTML = " <span class='container-title'>" + filename + "</span>";
@@ -266,13 +318,148 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 $(".modal-header").find(".alert").empty();
                 $(".modal-header").find(".alert").removeClass("alert-info");
                 $(".modal-header").find(".alert").addClass("alert-success");
+                $(".modal-header").find(".alert").append('<div>Click to download:</div>');
                 $(".modal-header").find(".alert").append(link);
             });
         });
 
-        function onDateChange() {
-             $("#dateIntervals button").removeClass("active");
-        }
+         $("#btnExportSelected").click(function(){
+            // Feature detection
+            var link = document.createElement("a");
+
+            if(link.download === undefined) {
+                // Needs to implement server side download
+                alert("We are sorry, your browser does not support HTML5 download. Please use Chrome, Firefox or Opera to download.")
+            }
+
+            var series = [];
+
+            for (var i = 0; i < self.visualization.plottedSeries.length; i++){
+                series.push(self.visualization.plottedSeries[i])
+            }
+            for (var i = 0; i < self.visualization.unplottedSeries.length; i++){
+                series.push(self.visualization.unplottedSeries[i])
+            }
+
+            if (series.length === 0){
+                return;
+            }
+
+            $("#btnExportSelected span").text("Compiling files...");
+            $("#btnExportSelected").prop('disabled', true);
+
+            var jobs = self.visualization.unplottedSeries.length + self.visualization.plottedSeries.length - 1;
+
+            series.forEach(function(mSeries){
+                 mSeries.loadDataset(function() {  // Needs to be changed to a callback with all series loaded
+                    if (jobs > 0){
+                        jobs--;
+                        return;
+                    }
+
+                    var files = [];
+
+                    for(var i = 0; i < series.length; i++){
+                        var filename = series[i].sitecode.trim() + " - " + series[i].variablecode.trim() + " - " + series[i].variablename.trim() + ".csv";
+                        var blobFile = new Blob(["", getCSVContent(series[i])]);
+                        files.push({name:filename, data:blobFile});
+                    }
+
+                     // Zip model that will compress the file
+                    var model = (function() {
+                        var zipFileEntry, zipWriter, writer, creationMethod, URL = obj.webkitURL || obj.mozURL || obj.URL;
+                        return {
+                            setCreationMethod : function(method) {
+                                creationMethod = method;
+                            },
+                            addFiles : function addFiles(files, oninit, onadd, onprogress, onend) {
+                                var addIndex = 0;
+
+                                function nextFile() {
+                                    var file = files[addIndex];
+                                    onadd(file);
+                                    zipWriter.add(file.name, new zip.BlobReader(file.data), function() {
+                                        addIndex++;
+                                        if (addIndex < files.length)
+                                            nextFile();
+                                        else
+                                            onend();
+                                    }, onprogress);
+                                }
+
+                                function createZipWriter() {
+                                    zip.createWriter(writer, function(writer) {
+                                        zipWriter = writer;
+                                        oninit();
+                                        nextFile();
+                                    }, onerror);
+                                }
+
+                                if (zipWriter)
+                                    nextFile();
+                                else if (creationMethod == "Blob") {
+                                    writer = new zip.BlobWriter();
+                                    createZipWriter();
+                                } else {
+                                    createTempFile(function(fileEntry) {
+                                        zipFileEntry = fileEntry;
+                                        writer = new zip.FileWriter(zipFileEntry);
+                                        createZipWriter();
+                                    });
+                                }
+                            },
+                            getBlobURL : function(callback) {
+                                zipWriter.close(function(blob) {
+                                    var blobURL = creationMethod == "Blob" ? URL.createObjectURL(blob) : zipFileEntry.toURL();
+                                    callback(blobURL);
+                                    zipWriter = null;
+                                });
+                            }
+                        };
+                    })();
+
+                    // Set the mode
+                    model.setCreationMethod("Blob");
+
+                    // Add the files to the zip
+                    model.addFiles(files,
+                        function() {
+                            // Initialise Method
+                            //console.log("Initialise");
+                        }, function(file) {
+                            // OnAdd
+                            //console.log("Added file");
+                        }, function(current, total) {
+                            // OnProgress
+                            //console.log("%s %s", current, total);
+                        }, function() {
+                            // OnEnd
+                            // The zip is ready prepare download link
+                            model.getBlobURL(function(url) {
+                                // var link = document.getElementById("downloadLink");
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", "TSA collection.zip");
+                                link.innerHTML = " <span class='container-title'>" + "TSA collection.zip" + "</span>";
+                                if (ui.getBrowserName.substr(0,7) == "Firefox"){    // Workaround for Firefox
+                                    var myEvt = document.createEvent('MouseEvents');
+                                    myEvt.initEvent(
+                                       'click'      // event type
+                                       ,true      // can bubble?
+                                       ,true      // cancelable?
+                                    );
+                                    link.dispatchEvent(myEvt);
+                                }
+                                else{
+                                    link.click();   // This is how real browsers do it, hell yeah!
+                                }
+
+                                $("#btnExportSelected span").text("Export selected (.zip)");
+                                $("#btnExportSelected").prop('disabled', false);
+                            });
+                        });
+                  });
+             });
+         });
 
         $('#dpd1').bind('changeDate', onDateChange);
         $('#dpd2').bind('changeDate', onDateChange);
@@ -315,60 +502,55 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             }
         });
 
-        $("#btnCollapseToggle").click(function() {
+        $("#btnCollapseToggle").click(function () {
             dir = !dir;
             var slideDistance = 307;
-            r = dir? -slideDistance : 0;
-            $("#panel-right").stop().animate({right: r+'px'}, 0);
-            $("#btnCollapseToggle span").removeClass();
-            if (!dir){
-                //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);    // animation
-                $("#graphContainer").width($("#graphContainer").width() - slideDistance);           // no animation
-                $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-right");
-            }
-            else{
-                //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);    // animation
-                $("#graphContainer").width($("#graphContainer").width() + slideDistance);           // no animation
-                $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
-            }
-            self.visualization.plotSeries();
+            r = dir ? -slideDistance : 0;
+            $("#panel-right").stop().animate({right: r + 'px'}, 200,
+                function () {
+                    $("#btnCollapseToggle span").removeClass();
+                    if (!dir) {
+                        //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);    // animation
+                        $("#graphContainer").width($("#graphContainer").width() - slideDistance);           // no animation
+                        $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-right");
+                    }
+                    else {
+                        //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);    // animation
+                        $("#graphContainer").width($("#graphContainer").width() + slideDistance);           // no animation
+                        $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
+                    }
+                    self.visualization.plotSeries();
+                }
+            );
         });
 
-        function toggleLeftPanel(){
-            if ($("#btnLeftPanelCollapse")[0].getAttribute("data-enabled") == "true"){
-                $("#leftPanel .panel-group").toggle();
-                isShown = !isShown;
-                google.maps.event.trigger(self.map.map, 'resize');
+        $("#btnLeftPanelCollapse").on("click", function() {
+            if ($("#btnLeftPanelCollapse").get(0).dataset.enabled === 'true') {
+                toggleFacetsPanel();
             }
-        }
-
-        function toggleLeftPanelButton(){
-            var btn = $("#btnLeftPanelCollapse")[0];
-            btn.setAttribute("data-enabled", "true");
-
-            if (isShown){
-                $("#leftPanel .panel-group").show();
-            }
-        }
-
-        $("#btnLeftPanelCollapse").on("click", toggleLeftPanel);
-
-        $("#btnHideLeftToolbar").on("click", toggleLeftPanel);
-
-        $("#visualizationTab").on("click", function(){
-            $("#leftPanel .panel-group").hide();
-
-            var btn = $("#btnLeftPanelCollapse")[0];
-            btn.setAttribute("data-enabled", "false");
         });
 
-        $("#datasetsTab").on("click", function(){
-            toggleLeftPanelButton();
+        $("#btnHideLeftToolbar").on("click", function() {
+            toggleFacetsPanel();
         });
+    }
 
-        $("#mapTab").on("click", function() {
-            toggleLeftPanelButton();
-        });
+    function toggleFacetsPanel() {
+        $("#leftPanel .panel-group").is(':hidden') ? showFacetsPanel(): hideFacetsPanel();
+        visibleFacetsPanel = !visibleFacetsPanel;
+    }
+
+    function hideFacetsPanel() {
+        $("#leftPanel .panel-group").hide();
+    }
+
+    function showFacetsPanel() {
+        $("#leftPanel .panel-group").show();
+        google.maps.event.trigger(self.map.map, 'resize');
+    }
+
+    function onDateChange() {
+         $("#dateIntervals button").removeClass("active");
     }
 
     function checkInitialFilters() {
@@ -386,12 +568,29 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
         self.data.toggleFilter('variablecode', selectedVariable);
         self.data.toggleFilter('qualitycontrollevelcode', selectedControlLevel);
 
-        if (self.data.filteredDataseries.length === 1 && shouldPlot) {
-            var dataseries = _(self.data.filteredDataseries).first();
+        if (shouldPlot) {
+            var facets = _(self.data.facets).filter(function(facet) { return facet.selected !== ""; });
+            facets.forEach(function(facet){
+                var defaultFilters = _(facet.filters).filter(function(filter){ return filter.applied });
+                defaultFilters.forEach(function(filter){
+                    self.data.toggleFilter(facet.keyfield, filter[facet.keyfield]);
+                });
+            });
+
+            var dataseries = _(self.data.filteredDataseries).first(require('visualization').plotLimit);
+            if (dataseries.length == 0) {
+                return;
+            }
+
             self.visualization.doPlot = (self.initialParameters['view'] === 'visualization')? true: false;
-            self.visualization.prepareSeries(dataseries);
+
+            self.table.toSelect = true;
+            dataseries.forEach(function(series) {
+                self.visualization.prepareSeries(series);
+            });
         }
     }
 
     return self;
 });
+

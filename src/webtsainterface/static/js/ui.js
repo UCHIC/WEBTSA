@@ -9,13 +9,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     var defaultView = 'map';
 
     self.loadView = function(view) {
-        view = ($('.nav-tabs').find('li[id*="' + view + '"]').length === 0)? 'map': view;
-        if ($('#' + view + 'Tab').hasClass(visibleViewClass)) {
-            return;
-        }
-
-        var contentLink = $("a[href='#" + view + "Content']");
-        contentLink.click();
+        $("#" + view + "Tab a").tab('show');
     };
 
     self.getActiveView = function() {
@@ -42,7 +36,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     self.facetsTemplate = _.template("<div class='panel panel-default'>\
         <div class='panel-heading'>\
             <h4 class='panel-title'>\
-                <span class='glyphicon glyphicon-unchecked'' title='Clear filter'></span>\
+                <span class='clear-filter glyphicon glyphicon-remove-circle' data-facet='<%= facetid %>' title='Clear filter'></span>\
                 <a data-toggle='collapse' class='accordion-toggle' data-parent='#accordion' href='#<%= facetid %>'>\
                     <%= facettitle %> \
                 </a>\
@@ -86,7 +80,25 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
         <button data-sitecode='<%= sitecode %>' class='btnViewSeries'>View Dataseries</button>\
     </section>");
 
-    self.renderFacets = function(parent){
+    self.legendTemplate = _.template("<section id='mapLegend'>\
+        <header>\
+            <h4>Legend</h4>\
+            <span class='glyphicon glyphicon-info-sign'></span>\
+        </header>\
+        <ul class='legendItems'></ul>\
+    </section>");
+
+    self.legendItemTemplate = _.template("<li>\
+        <span class='legendIcon <%= cssClass %>'></span>\
+        <span class='legendText'><%= title %></span>\
+    </li>");
+
+    self.legendIconItemTemplate = _.template("<li>\
+        <svg viewBox='0 0 100 100'><path d='<%= imagePath %>' /></svg>\
+        <span class='legendText'><%= title %></span>\
+    </li>");
+
+    self.renderFacets = function(parent) {
         var data = require('data');
         var facets = [];
         var facetsHtml;
@@ -179,17 +191,20 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
 
     };
 
-    self.showDataseriesDialog = function(series) {
+    self.showDataseriesDialog = function (series) {
         var visualization = require('visualization');
         var dialog = $('#InfoDialog');
         var plottedSeries = visualization.plottedSeries;
         var isAlreadyPlotted = _(_(plottedSeries).pluck('seriesid')).contains(series.seriesid);
 
-         $(".modal-header").find(".alert").remove();    // Clear previous download links
+        $(".modal-header").find(".alert").remove();    // Clear previous download links
 
         dialog.get(0).dataset['series'] = series.seriesid;
-        dialog.find("#series-active-info").text((series.isactive? "Active": "Not Active"));
-        dialog.find(".series-item-value").each(function(index, item) {
+        dialog.find("#series-active-info").text((series.isactive ? "Active" : "Not Active"));
+        dialog.find("#series-active-info").removeClass();
+        dialog.find("#series-active-info").addClass((series.isactive ? "label label-success" : "label label-danger"));
+
+        dialog.find(".series-item-value").each(function (index, item) {
             if (series.hasOwnProperty(item.dataset.field)) {
                 $(item).text(series[item.dataset.field]);
             }
@@ -198,7 +213,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
         dialog.find("#btnAddToPlot").prop('disabled',
             !visualization.canPlot() || isAlreadyPlotted);
         dialog.modal('show');
-    }
+    };
 
     self.updateTabsFilteredCount = function() {
         var data = require('data');
@@ -225,7 +240,7 @@ define('ui', ['visualization', 'jquery', 'underscore'], function() {
     self.customizeTableStyle = function() {
         $('.ColVis_MasterButton').removeClass('ColVis_Button').addClass('btn btn-default glyphicon');
 
-        $('#tableButtons').detach().prependTo('#datasetsTable_wrapper');
+        $('#tableButtons, .tableFilter').detach().prependTo('#datasetsTable_wrapper');
 
         if ($.support.placeholder) {
             var filter = $('#datasetsTable_filter');

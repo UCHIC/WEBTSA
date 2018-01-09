@@ -4,10 +4,10 @@ from webtsaservices.models import DataSeries
 
 class DataSeriesFieldManager(models.Manager):
     def get_field_names(self):
-        return DataSeries._meta.get_all_field_names()
+        return [field.name for field in DataSeries._meta.get_fields()]
 
     def get_field_choices(self):
-        fields = DataSeries._meta.get_all_field_names()
+        fields = [field.name for field in DataSeries._meta.get_fields()]
         return tuple(zip(fields, fields))
 
 

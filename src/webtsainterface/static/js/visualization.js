@@ -2,19 +2,20 @@
  * Created by Juan on 4/6/14.
  */
 
-define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
+define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
     var self = {};
 
-    self.plotTypes = { histogram: drawHistogram, multiseries: drawMultiseries, box: drawBoxPlot };
+    self.plotTypes = {
+        histogram: drawHistogram,
+        multiseries: drawMultiseries,
+        box: drawBoxPlot
+    };
     self.currentPlot = self.plotTypes.multiseries;
-
     self.plotLimit = 5;
-
     self.doPlot = true;
     self.shouldPlot = false;
     self.plottedSeries = [];
     self.unplottedSeries = [];
-
     self.boxWhiskerSvgs = [];
     self.dateFirst;
     self.dateLast;
@@ -24,16 +25,26 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
     var plotStarted = jQuery.Event("plotstarted");
     var plotFinished = jQuery.Event("plotfinished");
 
-    $(window).resize(_.debounce(function(){
-        if ($("#visualizationTab").hasClass("active"))
+    $(window).resize(_.debounce(function () {
+        if ($("#visualizationTab").hasClass("active")) {
             self.plotSeries();
+            var offset = $("#graphArea").width() - $("#panel-right").position().left;
+            $("#graphContainer").width("calc(100% - " + offset + "px)");
+        }
     }, 500));
 
-    self.canPlot = function() {
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        if ($(e.target).parent().attr("id") == "visualizationTab") {
+            $("#leftPanel .panel-group").hide();
+            // self.plotSeries();
+        } // newly activated tab
+    });
+
+    self.canPlot = function () {
         return self.plottedSeries.length + self.unplottedSeries.length < self.plotLimit;
     };
 
-    self.initializeDatePickers = function(){
+    self.initializeDatePickers = function () {
         // Remove the date pickers
         $("#plotOptionsContainer tbody tr:first-child").remove();
         $("#plotOptionsContainer tbody tr:first-child").remove();
@@ -41,11 +52,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         // Add new ones
         $("#plotOptionsContainer tbody").prepend(
             '<tr><td>Begin Date</td><td><input id="dpd1" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>\
-            <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>'
+             <tr><td>End Date</td><td><input id="dpd2" type="text" class="datepicker" data-date-format="m/dd/yyyy"></td></tr>'
         );
     };
 
-    self.prepareSeries = function(series) {
+    self.prepareSeries = function (series) {
         if (!self.canPlot()) {
             return;
         }
@@ -53,12 +64,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         $(document).trigger(plotDataLoading);
         self.unplottedSeries.push(series);
 
-        series.loadDataset(function() {
+        series.loadDataset(function () {
             $(document).trigger(plotDataReady);
         });
     };
 
-    self.plotSeries = function() {
+    self.plotSeries = function () {
         var ui = require('ui');
 
         var shouldPlot = true;
@@ -69,7 +80,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         }
 
         $(document).trigger(plotStarted);
-        self.unplottedSeries.forEach(function(series) {
+        self.unplottedSeries.forEach(function (series) {
             if (series.dataset.length === 0) {
                 shouldPlot = false;
             }
@@ -84,18 +95,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         self.unplottedSeries.length = 0;
         assignSeriesId();
         self.currentPlot();
+        // console.log("Drawing Plot");
         $(document).trigger(plotFinished);
-        //TODO: if not in visualization tab, make it redraw the plot.
     };
 
-    self.unplotSeries = function(seriesid) {
+    self.unplotSeries = function (seriesid) {
         var table = require('table');
         var ui = require('ui');
-        self.plottedSeries = _(self.plottedSeries).reject(function(plotted) {
+        self.plottedSeries = _(self.plottedSeries).reject(function (plotted) {
             return plotted.seriesid === seriesid;
         });
 
-        self.unplottedSeries = _(self.unplottedSeries).reject(function(unplotted) {
+        self.unplottedSeries = _(self.unplottedSeries).reject(function (unplotted) {
             return unplotted.seriesid === seriesid;
         });
 
@@ -106,14 +117,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         }
 
         self.plotSeries(); //TODO: remove it from the plot without re-plotting.
-
     };
 
-    self.clearGraph = function(){
+    self.clearGraph = function () {
         $("#graphContainer").empty();
         $("#legendContainer").find("ul").empty();
         $("#statisticsTable tbody").empty();
-
     };
 
     // Adds commas to numbers in thousand intervals
@@ -122,44 +131,98 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
     };
 
     // Moves an svg element to the last position of its container so it is rendered last and appears in front
-    d3.selection.prototype.moveToFront = function() {
-      return this.each(function(){
-        this.parentNode.appendChild(this);
-      });
+    d3.selection.prototype.moveToFront = function () {
+        return this.each(function () {
+            this.parentNode.appendChild(this);
+        });
     };
 
     function assignSeriesId() {
-        self.plottedSeries.forEach(function(series, index) {
-            series.dataset.forEach(function(data) {
+        self.plottedSeries.forEach(function (series, index) {
+            series.dataset.forEach(function (data) {
                 data.seriesID = index;
             });
         });
     }
 
-    function calcSummaryStatistics(data){
+    function onMouseOver(color) {
+        return function () {
+            var lighterColor = increase_brightness(color, 30);
+            d3.select(this)
+                .transition()
+                .duration(50)
+                //.attr('opacity', 0.7);
+                .style('fill', lighterColor);
+        }
+    }
+
+    function onMouseOut(color) {
+        return function () {
+            d3.select(this)
+                .transition()
+                .duration(300)
+                .style('fill', color);
+            //.attr('opacity', 1);
+        }
+    }
+
+    function increase_brightness(hex, percent) {
+        // strip the leading # if it's there
+        hex = hex.replace(/^\s*#|\s*$/g, '');
+
+        // convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
+        if (hex.length == 3) {
+            hex = hex.replace(/(.)/g, '$1$1');
+        }
+
+        var r = parseInt(hex.substr(0, 2), 16),
+            g = parseInt(hex.substr(2, 2), 16),
+            b = parseInt(hex.substr(4, 2), 16);
+
+        return '#' +
+            ((0 | (1 << 8) + r + (256 - r) * percent / 100).toString(16)).substr(1) +
+            ((0 | (1 << 8) + g + (256 - g) * percent / 100).toString(16)).substr(1) +
+            ((0 | (1 << 8) + b + (256 - b) * percent / 100).toString(16)).substr(1);
+    }
+
+    // Returns the length of the longest tick in characters
+    function getAxisSeparation(id) {
+        var ticks = $(".y.axis[data-id='" + id + "'] .tick text");
+        var max = 0;
+
+        for (var index = 0; index < ticks.length; index++) {
+            var a = $(ticks[index])[0].getBBox().width;
+            if (max < a) {
+                max = a;
+            }
+        }
+        return max + 10;
+    }
+
+    function calcSummaryStatistics(data) {
         var summary = [];
-        var sortedValues = data.map(function(value) {
+        var sortedValues = data.map(function (value) {
             return _.pluck(value, 'value');
         });
-        for (var i = 0; i < data.length; i++){
+        for (var i = 0; i < data.length; i++) {
             summary[i] = {
-                maximum:-Infinity,
-                minimum:Infinity,
+                maximum: -Infinity,
+                minimum: Infinity,
                 arithmeticMean: 0,
-                geometricSum:0,
-                geometricMean:0,
-                deviationSum:0,
-                standardDeviation:0,
-                observations:0,
-                coefficientOfVariation:0,
-                quantile10:0,
-                quantile25:0,
-                median:0,
-                quantile75:0,
-                quantile90:0
+                geometricSum: 0,
+                geometricMean: 0,
+                deviationSum: 0,
+                standardDeviation: 0,
+                observations: 0,
+                coefficientOfVariation: 0,
+                quantile10: 0,
+                quantile25: 0,
+                median: 0,
+                quantile75: 0,
+                quantile90: 0
             };
 
-            if (data[i].length == 0){
+            if (data[i].length == 0) {
                 summary[i].maximum = "NaN";
                 summary[i].minimum = "NaN";
                 summary[i].arithmeticMean = "NaN";
@@ -177,40 +240,52 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 continue;
             }
 
-            sortedValues[i] = sortedValues[i].map(function(value){
+            sortedValues[i] = sortedValues[i].map(function (value) {
                 return parseFloat(value);
             });
 
             sortedValues[i].sort();
 
             // Quantiles
-            summary[i].quantile10 = d3.quantile(sortedValues[i],.1).toFixed(2);
-            summary[i].quantile25 = d3.quantile(sortedValues[i],.25).toFixed(2);
-            summary[i].median = d3.quantile(sortedValues[i],.5).toFixed(2);
-            summary[i].quantile75 = d3.quantile(sortedValues[i],.75).toFixed(2);
-            summary[i].quantile90 = d3.quantile(sortedValues[i],.9).toFixed(2);
+            summary[i].quantile10 = d3.quantile(sortedValues[i], .09).toFixed(2);
+            summary[i].quantile25 = d3.quantile(sortedValues[i], .249).toFixed(2);
+            summary[i].median = d3.quantile(sortedValues[i], .49).toFixed(2);
+            summary[i].quantile75 = d3.quantile(sortedValues[i], .749).toFixed(2);
+            summary[i].quantile90 = d3.quantile(sortedValues[i], .89).toFixed(2);
 
             // Number of observations
             summary[i].observations = data[i].length;
 
             // Maximum and Minimum
-            summary[i].maximum = d3.max(data[i], function (d) {return parseFloat(d.value);});
-            summary[i].minimum = d3.min(data[i], function (d) {return parseFloat(d.value);});
+            summary[i].maximum = d3.max(data[i], function (d) {
+                return parseFloat(d.value);
+            }).toFixed(2);
+            summary[i].minimum = d3.min(data[i], function (d) {
+                return parseFloat(d.value);
+            }).toFixed(2);
 
             // Arithmetic Mean
-            summary[i].arithmeticMean = d3.mean(data[i], function (d) {return parseFloat(d.value);}).toFixed(2);
+            summary[i].arithmeticMean = d3.mean(data[i], function (d) {
+                return parseFloat(d.value);
+            }).toFixed(2);
 
             // Standard Deviation
-            summary[i].deviationSum = d3.sum(data[i], function (d) {return Math.pow(parseFloat(d.value) - summary[i].arithmeticMean, 2)}).toFixed(2);
+            summary[i].deviationSum = d3.sum(data[i], function (d) {
+                return Math.pow(parseFloat(d.value) - summary[i].arithmeticMean, 2)
+            }).toFixed(2);
             summary[i].standardDeviation = (Math.pow(summary[i].deviationSum / data[i].length, (1 / 2))).toFixed(2);
 
             // Geometric Mean
-            summary[i].geometricSum = d3.sum(data[i], function (d) {if (d.value!=0) return Math.log(Math.abs(d.value));}).toFixed(2);
+            summary[i].geometricSum = d3.sum(data[i], function (d) {
+                if (d.value != 0) return Math.log(Math.abs(d.value));
+            }).toFixed(2);
             summary[i].geometricMean = (Math.pow(2, (summary[i].geometricSum / data[i].length))).toFixed(2);
 
             // Coefficient of Variation
             var variation = summary[i].standardDeviation / summary[i].arithmeticMean;
-            if (variation == Infinity || variation == -Infinity){variation = null;}
+            if (variation == Infinity || variation == -Infinity) {
+                variation = null;
+            }
             summary[i].coefficientOfVariation = ((summary[i].standardDeviation / summary[i].arithmeticMean) * 100).toFixed(2) + "%";
 
             // Add commas
@@ -226,28 +301,28 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         return summary;
     }
 
-    function setSummaryStatistics(summary){
+    function setSummaryStatistics(summary) {
         $("#statisticsTable tbody").empty();
         $("#statisticsTable tbody").append(
             '<tr><td>Arithmetic Mean</td><td>' + summary.arithmeticMean + '</td></tr>\
-                    <tr><td>Geometric Mean</td><td>'+ summary.geometricMean + '</td></tr>\
+                    <tr><td>Geometric Mean</td><td>' + summary.geometricMean + '</td></tr>\
                     <tr><td>Maximum</td><td>' + summary.maximum + '</td></tr>\
                     <tr><td>Minimum</td><td>' + summary.minimum + '</td></tr>\
                     <tr><td>Standard Deviation</td><td>' + summary.standardDeviation + '</td></tr>\
-                    <tr><td>10%</td><td>'+ summary.quantile10 +'</td></tr>\
-                    <tr><td>25%</td><td>'+ summary.quantile25 +'</td></tr>\
-                    <tr><td>Median, 50%</td><td>'+ summary.median +'</td></tr>\
-                    <tr><td>75%</td><td>'+ summary.quantile75 +'</td></tr>\
-                    <tr><td>90%</td><td>'+ summary.quantile90 +'</td></tr>\
-                    <tr><td>Number of Observations</td><td>'+ summary.observations +'</td></tr>'
+                    <tr><td>10%</td><td>' + summary.quantile10 + '</td></tr>\
+                    <tr><td>25%</td><td>' + summary.quantile25 + '</td></tr>\
+                    <tr><td>Median, 50%</td><td>' + summary.median + '</td></tr>\
+                    <tr><td>75%</td><td>' + summary.quantile75 + '</td></tr>\
+                    <tr><td>90%</td><td>' + summary.quantile90 + '</td></tr>\
+                    <tr><td>Number of Observations</td><td>' + summary.observations + '</td></tr>'
         );
     }
 
-    function getDatasetsAfterFilters(){
+    function getDatasetsAfterFilters() {
         var minDate = new Date(8640000000000000);
         var maxDate = new Date(-8640000000000000);
         var datasets = _(self.plottedSeries).pluck('dataset');
-        var noDataValues = _(datasets).pluck('noDataValue');
+        var noDataValues = _(self.plottedSeries).pluck('nodatavalue');
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
 
         for (var i = 0; i < datasets.length; i++) {
@@ -255,7 +330,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             datasets[i] = datasets[i].filter(function (d) {
                 return (d.value != noDataValues[i]);
             });
-            for (var j = 0; j < datasets[i].length; j++){
+            for (var j = 0; j < datasets[i].length; j++) {
                 var parsedDate = parseDate(datasets[i][j]['date']);
                 if (minDate.valueOf() > parsedDate.valueOf()) {
                     minDate = parsedDate;
@@ -267,13 +342,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         }
 
         // Update minimum and maximum dates on the date pickers
-         self.dateFirst = $('#dpd1').datepicker({
-            onRender: function (date){
+        self.dateFirst = $('#dpd1').datepicker({
+            onRender: function (date) {
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
-        }).on('click', function(){
+        }).on('click', function () {
             self.dateLast.hide();
-        }).on('changeDate',function (ev) {
+        }).on('changeDate', function (ev) {
             self.dateFirst.hide();
             //$('#dpd2')[0].focus();
         }).data('datepicker');
@@ -282,16 +357,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             onRender: function (date) {
                 return (date.valueOf() > maxDate.valueOf() || date.valueOf() < minDate.valueOf()) ? 'disabled' : '';    // disable dates with no records
             }
-        }).on('click', function(){
+        }).on('click', function () {
             self.dateFirst.hide();
-        }).on('changeDate',function (ev) {
+        }).on('changeDate', function (ev) {
             self.dateLast.hide();
         }).data('datepicker');
 
         var nowTemp = new Date();
         var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
-        // If no dates are set, display the last month
+        // If no dates are set, display the last month. Display the whole set if it contains less than 500 data points.
         if (self.dateFirst.date.valueOf() == now.valueOf() && self.dateLast.date.valueOf() == now.valueOf()) {
             // Mark the button of last month interval
             $("#dateIntervals button").removeClass("active");
@@ -305,7 +380,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         }
 
         // Update click events for the date interval buttons
-        $("#btnLastWeek").click(function() {
+        $("#btnLastWeek").click(function () {
             $("#dateIntervals button").removeClass("active");
             $(this).addClass("active");
 
@@ -315,7 +390,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             self.dateLast.date = maxDate.setDate(maxDate.getDate() + 7);
             self.dateLast.setValue(maxDate);
         });
-        $("#btnLastMonth").click(function() {
+        $("#btnLastMonth").click(function () {
             $("#dateIntervals button").removeClass("active");
             $(this).addClass("active");
 
@@ -325,7 +400,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             self.dateLast.date = maxDate.setMonth(maxDate.getMonth() + 1);
             self.dateLast.setValue(maxDate);
         });
-        $("#btnAll").click(function() {
+        $("#btnAll").click(function () {
             $("#dateIntervals button").removeClass("active");
             $(this).addClass("active");
 
@@ -337,7 +412,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         });
 
         // Filter by dates if specified
-        for (var i = 0; i < datasets.length; i++){
+        for (var i = 0; i < datasets.length; i++) {
             datasets[i] = datasets[i].filter(function (d) {
                 return (parseDate(d.date).valueOf() >= self.dateFirst.date.valueOf() && parseDate(d.date).valueOf() <= self.dateLast.date.valueOf());
             });
@@ -346,55 +421,51 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
     }
 
     function drawMultiseries() {
-        var ui = require('ui');
-
         self.clearGraph();
         var varNames = _(self.plottedSeries).pluck('variablename');
         var siteNames = _(self.plottedSeries).pluck('sitename');
         var siteCodes = _(self.plottedSeries).pluck('sitecode');
         var varCodes = _(self.plottedSeries).pluck('variablecode');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
-
         var datasets = getDatasetsAfterFilters();
-
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
-        var axisMargin = 60;
         var numOfYAxes = varNames.length;
+        var qualityControlLevels = _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
 
         // Iterate the datasets and see which ones share y-axes
-        for (var i = 0; i < varNames.length; i++){
-            if (datasets[i].length == 0){
+        for (var i = 0; i < varNames.length; i++) {
+            if (datasets[i].length == 0) {
                 numOfYAxes--;
                 continue;
             }
         }
-        for (var i = 0; i < varNames.length - 1; i++){
-            for (var j = i + 1; j < varNames.length; j++){
-                if (varNames[i] == varNames[j] && varUnits[i] == varUnits[j] && datasets[i].length > 0){
+
+        for (var i = 0; i < varNames.length - 1; i++) {
+            for (var j = i + 1; j < varNames.length; j++) {
+                if (varNames[i] == varNames[j] && varUnits[i] == varUnits[j] && datasets[i].length > 0) {
                     numOfYAxes--;
                     break;
                 }
             }
         }
 
-        var margin = {top: 20, right: 30 + (Math.floor(numOfYAxes / 2)) * axisMargin, bottom:100, left: Math.max(50, (Math.ceil(numOfYAxes / 2)) * axisMargin)},
-            width = $("#graphContainer").width() - margin.left - margin.right,
+        var margin = {top: 20, right: 20, bottom: 100, left: 10},
+            width = $("#graphContainer").width() + $("#leftPanel").width(),
             height = $("#graphContainer").height() - margin.top - margin.bottom,
-            margin2 = {top: height + 60, right: margin.right, bottom: 20, left: margin.left},
-            width2 = $("#graphContainer").width() - margin2.left - margin2.right,
+            margin2 = {top: height + 63, right: margin.right, bottom: 20, left: margin.left},
             height2 = 30;
 
-        var yAxisCount = 0;     // Counter to keep track of y-axises as we place them
+        var yAxisCount = 0;     // Counter to keep track of y-axes as we place them
 
-        // Properties for the five vertical axises.
+        // Properties for the five vertical axes.
         // even: f(n) = n * 10
         // odd: f(n) = width - (n-1) * 10
         var axisProperties = [
             {xTranslate: 0, orient: "left", textdistance: -1},
-            {xTranslate: width, orient: "right", textdistance: 1},
-            {xTranslate: -65, orient: "left", textdistance: -1},
-            {xTranslate: width + 65, orient: "right", textdistance: 1},
-            {xTranslate: -130, orient: "left", textdistance: -1}
+            {xTranslate: 0, orient: "right", textdistance: 1},
+            {xTranslate: 0, orient: "left", textdistance: -1},
+            {xTranslate: 0, orient: "right", textdistance: 1},
+            {xTranslate: 0, orient: "left", textdistance: -1}
         ];
 
         var summary = calcSummaryStatistics(datasets);
@@ -406,41 +477,34 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             return {
                 seriesID: +d.seriesID,
                 date: parseDate(d['date']),
-                val: parseFloat(+d['value']) };
+                val: parseFloat(+d['value'])
+            };
         });
 
-        // then we need to nest the data on seriesID since we want to only draw one
-        // line per seriesID
+        // Then we need to nest the data on seriesID since we want to only draw one line per series
         data = d3.nest().key(function (d) {
             return d.seriesID;
         }).entries(data);
 
-        var x = d3.time.scale()
-            .domain([d3.min(data, function (d) {
-                return d3.min(d.values, function (d) {
+        var domain = [d3.min(data, function (d) {
+            return d3.min(d.values, function (d) {
+                return d.date;
+            });
+        }),
+            d3.max(data, function (d) {
+                return d3.max(d.values, function (d) {
                     return d.date;
                 });
-            }),
-                d3.max(data, function (d) {
-                    return d3.max(d.values, function (d) {
-                        return d.date;
-                    });
-                })])
+            })];
+
+        var x = d3.time.scale()
+            .domain(domain)
             .range([0, width])
             .nice(d3.time.day);
 
         var x2 = d3.time.scale()
-            .domain([d3.min(data, function (d) {
-                return d3.min(d.values, function (d) {
-                    return d.date;
-                });
-            }),
-                d3.max(data, function (d) {
-                    return d3.max(d.values, function (d) {
-                        return d.date;
-                    });
-                })])
-            .range([0, width2])
+            .domain(domain)
+            .range([0, width])
             .nice(d3.time.day);
 
         var color = d3.scale.category10()
@@ -454,253 +518,194 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var lines = new Array(data.length);
         var lines2 = new Array(data.length);
 
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(Math.max(1,(width - data.length * 51)/ 60))      // Don't even...
-            .orient("bottom");
-
-        var xAxis2 = d3.svg.axis()
-            .scale(x2)
-            .ticks((width2 - 60) / 60)
-            .orient("bottom");
-
         var svg = d3.select("#graphContainer").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom);
+            .style("width", $("#graphContainer").width())
+            .style("height", (height + margin.top + margin.bottom) + "px");
 
-        svg.append("defs").append("clipPath")
-            .attr("id", "clip")
-          .append("rect")
-            .attr("width", width)
-            .attr("height", height);
         var focus = svg.append("g")
-             .attr("class", "focus")
-             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("class", "focus")
+            .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
+            .attr("height", "100%");
+        //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var context = svg.append("g")
-        .attr("class", "context")
-        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-
-        focus.append("g")
-            .attr("class", "x axis")
-            //.attr("width", width  - margin.left - margin.right)
-            .attr("transform", "translate(0," + (height) + ")")
-            .call(xAxis)
-        .append("text")
-          .style("text-anchor", "end")
-          .attr("x", width/2)
-          .attr("y", 35)
-          .text("Date");
-
-
-        context.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + (height2) + ")")
-            .call(xAxis2)
+            .attr("class", "context");
 
         var offset = 0;     // offset for the data array when a dataset is empty
+
         // Append legend
-        for (var i = 0; i < self.plottedSeries.length; i++){
+        for (var i = 0; i < self.plottedSeries.length; i++) {
             $("#legendContainer ul").append(
                 '<li class="list-group-item" data-id="' + i + '">' +
-                    '<input type="checkbox" checked="" data-id="' + i + '">' +
-                    '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                    '<font color=' + color(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
-                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+                '<input type="checkbox" checked="" data-id="' + i + '">' +
+                '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
+                '<font color=' + color(i) + '> ■ ' + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
+                '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
+                '<span class="caption">' + qualityControlLevels[i] + '</span></li>'
+            );
         }
 
         // This loop builds and draws each time series
         for (var i = 0; i < datasets.length; i++) {
             // y-coordinate for the graph
+            var domainMin = d3.min(data, function (d) {
+                if (d.key == i) {
+                    return d3.min(d.values, function (d) {
+                        return d.val;
+                    });
+                }
+            });
+
+            var domainMax = d3.max(data, function (d) {
+                if (d.key == i) {
+                    return d3.max(d.values, function (d) {
+                        return d.val;
+                    });
+                }
+            });
+
+            if (domainMin == domainMax) {
+                var delta = (domainMin + 1) / 10;
+                domainMin -= delta;
+                domainMax += delta;
+            }
+
             y[i] = d3.scale.linear()
-                .domain([d3.min(data, function (d) {
-                    if (d.key == i) {
-                        return d3.min(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                }), d3.max(data, function (d) {
-                    if (d.key == i) {
-                        return d3.max(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                })])
+                .domain([domainMin, domainMax])
                 .range([height, 0]);
 
             // y-coordinate for the context view
             y2[i] = d3.scale.linear()
-                .domain([d3.min(data, function (d) {
-                    if (d.key == i) {
-                        return d3.min(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                }), d3.max(data, function (d) {
-                    if (d.key == i) {
-                        return d3.max(d.values, function (d) {
-                            return d.val;
-                        });
-                    }
-                })])
+                .domain([domainMin, domainMax])
                 .range([height2, 0]);
 
             yAxis[i] = d3.svg.axis()
                 .scale(y[i])
-                //.tickFormat(d3.format(".2f"))
+            //.tickFormat(d3.format(".2f"))
 
-
-            if (datasets[i].length == 0){
+            if (datasets[i].length == 0) {
                 offset++;
                 continue;
             }
 
-             // ----------------------- OPTIMIZATION BEGINS -----------------------
-            // if number of points > 2
+            // ----------------------- OPTIMIZATION BEGINS -----------------------
             var index = i - offset;
             var date1 = data[index]["values"][0].date;
             var val1 = parseFloat(data[index]["values"][0].val);
             var dataCopy = [];
             var marginOfError = 2; // The margin of error in degree units
 
-            dataCopy.push({val: val1, date: date1,seriesID:i })
+            dataCopy.push({val: val1, date: date1, seriesID: i})
             var points = [];
-            points.push({x:x(date1), y:y[i](val1)});  // push in the first point
+            points.push({x: x(date1), y: y[i](val1)});  // push in the first point
 
-            for (var j = 2; j < data[index]["values"].length - 1; j++){
+            for (var j = 2; j < data[index]["values"].length - 1; j++) {
                 // Current point
-                var date2 = data[index]["values"][j-1].date;
-                var val2 = parseFloat(data[index]["values"][j-1].val);
-                var point2 = {x:x(date2), y:y[i](val2)};
+                var date2 = data[index]["values"][j - 1].date;
+                var val2 = parseFloat(data[index]["values"][j - 1].val);
+                var point2 = {x: x(date2), y: y[i](val2)};
 
                 // Last inserted
-                var point1 = {x:points[points.length-1].x - point2.x, y:points[points.length-1].y-point2.y};
+                var point1 = {x: points[points.length - 1].x - point2.x, y: points[points.length - 1].y - point2.y};
 
                 // Next point
                 var date3 = data[index]["values"][j].date;
                 var val3 = data[index]["values"][j].val;
-                var point3 = {x:(x(date3)- point2.x), y:(y[i](val3) - point2.y)};
+                var point3 = {x: (x(date3) - point2.x), y: (y[i](val3) - point2.y)};
 
                 var dotProduct = (point1.x * point3.x + point1.y * point3.y);
-                var divisor = ((Math.sqrt(Math.pow(point1.x, 2) + Math.pow(point1.y, 2)))*(Math.sqrt(Math.pow(point3.x, 2) + Math.pow(point3.y, 2))));
+                var divisor = ((Math.sqrt(Math.pow(point1.x, 2) + Math.pow(point1.y, 2))) * (Math.sqrt(Math.pow(point3.x, 2) + Math.pow(point3.y, 2))));
 
                 // Angle between two vectors
-                var angle = Math.acos(dotProduct/divisor)* (180/Math.PI);
+                var angle = Math.acos(dotProduct / divisor) * (180 / Math.PI);
 
-                if (!(angle > 180 - marginOfError && angle < 180 + marginOfError)){
-                    dataCopy.push({val: val2, date: date2, seriesID:i});
+                if (!(angle > 180 - marginOfError && angle < 180 + marginOfError)) {
+                    dataCopy.push({val: val2, date: date2, seriesID: i});
                     points.push(point2);
                 }
             }
 
             // insert last value
-            date1 = data[index]["values"][data[index]["values"].length-1].date;
-            val1 = parseFloat(data[index]["values"][data[index]["values"].length-1].val);
+            date1 = data[index]["values"][data[index]["values"].length - 1].date;
+            val1 = parseFloat(data[index]["values"][data[index]["values"].length - 1].val);
 
-            dataCopy.push({val: val1, date: date1,seriesID:i })
+            dataCopy.push({val: val1, date: date1, seriesID: i})
             data[index]["values"] = dataCopy;   // Replace with new and optimized array
 
             // Show message with number of data points
-           /* $("#graphArea .alert").remove();
-            $("#graphArea").prepend(
-                '<div class="alert alert-info alert-dismissable">\
-                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
-                  <strong></strong>' + "Number of data points: " + dataCopy.length +
-                '</div>'
-            );*/
+            /* $("#graphArea .alert").remove();
+             $("#graphArea").prepend(
+                 '<div class="alert alert-info alert-dismissable">\
+                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
+                   <strong></strong>' + "Number of data points: " + dataCopy.length +
+                 '</div>'
+             );*/
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
-            // Returns the length of the longest tick in characters
-            function getAxisSeparation(id){
-                var browser = ui.getBrowserName;
-                var ticks = $(".y.axis[data-id='" + i +"'] .tick text");
-                var max = 0;
-                if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){               // Firefox and IE do not support width() for elements inside an svg. Must calculate it using the textContent and font size (12)
-                    for (var index = 0; index < ticks.length; index++){
-                        var a = ticks[index].textContent.length * 6.5;
-                        if (max < a){
-                            max = a;
-                        }
-                    }
-                }
-                else{
-                    for (var index = 0; index < ticks.length; index++){
-                        var a = $(ticks[index]);
-                        if (max < a.width()){
-                            max = a.width();
-                        }
-                    }
-                }
-                return max;
-            }
-
             // Append y-axis
-            var chosenYAxis = [i];
+            var chosenYAxes = [i];
 
             // Check if this axis will be shared with another variable
-            for (var j = 0; j < i; j++){
-                if (i != j && varNames[i] == varNames[j] && varUnits[i] == varUnits[j] ){
-                    chosenYAxis.push(j);
+            for (var j = 0; j < i; j++) {
+                if (i != j && varNames[i] == varNames[j] && varUnits[i] == varUnits[j]) {
+                    chosenYAxes.push(j);
                 }
             }
 
-            if (chosenYAxis.length > 1){
-                 var usedAxis = Math.min.apply(null, chosenYAxis);   // select the first axis created for this variable
-                // update previous axis
-                y[usedAxis].domain([d3.min(data, function (d) {
-                    if (d.key in chosenYAxis) {
+            if (chosenYAxes.length > 1) {
+                let usedAxis = Math.min.apply(null, chosenYAxes);   // select the first axis created for this variable
+                var newDomain = [Infinity, -Infinity];
+
+                newDomain = [Math.min(newDomain[0], d3.min(data, function (d) {
+                    if (jQuery.inArray(parseInt(d.key), chosenYAxes) != -1) {
                         return d3.min(d.values, function (d) {
                             return d.val;
                         });
                     }
-                    }), d3.max(data, function (d) {
-                        if (d.key in chosenYAxis) {
-                            return d3.max(d.values, function (d) {
-                                return d.val;
-                            });
-                        }
-                    })]
-                );
-                y2[usedAxis].domain([d3.min(data, function (d) {
-                    if (d.key in chosenYAxis) {
-                        return d3.min(d.values, function (d) {
+                })), Math.max(newDomain[1], d3.max(data, function (d) {
+                    if (jQuery.inArray(parseInt(d.key), chosenYAxes) != -1) {
+                        return d3.max(d.values, function (d) {
                             return d.val;
                         });
                     }
-                    }), d3.max(data, function (d) {
-                        if (d.key in chosenYAxis) {
-                            return d3.max(d.values, function (d) {
-                                return d.val;
-                            });
-                        }
-                    })]
-                );
+                }))];
 
-                // Use a previous axis
+                // update previous axis and use it
+                var currentDomain = y[usedAxis].domain();
+                var combinedDomain = [Math.min(newDomain[0], currentDomain[0]), Math.max(newDomain[1], currentDomain[1])]
+                y[usedAxis] = d3.scale.linear()
+                    .domain(combinedDomain)
+                    .range([height, 0]);
 
-                $("#yAxis-" + usedAxis).attr("style", "fill: #000");
-                focus.select("#yAxis-" + usedAxis).call(yAxis[usedAxis]);
+                // y-coordinate for the context view
+                y2[usedAxis] = d3.scale.linear()
+                    .domain(combinedDomain)
+                    .range([height2, 0]);
+
+                $(".y.axis[data-id='" + usedAxis + "']").attr("style", "fill: #000");
+
+                yAxis[usedAxis].scale(y[usedAxis]);
+
+                focus.select(".y.axis[data-id='" + usedAxis + "']").call(yAxis[usedAxis]);
 
                 lines[i] = d3.svg.line()
                     .x(function (d) {
                         return x(d.date);
                     })
-                    .y(
-                    function (d) {
+                    .y(function (d) {
                         return y[usedAxis](d.val);
                     });
 
                 lines2[i] = d3.svg.line()
-                    //.interpolate("basis")
+                //.interpolate("basis")
                     .x(function (d) {
                         return x2(d.date);
                     })
-                    .y(
-                    function (d) {
+                    .y(function (d) {
                         return y2[usedAxis](d.val);
                     });
             }
-            else{
+            else {
                 // Create a new axis
                 yAxis[i].orient(axisProperties[yAxisCount].orient);
                 var text = focus.append("g")
@@ -710,68 +715,132 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     .style("fill", color(i))
                     .attr("transform", "translate(" + (axisProperties[yAxisCount].xTranslate) + " ,0)")
                     .call(yAxis[i])
-                    .append("text")
+                        .append("text")
                         .attr("transform", "rotate(-90)")
-                        .attr("y", (getAxisSeparation(i) + 22) * axisProperties[yAxisCount].textdistance)
                         .style("text-anchor", "end")
                         .style("font-size", "14px")
                         .attr("dy", ".71em")
-                        .text(varNames[i] + " (" +  varUnits[i] + ")");
+                        .text(varNames[i] + " (" + varUnits[i] + ")");
 
-                    var axisHeight = $(".y.axis[data-id=" + 0 +"]")[0].getBBox().height;
-                    var textHeight = $(".y.axis[data-id='" + i +"'] > text").width();
+                var axisHeight = $(".y.axis[data-id=" + i + "]")[0].getBBox().height;
+                var textHeight = $(".y.axis[data-id='" + i + "'] > text").text().length * 6.5;
 
-                    // the width() method does not work in Firefox for elements inside an svg. Must calculate it
-                    var browser = ui.getBrowserName;
-                    if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){
-                        textHeight = $(".y.axis[data-id='" + i +"'] > text").text().length * 6.5;
-                    }
-                    text.attr("x", -(axisHeight - textHeight)/2);
-                    yAxisCount++;
+                text.attr("x", -(axisHeight - textHeight) / 2);
+                text.attr("y", (getAxisSeparation(i) + 15) * axisProperties[yAxisCount].textdistance);
+                yAxisCount++;
 
                 lines[i] = d3.svg.line()
-                .x(function (d) {
-                    return x(d.date);
-                })
-                .y(
-                function (d) {
-                    return y[d.seriesID](d.val);
-                });
+                    .x(function (d) {
+                        return x(d.date);
+                    })
+                    .y(function (d) {
+                        return y[d.seriesID](d.val);
+                    });
 
                 lines2[i] = d3.svg.line()
-                    //.interpolate("basis")
+                //.interpolate("basis")
                     .x(function (d) {
                         return x2(d.date);
                     })
-                    .y(
-                    function (d) {
+                    .y(function (d) {
                         return y2[d.seriesID](d.val);
                     });
+
+                // Update the axis properties
+                var axisSpacing = 10;
+                if (yAxisCount - 1 === 0) {
+                    axisProperties[2].xTranslate = -($("#yAxis-" + 0)[0].getBBox().width + axisSpacing);
+                    margin.left += $("#yAxis-" + 0)[0].getBBox().width + axisSpacing;
+                }
+                else if (yAxisCount - 1 === 1) {
+                    axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-" + 1)[0].getBBox().width + axisSpacing;
+                    margin.right += $("#yAxis-" + 1)[0].getBBox().width + axisSpacing;
+                }
+                else if (yAxisCount - 1 === 2) {
+                    axisProperties[4].xTranslate = axisProperties[2].xTranslate - ($("#yAxis-" + 2)[0].getBBox().width + axisSpacing);
+                    margin.left += $("#yAxis-" + 2)[0].getBBox().width + axisSpacing;
+                }
+                else if (yAxisCount - 1 === 3) {
+                    margin.right += $("#yAxis-" + 3)[0].getBBox().width + axisSpacing;
+                }
+                else if (yAxisCount - 1 === 4) {
+                    margin.left += $("#yAxis-" + 4)[0].getBBox().width + axisSpacing;
+                }
+
+                focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                    .attr("width", $("#graphContainer").width() - margin.left - margin.right);
             }
 
+            // If the graph contains less than 2 data points, append circles
+            if (data[i] && data[i].values.length < 2) {
+                focus.selectAll("circle.line")
+                    .data(data[i]['values'])
+                    .enter().append("svg:circle")
+                    .attr("class", "line")
+                    .style("fill", color(i))
+                    .attr("cx", lines[i].x())
+                    .attr("cy", lines[i].y())
+                    .attr("r", 3.5);
 
-            // Update the axis properties
-            if ( yAxisCount - 1 == 0)
-                axisProperties[2].xTranslate = - $("#yAxis-" + 0)[0].getBBox().width;
-
-            if (yAxisCount - 1 == 1)
-                axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-"+ 1)[0].getBBox().width;
-
-            if (yAxisCount - 1 == 2)
-                axisProperties[4].xTranslate = axisProperties[2].xTranslate - $("#yAxis-" + 2)[0].getBBox().width;
+                context.selectAll("circle.line")
+                    .data(data[i]['values'])
+                    .enter().append("svg:circle")
+                    .attr("class", "line")
+                    .style("fill", color(i))
+                    .attr("cx", lines2[i].x())
+                    .attr("cy", lines2[i].y())
+                    .attr("r", 3.5);
+            }
         }
 
-        // Append circle points
-        /*focus.selectAll("circle.line")
-		    .data(data[0]['values'])
-		    .enter().append("svg:circle")
-		    .attr("class", "line")
-		    .style("fill", "green")
-		    .attr("cx", lines[0].x())
-		    .attr("cy", lines[0].y())
-		    .attr("r", 3.5);*/
+        // Append x axis
+        width = $("#graphContainer").width() - margin.left - margin.right;
 
-        $('#legendContainer input[type="checkbox"]').click(function() {
+        // Axes to the right
+        axisProperties[1].xTranslate = width;
+        axisProperties[3].xTranslate += width;
+
+        context.attr("transform", "translate(" + margin.left + "," + margin2.top + ")");
+
+        d3.select("#yAxis-1").attr("transform", "translate(" + (axisProperties[1].xTranslate) + " ,0)");
+        d3.select("#yAxis-3").attr("transform", "translate(" + (axisProperties[3].xTranslate) + " ,0)");
+
+        x.range([0, width]);
+        x2.range([0, width]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .ticks(Math.max(1, (width - data.length * 51) / 60))      // Don't even...
+            .orient("bottom");
+
+        var xAxis2 = d3.svg.axis()
+            .scale(x2)
+            .ticks(Math.max(1, (width - data.length * 51) / 60))
+            .orient("bottom");
+
+        focus.append("g")
+            .attr("class", "x axis")
+            //.attr("width", width  - margin.left - margin.right)
+            .attr("transform", "translate(0," + (height) + ")")
+            .call(xAxis)
+            .append("text")
+            .style("text-anchor", "end")
+            .attr("x", width / 2)
+            .attr("y", 35)
+            .text("Date");
+
+        context.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + (height2) + ")")
+            .call(xAxis2);
+
+        svg.append("defs").append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height);
+
+        $('#legendContainer input[type="checkbox"]').click(function () {
             var that = this;
             var path = $("#path" + that.getAttribute("data-id"));
 
@@ -784,12 +853,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         });
 
         // Bind unplot button event
-        $('#legendContainer').find('button.close').click(function() {
+        $('#legendContainer').find('button.close').click(function () {
             var id = +this.dataset['seriesid'];
             self.unplotSeries(id);
         });
-
-        // Update xAxis ticks
 
         var seriesID = focus.selectAll(".seriesID")
             .data(data, function (d) {
@@ -814,45 +881,106 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             })
             .attr("class", "seriesID2");
 
-         var brush = d3.svg.brush()
-        .x(x2)
-        .on("brush", brushed);
+        var brush = d3.svg.brush()
+            .x(x2)
+            .on("brush", brushed);
 
         context.append("g")
-          .attr("class", "x brush")
-          .call(brush)
-        .selectAll("rect")
-          .attr("y", -6)
-          .attr("height", height2+7);
+            .attr("class", "x brush")
+            .call(brush)
+            .selectAll("rect")
+            .attr("y", -6)
+            .attr("height", height2 + 7);
 
-        function pathClickHandler (d){
-            if(d3.select(this).style("stroke-width") == "2.5px"){
-                d3.select(this)
-                   .style("stroke-width", 1.5);
+        function paintGridAxis(id) {
+            var gridAxis = d3.svg.axis()
+                .scale(y[id])
+                .orient("left")
+                .tickSize(-width, 0, 0)
+                .tickFormat("");
+
+            focus.insert("g", ":first-child")
+                .attr("class", "grid")
+                .style({'stroke': 'lightgray', 'stroke-width': '1.5px'})
+                .call(gridAxis);
+        }
+
+        function onPathClick() {
+            var id = $(this).parent().attr("data-id");
+
+            var axisID = 0;
+            var varName = varNames[this.parentElement.getAttribute("data-id")];
+            var varUnit = varUnits[this.parentElement.getAttribute("data-id")];
+            for (var x = 0; x < varNames.length; x++) {
+                if (varName == varNames[x] && varUnit == varUnits[x]) {
+                    axisID = x;
+                    break;
+                }
             }
-            else{
-                svg.selectAll(".line").style("stroke-width", 1.5)
-                d3.select(this).style("stroke-width", 2.5);
-                d3.select(this.parentElement).moveToFront();
+
+            var flag = true;
+
+            d3.select(this.parentElement).moveToFront();
+            d3.selectAll(".y.axis[data-id='" + axisID + "'] .domain," + ".y.axis[data-id='" + axisID + "'] .domain .tick line").attr("stroke-width", 2.5);
+
+            if (this.parentElement.getAttribute("opacity") == "0.4") {
+                focus.selectAll(".seriesID").attr("opacity", "0.4");
+            }
+            else {
+                var paths = focus.selectAll(".seriesID")[0];
+
+                if (paths.length > 1) {
+                    paths.forEach(function (path) {
+                        if (path.getAttribute("opacity") == "0.4") {
+                            path.setAttribute("opacity", "1");
+                            flag = false;
+                        }
+                        else {
+                            path.setAttribute("opacity", "0.4");
+                        }
+                    });
+                }
+                else {
+                    if (focus.selectAll(".grid")[0].length) {
+                        // d3.selectAll(".grid").remove();
+                        d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
+                        flag = false;
+                    }
+                    else {
+                        d3.selectAll(".y.axis[data-id='" + id + "'] .domain," + ".y.axis[data-id='" + id + "'] .domain .tick line").attr("stroke-width", 2.5);
+                        // paintGridAxis(id);
+                    }
+                }
             }
 
-             $('#legendContainer .list-group-item').removeClass("highlight");
+            this.parentElement.setAttribute("opacity", "1");
+            // d3.selectAll(".grid").remove();
+            d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
 
-            $('#legendContainer .list-group-item[data-id="'+ this.parentElement.getAttribute("data-id") +'"]').addClass("highlight");
-            setSummaryStatistics(summary[this.parentElement.getAttribute("data-id")]);
+            if (flag) {
+                d3.selectAll(".y.axis[data-id='" + axisID + "'] .domain," + ".y.axis[data-id='" + axisID + "'] .domain .tick line").attr("stroke-width", 2.5);
+                // paintGridAxis(id);
+            }
+            else {
+                d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
+            }
+
+            $('#legendContainer .list-group-item').removeClass("highlight");
+            $('#legendContainer .list-group-item[data-id="' + this.parentElement.getAttribute("data-id") + '"]').addClass("highlight");
+            setSummaryStatistics(summary[id]);
         }
 
         seriesID.append("path")
             .attr("class", "line")
             .style("stroke-width", 1.5)
-            .on("click", pathClickHandler)
+            .on("click", onPathClick)
             .attr("d", function (d) {
                 return lines[d.key](d.values);
             })
             .style("stroke", function (d) {
-                return color(d.key);
-            }
-        );
+                    return color(d.key);
+                }
+            );
 
         seriesID2.append("path")
             .attr("class", "line")
@@ -861,9 +989,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 return lines2[d.key](d.values);
             })
             .style("stroke", function (d) {
-                return color(d.key);
-            }
-        );
+                    return color(d.key);
+                }
+            );
 
         // Set the first summary statistics by default
         setSummaryStatistics(summary[0]);
@@ -873,27 +1001,26 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
         // Highlight the first path
         var path = d3.select("#path0 > g");
-            path.each(pathClickHandler);
+        path.each(onPathClick);
 
         $('#legendContainer .list-group-item').click(function (e) {
-            if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
+            if (e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button') {
                 return;
             }
 
-            var that = this;
-            var id = that.getAttribute("data-id");
+            var id = this.getAttribute("data-id");
 
-            if (that.className != "list-group-item"){
-                var path = d3.select("#path" + that.getAttribute("data-id") + " path");
-                path.each(pathClickHandler);
+            if (this.className !== "list-group-item") {
+                var path = d3.select("#path" + id + " path");
+                path.each(onPathClick);
             }
 
-            if (that.className == "list-group-item"){
+            if (this.className === "list-group-item") {
                 $('#legendContainer .list-group-item').removeClass("highlight");
-                this.className="list-group-item highlight"
-
-                svg.selectAll(".line")
-                    .style("stroke-width", 1.5)
+                // d3.selectAll(".grid").remove();
+                d3.selectAll(".domain, .tick line").attr("stroke-width", 1);
+                d3.selectAll(".seriesID").attr("opacity", "1");
+                this.className = "list-group-item highlight";
 
                 // Set summary statistics
                 setSummaryStatistics(summary[id]);
@@ -901,11 +1028,14 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         });
 
         function brushed() {
-          x.domain(brush.empty() ? x2.domain() : brush.extent());
-          focus.selectAll(".seriesID")
-            .selectAll("path")
-            .attr("d", function(d) {return lines[d.key](d.values); });
-          focus.select(".x.axis").call(xAxis);
+            x.domain(brush.empty() ? x2.domain() : brush.extent());
+            focus.selectAll(".seriesID")
+                .selectAll("path")
+                .attr("d", function (d) {
+                    return lines[d.key](d.values);
+                });
+
+            focus.select(".x.axis").call(xAxis);
         }
     }
 
@@ -915,10 +1045,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         var siteNames = _(self.plottedSeries).pluck('sitename');
         var siteCodes = _(self.plottedSeries).pluck('sitecode');
         var varCodes = _(self.plottedSeries).pluck('variablecode');
+        var qualityControlLevels = _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
         var datasets = getDatasetsAfterFilters();
         var summary = calcSummaryStatistics(datasets);
-        var values = _(datasets).map(function(dataset) {
+        var values = _(datasets).map(function (dataset) {
             return _.pluck(dataset, 'value');
         });
         var numOfDatasets = values.length;
@@ -928,8 +1059,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             height = $("#graphContainer").height();
         var numOfEmptyDatasets = 0;
 
-        for (var i = 0; i < numOfDatasets; i++){
-            if (values[i].length == 0){
+        for (var i = 0; i < numOfDatasets; i++) {
+            if (values[i].length == 0) {
                 numOfEmptyDatasets++;
             }
         }
@@ -944,28 +1075,40 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             var domainMin = Math.min.apply(Math, values[i]);
             var domainMax = Math.max.apply(Math, values[i]);
 
-            var graph = {x:null, y:null, xAxis:null, numberOfBins:20, yAxis:null, svg:null, data:null}
+            var graph = {x: null, y: null, xAxis: null, numberOfBins: 20, yAxis: null, svg: null, data: null}
 
             // Append legend
             $("#legendContainer ul").append(
                 '<li class="list-group-item" data-id="' + i + '">' +
                 '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
-                '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+                '<font color=' + colors(i) + '> ■ ' + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
+                '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
+                '<span class="caption">' + qualityControlLevels[i] + '</span></li>'
+            );
 
             // Bind unplot button event
-            $('#legendContainer').find('button.close').click(function() {
+            $('#legendContainer').find('button.close').click(function () {
                 var id = +this.dataset['seriesid'];
                 self.unplotSeries(id);
             });
 
             // If the dataset is empty, skip to the next one
-            if (values[i].length == 0){
+            if (values[i].length == 0) {
                 continue;
             }
 
+            // domain can't be closed on a single value
+            if (domainMin == domainMax) {
+                if (domainMin == 0) {
+                    domainMax = 1;
+                }
+                else {
+                    domainMax += domainMin / 10;
+                }
+            }
+
             graph.x = d3.scale.linear()
-                .domain([domainMin, Math.max(domainMin + 1, domainMax)])// domain can't be [0,0]
+                .domain([domainMin, domainMax])
                 .range([0, width]);
 
             var ticks = graph.x.ticks(20);
@@ -974,10 +1117,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             ticks.unshift(ticks[0] - (ticksDelta));
             ticks.push(ticks[ticks.length - 1] + ticksDelta);
 
-            for(var x = 0; x < ticks.length; x++){
+            for (var x = 0; x < ticks.length; x++) {
                 ticks[x] = parseFloat(ticks[x].toFixed(2))
             }
-
 
             graph.x = d3.scale.linear()
                 .domain([ticks[0], ticks[ticks.length - 1]])
@@ -989,12 +1131,15 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 (values[i]);
 
             graph.y = d3.scale.linear()
-                .domain([0, d3.max(graph.data, function (d) {return d.y;})])
+                .domain([0, d3.max(graph.data, function (d) {
+                    return d.y;
+                })])
                 .range([graphHeight, 0]);
 
             graph.xAxis = d3.svg.axis()
                 .scale(graph.x)
                 .tickValues(ticks)
+                .tickFormat(d3.format(""))
                 .orient("bottom");
 
             graph.yAxis = d3.svg.axis()
@@ -1008,7 +1153,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 .attr("data-id", i)
                 .attr("height", graphHeight + margin.bottom + margin.top)
                 .append("g")
-                .attr("transform", "translate(" + margin.left + ","+margin.top +")");
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
             var bar = graph.svg.selectAll(".bar")
                 .data(graph.data)
@@ -1019,32 +1164,60 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 });
 
             // TODO: IMPLEMENT FLOATING DIV
-                /*.on("mouseover", function(d) {
-                    var bar_width = parseInt($(this).attr("width"), 10);
-                    var x = parseInt($(this).attr("x"), 10) + bar_width / 2 + 5;
-                    var y = parseInt($(this).attr("y"), 10) - 20;
-                    div.transition().duration(200).style("opacity", 1);
-                    // include info you want to display here:
-                    div.html(formatCount(d.y) + "<br/>").style("left", x + "px").style("top", y + "px");
-                }).on("mouseout", function(d) {
-                    div.transition().duration(500).style("opacity", 0);
-                });
+            /*.on("mouseover", function(d) {
+                var bar_width = parseInt($(this).attr("width"), 10);
+                var x = parseInt($(this).attr("x"), 10) + bar_width / 2 + 5;
+                var y = parseInt($(this).attr("y"), 10) - 20;
+                div.transition().duration(200).style("opacity", 1);
+                // include info you want to display here:
+                div.html(formatCount(d.y) + "<br/>").style("left", x + "px").style("top", y + "px");
+            }).on("mouseout", function(d) {
+                div.transition().duration(500).style("opacity", 0);
+            });
 */
+            var rectWidth = 0;
+            for (var x = 0; x < graph.data.length; x++) {
+                if (graph.data[x].length !== 0) {
+                    rectWidth = graph.x(graph.data[x].dx + ticks[0]) - 2;
+                    break;
+                }
+            }
+
             bar.append("rect")
                 .attr("x", 1)
-                .attr("width", graph.x(graph.data[1].dx + ticks[0]) - 2)
+                .attr("width", rectWidth)
                 .style("fill", colors(i))
-                .style("opacity", 1)
                 .attr("height", function (d) {
-                        return graphHeight - graph.y(d.y);
-                });
+                    return graphHeight - graph.y(d.y);
+                })
+                .on("mouseover", onMouseOver(colors(i)))
+                .on("mouseout", onMouseOut(colors(i)));
 
             bar.append("text")
                 .attr("dy", ".75em")
-                .attr("y", 6)
-                .attr("x", graph.x(graph.data[0].dx + ticks[0]) / 2)
+                .attr("y", function (d) {
+                    if (graphHeight - graph.y(d.y) > 16) {
+                        return 6;
+                    }
+                    else {
+                        return -14;
+                    }
+                })
+                .attr("x", rectWidth / 2)
+                .attr("fill", function (d) {
+                    if (graphHeight - graph.y(d.y) > 16) {
+                        return "#fff";
+                    }
+                    else {
+                        return "#000";
+                    }
+                })
                 .attr("text-anchor", "middle")
-                .text(function(d) { return formatCount(d.y);});
+                .text(function (d) {
+                    if (formatCount(d.y) !== "0") {
+                        return formatCount(d.y);
+                    }
+                });
 
             graph.svg.append("g")
                 .attr("class", "x axis")
@@ -1053,26 +1226,39 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 .call(graph.xAxis)
                 .append("text")
                 .attr("class", "x label")
-                  .attr("x", width / 2)
-                  .attr("y", margin.bottom - 25)
-                  .style("text-anchor", "middle")
-                  .text(varNames[i] + " (" + varUnits[i] + ")")
+                .attr("x", width / 2)
+                .attr("y", margin.bottom - 25)
+                .style("text-anchor", "middle")
+                .text(varNames[i] + " (" + varUnits[i] + ")")
 
             graph.svg.append("g")
-              .attr("class", "y axis")
-              .attr("id", "y-axis-" + i)
-              .call(graph.yAxis)
-            .append("text")
+                .attr("class", "y axis")
+                .attr("id", "y-axis-" + i)
+                .call(graph.yAxis)
+                .append("text")
                 .attr("class", "y label")
-              .attr("transform", "rotate(-90)")
-              .attr("x", -(graphHeight + margin.bottom) / 2)
-              .attr("y", -50)
-              .text("Data points");
+                .attr("transform", "rotate(-90)")
+                .attr("x", -(graphHeight + margin.bottom) / 2)
+                .attr("y", -50)
+                .text("Data points");
+
+            // Draw grid lines
+            var gridAxis = d3.svg.axis()
+                .scale(graph.y)
+                .orient("left")
+                .tickSize(-width, 0, 0)
+                .tickFormat("");
+
+            //graph.svg.selectAll(".grid").remove();
+            graph.svg.insert("g", ":first-child")
+                .attr("class", "grid")
+                .style({'stroke': 'lightgray', 'stroke-width': '1.5px'})
+                .call(gridAxis);
 
             graphs.push(graph);
 
             // Scroll event
-            $('#graph-' + i).on('mousewheel DOMMouseScroll', function(e){
+            $('#graph-' + i).on('mousewheel DOMMouseScroll', function (e) {
                 var minTicks = 5;
                 var maxTicks = 40;
                 var i = e.currentTarget.getAttribute("data-id");
@@ -1087,14 +1273,14 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
                 var binNumber = graphs[i].x.ticks(graphs[i].numberOfBins).length;
 
-                if(e.originalEvent.wheelDelta > 0 || e.originalEvent.detail > 0){
+                if (e.originalEvent.wheelDelta > 0 || e.originalEvent.detail > 0) {
                     delta = 1;
                 }
                 else {
                     delta = -1
                 }
 
-                do{
+                do {
                     graphs[i].x = d3.scale.linear()
                         .domain([domainMin, domainMax])
                         .range([0, width]);
@@ -1105,7 +1291,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     graphs[i].numberOfBins = Math.max(graphs[i].numberOfBins, minTicks);
                     graphs[i].numberOfBins = Math.min(graphs[i].numberOfBins, maxTicks);
 
-                    if (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length){
+                    // If this input does not produce a different number of bins in the graph, skip to the next iteration
+                    if (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length) {
                         continue;
                     }
 
@@ -1116,7 +1303,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     ticks.push(ticks[ticks.length - 1] + ticksDelta);
 
                     // Format the ticks to prevent a big chain of 0s
-                    for(var x = 0; x < ticks.length; x++){
+                    for (var x = 0; x < ticks.length; x++) {
                         ticks[x] = parseFloat(ticks[x].toFixed(2))
                     }
 
@@ -1124,64 +1311,110 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                         .domain([ticks[0], ticks[ticks.length - 1]])
                         .range([0, width]);
                     graphs[i].data = d3.layout.histogram()
-                    .bins(ticks)
-                    (values[i]);
+                        .bins(ticks)(values[i]);
 
-                    graphs[i].y.domain([0, d3.max(graphs[i].data, function (d) {return d.y;})]);
+                    graphs[i].y.domain([0, d3.max(graphs[i].data, function (d) {
+                        return d.y;
+                    })]);
 
+                    // Bind new axis properties
                     graphs[i].xAxis.tickValues(ticks);
                     graphs[i].xAxis.tickFormat(d3.format(""));  // Empty format so it doesn't use its default format which rounds the numbers
                     graphs[i].xAxis.scale(graphs[i].x);
                     graphs[i].yAxis.scale(graphs[i].y);
 
+                    // Call axes
                     d3.select("#x-axis-" + i).call(graphs[i].xAxis);
                     d3.select("#y-axis-" + i).call(graphs[i].yAxis);
 
+                    // Draw new grid lines
+                    var gridAxis = d3.svg.axis()
+                        .scale(graphs[i].y)
+                        .orient("left")
+                        .tickSize(-width, 0, 0)
+                        .tickFormat("")
+                        .ticks(numOfTicks);
+
+                    graphs[i].svg.selectAll(".grid").remove();
+                    graphs[i].svg.insert("g", ":first-child")
+                        .attr("class", "grid")
+                        .style({'stroke': 'lightgray', 'stroke-width': '1.5px'})
+                        .call(gridAxis);
+
+                    // Append new graph
                     graphs[i].svg.selectAll(".bar").remove();
+
                     var bar = graphs[i].svg.selectAll(".bar")
-                    .data(graphs[i].data)
-                    .enter().append("g")
-                    .attr("class", "bar")
-                    .attr("transform", function (d) {
-                        return "translate(" + graphs[i].x(d.x) + "," + graphs[i].y(d.y) + ")";
-                    });
+                        .data(graphs[i].data)
+                        .enter().append("g")
+                        .attr("class", "bar")
+                        .attr("transform", function (d) {
+                            return "translate(" + graphs[i].x(d.x) + "," + graphs[i].y(d.y) + ")";
+                        });
+
+                    var rectWidth = 0;
+                    for (var x = 0; x < graphs[i].data.length; x++) {
+                        if (graphs[i].data[x].length != 0) {
+                            rectWidth = graphs[i].x(graphs[i].data[x].dx + ticks[0]) - 2;
+                            break;
+                        }
+                    }
 
                     bar.append("rect")
                         .attr("x", 1)
-                        .attr("width", graphs[i].x(graphs[i].data[1].dx + ticks[0]) - 2)
+                        .attr("width", rectWidth)
                         .style("fill", colors(i))
-                        .style("opacity", 1)
                         .attr("height", function (d) {
-                                return graphHeight - graphs[i].y(d.y);
-                        });
+                            return graphHeight - graphs[i].y(d.y);
+                        })
+                        .on("mouseover", onMouseOver(colors(i)))
+                        .on("mouseout", onMouseOut(colors(i)));
 
                     bar.append("text")
                         .attr("dy", ".75em")
-                        .attr("y", 6)
-                        .attr("x", graphs[i].x(graphs[i].data[0].dx + graphs[i].x.domain()[0]) / 2)
+                        .attr("x", rectWidth / 2)
+                        .attr("y", function (d) {
+                            if (graphHeight - graphs[i].y(d.y) > 16) {
+                                return 6;
+                            }
+                            else {
+                                return -14;
+                            }
+                        })
                         .attr("text-anchor", "middle")
-                        .text(function(d) { return formatCount(d.y); });
+                        .attr("fill", function (d) {
+                            if (graphHeight - graphs[i].y(d.y) > 16) {
+                                return "#fff";
+                            }
+                            else {
+                                return "#000";
+                            }
+                        })
+                        .text(function (d) {
+                            if (formatCount(d.y) != "0") {
+                                return formatCount(d.y);
+                            }
+                        });
                 }
                 while (binNumber == graphs[i].x.ticks(graphs[i].numberOfBins).length && graphs[i].numberOfBins > minTicks && graphs[i].numberOfBins < maxTicks);
             });
         }
 
-        // Set the first summary statistics by default
-        setSummaryStatistics(summary[0]);
-        // Highlight the first row
-        $('#legendContainer .list-group-item').removeClass("highlight");
+        setSummaryStatistics(summary[0]);                                               // Set the first summary statistics by default
+
+        $('#legendContainer .list-group-item').removeClass("highlight");                // Highlight the first row
         $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
 
         $('#legendContainer .list-group-item').click(function (e) {
-           if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
-               return;
-           }
-           var that = this;
+            if (e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button') {
+                return;
+            }
+            var that = this;
 
-           var id = that.getAttribute("data-id");
-           if (that.className == "list-group-item"){
+            var id = that.getAttribute("data-id");
+            if (that.className == "list-group-item") {
                 $('#legendContainer .list-group-item').removeClass("highlight");
-                this.className="list-group-item highlight"
+                this.className = "list-group-item highlight"
 
                 // Set summary statistics
                 setSummaryStatistics(summary[id]);
@@ -1189,16 +1422,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         });
     }
 
-    function drawBoxPlot(){
+    function drawBoxPlot() {
+        var ui = require('ui');
         var varNames = _(self.plottedSeries).pluck('variablename');
         var siteNames = _(self.plottedSeries).pluck('sitename');
         var siteCodes = _(self.plottedSeries).pluck('sitecode');
         var varCodes = _(self.plottedSeries).pluck('variablecode');
         var varUnits = _(self.plottedSeries).pluck('variableunitsabbreviation');
-        var observations = getDatasetsAfterFilters()
+        var qualityControlLevels = _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
+        var observations = getDatasetsAfterFilters();
         var summary = calcSummaryStatistics(observations);
 
-        observations = observations.map(function(dataset) {
+        observations = observations.map(function (dataset) {
             return _.pluck(dataset, 'value');
         });
 
@@ -1207,23 +1442,23 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             width = 30,
             height = ($("#graphContainer").height()) / Math.ceil(varNames.length / 3) - margin.top - margin.bottom;
 
-        var boxContainerWidth = $("#graphContainer").width()/3 - 30;
+        var boxContainerWidth = $("#graphContainer").width() / 3 - 30;
 
         var colors = d3.scale.category10();
         var data = [];
         var charts = [];
 
-        if(self.boxWhiskerSvgs.length == 0){
+        if (self.boxWhiskerSvgs.length == 0) {
             self.clearGraph();
         }
-        if($(".focus").length > 0 || $(".bar").length){
+        if ($(".focus").length > 0 || $(".bar").length) {
             self.clearGraph();
             self.boxWhiskerSvgs = [];
         }
 
         // The x-axis
         var x = d3.time.scale()
-            .domain([0,1])
+            .domain([0, 1])
             .range([0, 180])
             .nice(d3.time.day);
 
@@ -1232,27 +1467,27 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             .ticks(0)
             .orient("bottom");
 
-        for (var i = 0; i < observations.length; i++){
+        for (var i = 0; i < observations.length; i++) {
             data[0] = observations[i];
 
-            if (data[0].length == 0){   // This will prevent the plugin from throwing errors when dealing with empty sets
+            if (data[0].length == 0) {   // This will prevent the plugin from throwing errors when dealing with empty sets
                 data[0][0] = 0;
             }
 
             var min = Infinity,
                 max = -Infinity;
 
-            for (var j = 0; j < data[0].length; j++){
+            for (var j = 0; j < data[0].length; j++) {
                 data[0][j] = parseFloat(data[0][j]);
-                if(data[0][j] > max){
+                if (data[0][j] > max) {
                     max = data[0][j];
                 }
-                if (data[0][j] < min){
+                if (data[0][j] < min) {
                     min = data[0][j]
                 }
             }
 
-            min = min - (max - min) / 20;   //  Add a last tick so that the box doesn't appear on top of the x-axis
+            min = min - (max - min) / 20;   //  Add a last tick so that the box doesn't appear right on top of the x-axis
 
             // The y-axis
             var y = d3.scale.linear()
@@ -1260,21 +1495,21 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                 .range([height, 0]);
 
             var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
+                .scale(y)
+                .orient("left");
 
             charts[i] = d3.box()
                 .whiskers(iqr(1.5))
                 .width(width)
                 .height(height);
 
-            if (min == Infinity || max == -Infinity){
+            if (min == Infinity || max == -Infinity) {
                 min = 1;
                 max = 1;
             }
             var text;
             charts[i].domain([min, max]);
-            if (self.boxWhiskerSvgs[i] != null){
+            if (self.boxWhiskerSvgs[i] != null) {
                 // update domain
                 charts[i].domain([min, max]);
 
@@ -1284,12 +1519,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
                 text = $("svg[data-id='" + i + "'] .yAxisLabel");
             }
-            else{
+            else {
                 self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
-                  .data(data)
-                  .attr("class", "box")
-                  .attr("data-id", i)
-                .append("g")
+                    .data(data)
+                    .attr("class", "box")
+                    .attr("data-id", i)
+                    .append("g")
                     .attr("transform", "translate(" + ((boxContainerWidth) / 2) + "," + margin.top + ")")
                     .call(charts[i]);
 
@@ -1298,16 +1533,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
                 // Draw y-axis
                 text = self.boxWhiskerSvgs[i].append("g")
-                .attr("class", "y axis")
-                .call(yAxis)
-                .append("text")
-                  .attr("transform", "rotate(-90)")
-                  .attr("class", "yAxisLabel")
-                  .attr("y", -$("svg[data-id='" + i + "'] .tick:last text").width() - 26)
-                  .attr("dy", ".71em")
-                  .style("text-anchor", "end")
-                  .style("font-size", "14px")
-                  .text(varNames[i] + " (" + varUnits[i] + ")");
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("class", "yAxisLabel")
+                    .attr("y", -$("svg[data-id='" + i + "'] .tick:last text").width() - 26)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .style("font-size", "14px")
+                    .text(varNames[i] + " (" + varUnits[i] + ")");
 
                 // Draw x-axis
                 self.boxWhiskerSvgs[i].append("g")
@@ -1315,20 +1550,22 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
                     .attr("transform", "translate(" + (-$("svg[data-id='" + i + "'] text.box").width() - 40) + "," + height + ")")
                     .call(xAxis)
                     .append("text")
-                      .style("text-anchor", "end")
-                      .attr("x", 105)
-                      .attr("y", 15)
-                      .text("Overall");
+                    .style("text-anchor", "end")
+                    .attr("x", 105)
+                    .attr("y", 15)
+                    .text("Overall");
 
                 // Append legend
                 $("#legendContainer ul").append(
                     '<li class="list-group-item" data-id="' + i + '">' +
                     '<button class="close" data-seriesid=' + self.plottedSeries[i].seriesid + ' >&times;</button>' +
-                    '<font color=' + colors(i) + '> ■ '  + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
-                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span></li>');
+                    '<font color=' + colors(i) + '> ■ ' + '</font><span>' + varCodes[i] + ": " + varNames[i] + '</span>' +
+                    '<span class="caption">' + siteCodes[i] + ": " + siteNames[i] + '</span>' +
+                    '<span class="caption">' + qualityControlLevels[i] + '</span></li>'
+                );
 
                 // Bind unplot button event
-                $('#legendContainer').find('button.close').click(function() {
+                $('#legendContainer').find('button.close').click(function () {
                     var id = +this.dataset['seriesid'];
                     $('#legendContainer ul').empty();
                     self.boxWhiskerSvgs.length = 0;
@@ -1337,18 +1574,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             }
 
             var axisHeight = height;
-            var textHeight = $("svg[data-id=" + i +"] .yAxisLabel").width();
-            var textWidth = $("svg[data-id='" + i + "'] .tick:last text").width();
-            var tickWidth = $("svg[data-id='" + i + "'] text.box").width();
-
-            // Reposition y-axis label
-            // the width() method does not work in Firefox for elements inside an svg. Must calculate it
-            var browser = ui.getBrowserName;
-            if (browser.substring(0,7) == "Firefox" || browser.substr(0,2) == "IE"){
-                textHeight = $("svg[data-id=" + i +"] .yAxisLabel").text().length * 7;
-                textWidth = $("svg[data-id='" + i + "'] .tick:last text").text().length * 7;
-                tickWidth = $("svg[data-id='" + i + "'] text.box")[0].textContent.length * 7;
+            var textHeight = $("svg[data-id=" + i + "] .yAxisLabel")[0].getBBox().width;
+            if ($("svg[data-id='" + i + "'] .tick:last text").length) {
+                var textWidth = $("svg[data-id='" + i + "'] .tick:last text")[0].getBBox().width;
             }
+
+            var tickWidth = $("svg[data-id='" + i + "'] text.box")[0].getBBox().width;
 
             // Reposition x-axis
             $("svg[data-id='" + i + "'] .x.axis").attr("transform", "translate(" + (-tickWidth - 40) + "," + height + ")");
@@ -1356,17 +1587,17 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
             // Reposition y-axis
             $("svg[data-id='" + i + "'] .y.axis").attr("transform", "translate(" + (-tickWidth - 40) + "," + (0) + ")");
 
-            text.attr("x", -(axisHeight - textHeight)/2);
-            text.attr("y", -textWidth - 26)
+            text.attr("x", -(axisHeight - textHeight) / 2);
+            text.attr("y", -textWidth - 26);
 
             // Update size
-            self.boxWhiskerSvgs[i].attr("height", height);
+            self.boxWhiskerSvgs[i].style("height", height + "px");
             var browser = ui.getBrowserName;
-            if (browser.substr(0,2) == "IE"){
-                $(self.boxWhiskerSvgs[i][0][0].parentNode).css("height", height + margin.bottom + margin.top + "px");
+            if (browser.substr(0, 2) == "IE") {
+                $(self.boxWhiskerSvgs[i][0][0].parentNode).css("height", (height + margin.bottom + margin.top) + "px");
             }
-            else{
-                self.boxWhiskerSvgs[i][0][0].parentElement.setAttribute("height", height + margin.bottom + margin.top);
+            else {
+                self.boxWhiskerSvgs[i][0][0].parentElement.style.height = (height + margin.bottom + margin.top) + "px";
             }
 
             $("svg").css("margin-left", margin.left + "px");
@@ -1380,15 +1611,15 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
         $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
 
         $('#legendContainer .list-group-item').click(function (e) {
-           if ( e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button' ) {
-               return;
-           }
-           var that = this;
+            if (e.target.nodeName.toLowerCase() == 'input' || e.target.nodeName.toLowerCase() == 'button') {
+                return;
+            }
+            var that = this;
 
-           var id = that.getAttribute("data-id");
-           if (that.className == "list-group-item"){
+            var id = that.getAttribute("data-id");
+            if (that.className == "list-group-item") {
                 $('#legendContainer .list-group-item').removeClass("highlight");
-                this.className="list-group-item highlight"
+                this.className = "list-group-item highlight";
 
                 // Set summary statistics
                 setSummaryStatistics(summary[id]);
@@ -1397,18 +1628,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function() {
 
         // Returns a function to compute the interquartile range.
         function iqr(k) {
-          return function(d, i) {
-            var q1 = d.quartiles[0],
-                q3 = d.quartiles[2],
-                iqr = (q3 - q1) * k,
-                i = -1,
-                j = d.length;
-            while (d[++i] < q1 - iqr);
-            while (d[--j] > q3 + iqr);
-            return [i, j];
-          };
+            return function (d, i) {
+                var q1 = d.quartiles[0],
+                    q3 = d.quartiles[2],
+                    iqr = (q3 - q1) * k,
+                    i = -1,
+                    j = d.length;
+                while (d[++i] < q1 - iqr) ;
+                while (d[--j] > q3 + iqr) ;
+                return [i, j];
+            };
         }
     }
 
-	return self;
+    return self;
 });

@@ -1,10 +1,19 @@
 <div class="tab-pane" id="datasetsContent">
     <div class="panel panel-default" id="listBlocksContainer">
-
         <div id="tableButtons">
-
+            <div class="SelectionButtons btn-group">
+                <button type="button" id="btnShowAll" class="btn btn-default glyphicon"><span>Show All</span></button>
+                <button type="button" id="btnShowSelected" class="btn btn-default glyphicon"><span>Show Selected</span></button>
+                <button type="button" id="btnClearSelected" class="btn btn-default glyphicon"><span>Clear Selected</span></button>
+                <button type="button" id="btnExportSelected" class="btn btn-info glyphicon"><span>Export selected (.zip)</span></button>
+            </div>
         </div>
 
+        <div id="tableFilter" class="tableFilter">
+            <input id="txtTableSearch" type="search" class="form-control input-sm" aria-controls="datasetsTable" placeholder="Search">
+            <button id="btnSearchSettings" class="btn btn-default glyphicon glyphicon-tasks" title="Search Settings"
+                    data-toggle="modal" data-target="#SearchSettingsDialog"></button>
+        </div>
 
         <table class="table display cell-border" id="datasetsTable" cellspacing="0">
             <thead></thead>
@@ -12,16 +21,37 @@
         </table>
     </div>
 
+    <div class="modal fade" id="SearchSettingsDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Search Settings</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-list">
+                        <span class="settings-item"><input type="checkbox" value="exactMatch">Exact Match</span>
+                        <!-- <span class="settings-item"><input type="checkbox" value="smartSearch" checked>Smart Search</span> -->
+                        <span class="settings-item"><input type="checkbox" value="caseSensitive">Case Sensitive</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Dataset Info Modal -->
-    <div class="modal fade" id="InfoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-         aria-hidden="true">
+    <div class="modal fade" id="InfoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="datasetInfoTitle">Dataseries Information</h4>
                     <span id="series-active-info"></span>
-                    <button type="button" id="btnExport" class="btn btn-default glyphicon glyphicon-download-alt" title="Export dataset"></button>
+                    <button type="button" id="btnExport" class="btn btn-info glyphicon glyphicon-download-alt"
+                            title="Export dataset">
+                        <span class="container-title"> Export</span>
+                    </button>
+                    <br><br>
                 </div>
                 <div class="modal-body panel-group">
                     <div class="panel panel-default">
@@ -182,7 +212,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" id="btnAddToPlot" class="btn btn-default" title="You can't plot more than 5 dataseries.">Add To Current Plot</button>
+                    <button type="button" id="btnAddToPlot" class="btn btn-info"
+                            title="You can't plot more than 5 dataseries.">Add To Current Plot</button>
                     <button type="button" id="btnPlotDataset" class="btn btn-primary">Clear and plot</button>
                 </div>
             </div>
