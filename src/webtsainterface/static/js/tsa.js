@@ -218,14 +218,14 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                             "# MethodLink: " + series['sitecode'] + "\n#\n";
 
             // Append Qualifier Information
-            if (series['qualifierCodes']) {
-                csvContent += "# Qualifier Information\n" +
-                    "# ---------------------------\n";
-                for (var i = 0; i < series['qualifierCodes'].length; i++) {
-                    csvContent += "# " + series['qualifierCodes'][i] + " - " + series['qualifierDescriptions'][i] + "\n";
-                }
-                csvContent += "#\n";
-            }
+            // if (series['qualifierCodes']) {
+            //     csvContent += "# Qualifier Information\n" +
+            //         "# ---------------------------\n";
+            //     for (var i = 0; i < series['qualifierCodes'].length; i++) {
+            //         csvContent += "# " + series['qualifierCodes'][i] + " - " + series['qualifierDescriptions'][i] + "\n";
+            //     }
+            //     csvContent += "#\n";
+            // }
 
 
             // Append Series Information
