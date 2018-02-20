@@ -1,32 +1,26 @@
 {
-  "secret_key": "!#f33z*)w$^0pi7c1r(807j4n6g*o&pt9@ar-17*i7nngiug8!",
-  "host": "data.uwrl.usu.edu",
+  "secret_key": "unallavesecreta!!",
+  "host": "",
   "databases": [
     {
       "name": "default",
-      "schema": "TSA_Config",
-      "engine": "sql_server.pyodbc",
-      "user": "django",
-      "password": "djangoapp!",
-      "host": "localhost",
-      "port": "3306",
-      "options": {
-            "driver": "SQL Server Native Client 11.0",
-            "host_is_server": "False"
-        }
+      "schema": "tsa_config",
+      "engine": "django.db.backends.postgresql_psycopg2",
+      "user": "websdl_user",
+      "password": "stapleheadhorsebatterystapler",
+      "host": "iutahinflux.uwrl.usu.edu",
+      "port": "5432",
+      "options": {}
     },
     {
       "name": "tsa",
-      "schema": "TSA_Catalog",
-      "engine": "sql_server.pyodbc",
-      "user": "WebApplication",
-      "password": "W3bAppl1c4t10n!",
-      "host": "iutahdbs.uwrl.usu.edu",
-      "port": "3306",
-      "options": {
-            "driver": "SQL Server Native Client 11.0",
-            "host_is_server": "False"
-        }
+      "schema": "tsa_catalog",
+      "engine": "django.db.backends.postgresql_psycopg2",
+      "user": "websdl_user",
+      "password": "stapleheadhorsebatterystapler",
+      "host": "iutahinflux.uwrl.usu.edu",
+      "port": "5432",
+      "options": {}
     }
   ]
 }
