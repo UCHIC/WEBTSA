@@ -46,7 +46,7 @@ define('map', ['mapLibraries'], function() {
         var ui = require('ui');
 
         var settings = {
-            center: new google.maps.LatLng(41.0648701, -111.4622151),
+            center: new google.maps.LatLng(41.850033, -87.6500523),
             mapTypeId: google.maps.MapTypeId.TERRAIN,
             streetViewControlOptions: {
                 position: google.maps.ControlPosition.LEFT_TOP
@@ -55,7 +55,7 @@ define('map', ['mapLibraries'], function() {
                 position: google.maps.ControlPosition.LEFT_TOP
             },
 
-            zoom: 7
+            zoom: 4
         };
 
         infoWindow = new google.maps.InfoWindow();
