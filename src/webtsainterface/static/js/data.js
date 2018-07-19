@@ -10,7 +10,6 @@ define('data', ['jquery'], function() {
     self.facets = [];
     self.sites = [];
 
-
     //events
     var dataLoaded = jQuery.Event("dataloaded");
     var dataFiltered = jQuery.Event("datafiltered");

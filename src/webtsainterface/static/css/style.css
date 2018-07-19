@@ -26,6 +26,12 @@
     shape-rendering: crispEdges;
 }
 
+.zoom {
+    cursor: move;
+    fill: none;
+    pointer-events: all;
+}
+
 .clearfix:after {
     visibility: hidden;
     display: block;
@@ -430,8 +436,8 @@ line.tick {
 }
 
 .navbar-brand img {
-    max-height: 60px;
-    margin-top: 7px;
+    max-height: 42px;
+    margin-top: -6px;
 }
 
 .navbar-brand {

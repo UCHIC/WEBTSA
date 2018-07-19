@@ -449,7 +449,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
         }
 
-        var margin = {top: 20, right: 20, bottom: 100, left: 10},
+        var margin = {top: 20, right: 40, bottom: 130, left: 10},
             width = $("#graphContainer").width() + $("#leftPanel").width(),
             height = $("#graphContainer").height() - margin.top - margin.bottom,
             margin2 = {top: height + 63, right: margin.right, bottom: 20, left: margin.left},
@@ -518,15 +518,29 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var lines = new Array(data.length);
         var lines2 = new Array(data.length);
 
+        var canvasOffset = { width: -30, height: -10};  // Offset to prevent scroll bars from appearing in certain browsers.
+
         var svg = d3.select("#graphContainer").append("svg")
-            .style("width", $("#graphContainer").width())
-            .style("height", (height + margin.top + margin.bottom) + "px");
+            .style("width", ($("#graphContainer").width() + canvasOffset.width) + "px")
+            .style("height", (height + margin.top + margin.bottom + canvasOffset.height) + "px");
 
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
             .attr("height", "100%");
         //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var zoom = d3.behavior.zoom().scaleExtent([1, 1000])
+            .on("zoom", zoomed);
+
+        zoom.x(x);
+
+        svg.append("rect")
+            .attr("class", "zoom")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .call(zoom);
 
         var context = svg.append("g")
             .attr("class", "context");
@@ -589,57 +603,57 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
 
             // ----------------------- OPTIMIZATION BEGINS -----------------------
-            var index = i - offset;
-            var date1 = data[index]["values"][0].date;
-            var val1 = parseFloat(data[index]["values"][0].val);
-            var dataCopy = [];
-            var marginOfError = 2; // The margin of error in degree units
-
-            dataCopy.push({val: val1, date: date1, seriesID: i})
-            var points = [];
-            points.push({x: x(date1), y: y[i](val1)});  // push in the first point
-
-            for (var j = 2; j < data[index]["values"].length - 1; j++) {
-                // Current point
-                var date2 = data[index]["values"][j - 1].date;
-                var val2 = parseFloat(data[index]["values"][j - 1].val);
-                var point2 = {x: x(date2), y: y[i](val2)};
-
-                // Last inserted
-                var point1 = {x: points[points.length - 1].x - point2.x, y: points[points.length - 1].y - point2.y};
-
-                // Next point
-                var date3 = data[index]["values"][j].date;
-                var val3 = data[index]["values"][j].val;
-                var point3 = {x: (x(date3) - point2.x), y: (y[i](val3) - point2.y)};
-
-                var dotProduct = (point1.x * point3.x + point1.y * point3.y);
-                var divisor = ((Math.sqrt(Math.pow(point1.x, 2) + Math.pow(point1.y, 2))) * (Math.sqrt(Math.pow(point3.x, 2) + Math.pow(point3.y, 2))));
-
-                // Angle between two vectors
-                var angle = Math.acos(dotProduct / divisor) * (180 / Math.PI);
-
-                if (!(angle > 180 - marginOfError && angle < 180 + marginOfError)) {
-                    dataCopy.push({val: val2, date: date2, seriesID: i});
-                    points.push(point2);
-                }
-            }
-
-            // insert last value
-            date1 = data[index]["values"][data[index]["values"].length - 1].date;
-            val1 = parseFloat(data[index]["values"][data[index]["values"].length - 1].val);
-
-            dataCopy.push({val: val1, date: date1, seriesID: i})
-            data[index]["values"] = dataCopy;   // Replace with new and optimized array
+            // var index = i - offset;
+            // var date1 = data[index]["values"][0].date;
+            // var val1 = parseFloat(data[index]["values"][0].val);
+            // var dataCopy = [];
+            // var marginOfError = 2; // The margin of error in degree units
+            //
+            // dataCopy.push({val: val1, date: date1, seriesID: i})
+            // var points = [];
+            // points.push({x: x(date1), y: y[i](val1)});  // push in the first point
+            //
+            // for (var j = 2; j < data[index]["values"].length - 1; j++) {
+            //     // Current point
+            //     var date2 = data[index]["values"][j - 1].date;
+            //     var val2 = parseFloat(data[index]["values"][j - 1].val);
+            //     var point2 = {x: x(date2), y: y[i](val2)};
+            //
+            //     // Last inserted
+            //     var point1 = {x: points[points.length - 1].x - point2.x, y: points[points.length - 1].y - point2.y};
+            //
+            //     // Next point
+            //     var date3 = data[index]["values"][j].date;
+            //     var val3 = data[index]["values"][j].val;
+            //     var point3 = {x: (x(date3) - point2.x), y: (y[i](val3) - point2.y)};
+            //
+            //     var dotProduct = (point1.x * point3.x + point1.y * point3.y);
+            //     var divisor = ((Math.sqrt(Math.pow(point1.x, 2) + Math.pow(point1.y, 2))) * (Math.sqrt(Math.pow(point3.x, 2) + Math.pow(point3.y, 2))));
+            //
+            //     // Angle between two vectors
+            //     var angle = Math.acos(dotProduct / divisor) * (180 / Math.PI);
+            //
+            //     if (!(angle > 180 - marginOfError && angle < 180 + marginOfError)) {
+            //         dataCopy.push({val: val2, date: date2, seriesID: i});
+            //         points.push(point2);
+            //     }
+            // }
+            //
+            // // insert last value
+            // date1 = data[index]["values"][data[index]["values"].length - 1].date;
+            // val1 = parseFloat(data[index]["values"][data[index]["values"].length - 1].val);
+            //
+            // dataCopy.push({val: val1, date: date1, seriesID: i})
+            // data[index]["values"] = dataCopy;   // Replace with new and optimized array
 
             // Show message with number of data points
-            /* $("#graphArea .alert").remove();
-             $("#graphArea").prepend(
-                 '<div class="alert alert-info alert-dismissable">\
-                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
-                   <strong></strong>' + "Number of data points: " + dataCopy.length +
-                 '</div>'
-             );*/
+            // $("#graphArea .alert").remove();
+            //  $("#graphArea").prepend(
+            //      '<div class="alert alert-info alert-dismissable">\
+            //        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
+            //        <strong></strong>' + "Number of data points: " + dataCopy.length +
+            //      '</div>'
+            //  );
             // ----------------------- OPTIMIZATION ENDS -----------------------
 
             // Append y-axis
@@ -887,6 +901,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         context.append("g")
             .attr("class", "x brush")
+            .attr("id", "brush-context")
             .call(brush)
             .selectAll("rect")
             .attr("y", -6)
@@ -1034,9 +1049,36 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 .attr("d", function (d) {
                     return lines[d.key](d.values);
                 });
-
             focus.select(".x.axis").call(xAxis);
+
+            // Calculate zoomf
+            var s = x.domain();
+            var s_orig = x2.domain();
+            var newS = (s_orig[1] - s_orig[0]) / (s[1] - s[0]);
+            var t = (s[0] - s_orig[0]) / (s_orig[1] - s_orig[0]);
+            var trans = width * newS * t;
+            zoom.scale(newS);
+            zoom.translate([-trans, 0]);
         }
+
+        function zoomed() {
+            var t = d3.event.translate;
+            var s = d3.event.scale;
+            var size = width * s;
+            t[0] = Math.min(t[0], 0);
+            t[0] = Math.max(t[0], width - size);
+            zoom.translate(t);
+            focus.selectAll(".seriesID")
+                .selectAll("path")
+                .attr("d", function (d) {
+                    return lines[d.key](d.values);
+                });
+            focus.select(".x.axis").call(xAxis);
+            //Find extent of zoomed area, what's currently at edges of graphed region
+            var brushExtent = [x.invert(0), x.invert(width)];
+            context.select(".brush").call(brush.extent(brushExtent));
+        }
+
     }
 
     function drawHistogram() {
