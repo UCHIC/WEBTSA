@@ -524,12 +524,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .style("width", ($("#graphContainer").width() + canvasOffset.width) + "px")
             .style("height", (height + margin.top + margin.bottom + canvasOffset.height) + "px");
 
-        var focus = svg.append("g")
-            .attr("class", "focus")
-            .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
-            .attr("height", "100%");
-        //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
         var zoom = d3.behavior.zoom().scaleExtent([1, 1000])
             .on("zoom", zoomed);
 
@@ -541,6 +535,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("height", height)
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .call(zoom);
+
+        var focus = svg.append("g")
+            .attr("class", "focus")
+            .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
+            .attr("height", "100%");
+        //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var context = svg.append("g")
             .attr("class", "context");
