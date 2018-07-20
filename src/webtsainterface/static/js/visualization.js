@@ -534,7 +534,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("width", $("#graphContainer").width())
             .attr("height", "100%")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .on("mouseout", function() { marker.style("display", "none"); })
+            .on("mouseout", function() { marker.style("display", "none"); verticalTrace.style("display", "none") })
             .on("mousemove", mousemove)
             .call(zoom);
 
@@ -542,12 +542,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         function mousemove() {
             marker.style("display", null);
+            verticalTrace.style("display", null);
             var x0 = x.invert(d3.mouse(this)[0]),
                 i = bisectDate(data[0].values, x0, 1),
                 d0 = data[0].values[i - 1],
                 d1 = data[0].values[i],
                 d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-
 
             // Calculate offset to prevent graph cutoff
             var offsetX = x(d.date) > width - 150 ? -170 : 0;
@@ -562,6 +562,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             // Move the marker
             svg.select(".marker").attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[0](d.val) + margin.top) + ")");
+
+            // Move the tracing line
+            svg.select(".line-dash")
+                .attr("x1", x(d.date) + margin.left)
+                .attr("x2", x(d.date) + margin.left);
 
             svg.select(".marker text.marker-val").text(d.val);
             var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
@@ -580,6 +585,14 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         marker.append("circle")
             .attr("r", 4.5);
+
+        var verticalTrace = svg.append("line")
+            .attr("stroke-dasharray", "5,5")
+            .attr("class", "line-dash")
+            .attr("x1", 0)
+            .attr("y1", margin.top)
+            .attr("x2", 0)
+            .attr("y2", height + margin.top);
 
         marker.append("rect")
             .attr("fill", "#ffffffc9")
@@ -842,7 +855,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .attr("width", $("#graphContainer").width() - margin.left - margin.right);
 
                 overlay.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                    .attr("width", $("#graphContainer").width() - margin.left - margin.right);
+                    .attr("width", $("#graphContainer").width() - margin.left - margin.right)
+                    .attr("height", $("#graphContainer").height() - margin.top - margin.bottom);
             }
 
             // If the graph contains less than 2 data points, append circles
@@ -1120,6 +1134,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             zoom.scale(newS);
             zoom.translate([-trans, 0]);
             marker.style("display", "none");
+            verticalTrace.style("display", "none");
         }
 
         function zoomed() {
@@ -1139,6 +1154,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var brushExtent = [x.invert(0), x.invert(width)];
             context.select(".brush").call(brush.extent(brushExtent));
             marker.style("display", "none");
+            verticalTrace.style("display", "none");
         }
 
     }

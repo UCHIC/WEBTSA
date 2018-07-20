@@ -37,8 +37,9 @@
     stroke: steelblue;
 }
 
-.marker {
-
+.line-dash {
+  stroke: lightgrey;
+  stroke-width: 1px;
 }
 
 .clearfix:after {
@@ -724,16 +725,15 @@ table.dataTable tbody tr.selected {
     height: -webkit-calc(100% - 10px);
     height: -moz-calc(100% - 10px);
     height: calc(100% - 10px);
-    position: absolute;
-    margin: 5px;
-    padding-bottom: 5px;
-    padding-right: 5px;
+    margin: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
 }
 
 #panel-right .panel {
     min-height: 80px;
     border: 1px solid #aaa;
-    border-radius: 4px 4px 0px 0px;
+    border-radius: 4px 4px 0 0;
     padding-bottom: 3px;
     margin-bottom: 5px;
 }
