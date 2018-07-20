@@ -33,8 +33,12 @@
 }
 
 .focus .marker-circle {
-  fill: none;
-  stroke: steelblue;
+    fill: none;
+    stroke: steelblue;
+}
+
+.marker {
+
 }
 
 .clearfix:after {

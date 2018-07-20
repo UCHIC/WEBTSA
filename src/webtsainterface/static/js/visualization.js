@@ -547,8 +547,25 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 d0 = data[0].values[i - 1],
                 d1 = data[0].values[i],
                 d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+
+            // Calculate offset to prevent graph cutoff
+            var offsetX = x(d.date) > width - 150 ? -170 : 0;
+            svg.select(".marker rect").attr("x", offsetX + 10);
+            svg.select(".marker text.marker-val").attr("x", offsetX + 20);
+            svg.select(".marker text.marker-date").attr("x", offsetX + 20);
+
+            var offsetY = y[0](d.val) + margin.top < 50 ? - y[0](d.val) + margin.top : 0;
+            svg.select(".marker rect").attr("y", offsetY - 25);
+            svg.select(".marker text.marker-val").attr("y", offsetY - 5);
+            svg.select(".marker text.marker-date").attr("y", offsetY + 12);
+
+            // Move the marker
             svg.select(".marker").attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[0](d.val) + margin.top) + ")");
-            svg.select(".marker text").text(d.val);
+
+            svg.select(".marker text.marker-val").text(d.val);
+            var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
+            svg.select(".marker text.marker-date").text(formatDate(d.date));
         }
 
         var focus = svg.append("g")
@@ -559,15 +576,28 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         var marker = svg.append("g")
             .style("display", "none")
-            .attr("class", "marker")
-            .style("display", "none");
+            .attr("class", "marker");
 
         marker.append("circle")
             .attr("r", 4.5);
 
+        marker.append("rect")
+            .attr("fill", "#ffffffc9")
+            .attr("width", "150px")
+            .attr("height", "50px")
+            .attr("rx", "4")
+            .attr("ry", "4")
+            .attr("stroke", "#df8f26")
+            .attr("stroke-width", "2");
+
         marker.append("text")
-            .attr("x", 9)
-            .attr("dy", ".35em");
+            .style("font-weight", "bold")
+            .style("font-size", "18px")
+            .style("fill", "steelblue")
+            .attr("class", "marker-val");
+
+        marker.append("text")
+            .attr("class", "marker-date");
 
         var context = svg.append("g")
             .attr("class", "context");
