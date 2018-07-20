@@ -529,19 +529,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         zoom.x(x);
 
-        var overlay = svg.append("rect")
-            .attr("class", "zoom")
-            .attr("width", $("#graphContainer").width())
-            .attr("height", "100%")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .on("mouseout", function () {
-                marker.style("display", "none");
-                verticalTrace.style("display", "none");
-                dateWindow.style("display", "none");
-            })
-            .on("mousemove", mousemove)
-            .call(zoom);
-
         var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
         function mousemove() {
@@ -578,7 +565,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 .attr("x2", x(d.date) + margin.left);
 
             // Move the date window
-            svg.select(".date-window").attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (height + margin.top - 40) + ")");
+            var dateLeft = Math.min(Math.max((x(d.date) + margin.left), 150), width - 20);
+            svg.select(".date-window").attr("transform", "translate(" + dateLeft + "," + (height + margin.top - 40) + ")");
             var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
             svg.select("text.marker-date").text(formatDate(d.date));
         }
@@ -644,6 +632,19 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         var context = svg.append("g")
             .attr("class", "context");
+
+        var overlay = svg.append("rect")
+            .attr("class", "zoom")
+            .attr("width", $("#graphContainer").width())
+            .attr("height", "100%")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .on("mouseout", function () {
+                marker.style("display", "none");
+                verticalTrace.style("display", "none");
+                dateWindow.style("display", "none");
+            })
+            .on("mousemove", mousemove)
+            .call(zoom);
 
         var offset = 0;     // offset for the data array when a dataset is empty
 
