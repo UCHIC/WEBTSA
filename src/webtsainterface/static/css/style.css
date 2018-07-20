@@ -32,6 +32,11 @@
     pointer-events: all;
 }
 
+.focus .marker-circle {
+  fill: none;
+  stroke: steelblue;
+}
+
 .clearfix:after {
     visibility: hidden;
     display: block;

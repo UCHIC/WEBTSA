@@ -529,18 +529,45 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         zoom.x(x);
 
-        svg.append("rect")
+        var overlay = svg.append("rect")
             .attr("class", "zoom")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", $("#graphContainer").width())
+            .attr("height", "100%")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .on("mouseout", function() { marker.style("display", "none"); })
+            .on("mousemove", mousemove)
             .call(zoom);
+
+        var bisectDate = d3.bisector(function(d) { return d.date; }).left;
+
+        function mousemove() {
+            marker.style("display", null);
+            var x0 = x.invert(d3.mouse(this)[0]),
+                i = bisectDate(data[0].values, x0, 1),
+                d0 = data[0].values[i - 1],
+                d1 = data[0].values[i],
+                d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+            svg.select(".marker").attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[0](d.val) + margin.top) + ")");
+            svg.select(".marker text").text(d.val);
+        }
 
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
             .attr("height", "100%");
         //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var marker = svg.append("g")
+            .style("display", "none")
+            .attr("class", "marker")
+            .style("display", "none");
+
+        marker.append("circle")
+            .attr("r", 4.5);
+
+        marker.append("text")
+            .attr("x", 9)
+            .attr("dy", ".35em");
 
         var context = svg.append("g")
             .attr("class", "context");
@@ -782,6 +809,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 }
 
                 focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                    .attr("width", $("#graphContainer").width() - margin.left - margin.right);
+
+                overlay.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                     .attr("width", $("#graphContainer").width() - margin.left - margin.right);
             }
 
@@ -1051,7 +1081,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 });
             focus.select(".x.axis").call(xAxis);
 
-            // Calculate zoomf
+            // Calculate zoom
             var s = x.domain();
             var s_orig = x2.domain();
             var newS = (s_orig[1] - s_orig[0]) / (s[1] - s[0]);
@@ -1059,6 +1089,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var trans = width * newS * t;
             zoom.scale(newS);
             zoom.translate([-trans, 0]);
+            marker.style("display", "none");
         }
 
         function zoomed() {
@@ -1077,6 +1108,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             //Find extent of zoomed area, what's currently at edges of graphed region
             var brushExtent = [x.invert(0), x.invert(width)];
             context.select(".brush").call(brush.extent(brushExtent));
+            marker.style("display", "none");
         }
 
     }
