@@ -534,7 +534,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("width", $("#graphContainer").width())
             .attr("height", "100%")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .on("mouseout", function() { marker.style("display", "none"); verticalTrace.style("display", "none") })
+            .on("mouseout", function () {
+                marker.style("display", "none");
+                verticalTrace.style("display", "none");
+                dateWindow.style("display", "none");
+            })
             .on("mousemove", mousemove)
             .call(zoom);
 
@@ -543,22 +547,27 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         function mousemove() {
             marker.style("display", null);
             verticalTrace.style("display", null);
+            dateWindow.style("display", null);
             var x0 = x.invert(d3.mouse(this)[0]),
                 i = bisectDate(data[0].values, x0, 1),
                 d0 = data[0].values[i - 1],
                 d1 = data[0].values[i],
                 d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 
-            // Calculate offset to prevent graph cutoff
-            var offsetX = x(d.date) > width - 150 ? -170 : 0;
-            svg.select(".marker rect").attr("x", offsetX + 10);
-            svg.select(".marker text.marker-val").attr("x", offsetX + 20);
-            svg.select(".marker text.marker-date").attr("x", offsetX + 20);
+            svg.select(".marker text.marker-val").text(d.val);
+            var bbox = svg.select(".marker text.marker-val").node().getBBox();
+            svg.select(".marker rect")
+                .attr("width", bbox.width + 20)
+                .attr("height", bbox.height + 20);
 
-            var offsetY = y[0](d.val) + margin.top < 50 ? - y[0](d.val) + margin.top : 0;
-            svg.select(".marker rect").attr("y", offsetY - 25);
-            svg.select(".marker text.marker-val").attr("y", offsetY - 5);
-            svg.select(".marker text.marker-date").attr("y", offsetY + 12);
+            // Calculate offset to prevent graph cutoff
+            var offsetX = x(d.date) > width - (bbox.width + 30) ? - (bbox.width + 30) : 10;
+            svg.select(".marker rect").attr("x", offsetX);
+            svg.select(".marker text.marker-val").attr("x", offsetX + 10);
+
+            var offsetY = y[0](d.val) + margin.top < 50 ? -y[0](d.val) + margin.top : 0;
+            svg.select(".marker rect").attr("y", offsetY - 20);
+            svg.select(".marker text.marker-val").attr("y", offsetY + 5);
 
             // Move the marker
             svg.select(".marker").attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[0](d.val) + margin.top) + ")");
@@ -568,9 +577,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 .attr("x1", x(d.date) + margin.left)
                 .attr("x2", x(d.date) + margin.left);
 
-            svg.select(".marker text.marker-val").text(d.val);
+            // Move the date window
+            svg.select(".date-window").attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (height + margin.top - 40) + ")");
             var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
-            svg.select(".marker text.marker-date").text(formatDate(d.date));
+            svg.select("text.marker-date").text(formatDate(d.date));
         }
 
         var focus = svg.append("g")
@@ -584,7 +594,31 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("class", "marker");
 
         marker.append("circle")
+            .attr("fill", "#FFF")
+            .attr("stroke", "steelblue")
+            .attr("strokw-width", "2")
             .attr("r", 4.5);
+
+        var dateWindow = svg.append("g")
+            .style("display", "none")
+            .attr("y", height + margin.top - 40)
+            .attr("class", "date-window");
+
+        dateWindow.append("rect")
+            .attr("fill", "#ffffffc9")
+            .attr("width", "150px")
+            .attr("height", "25px")
+            .attr("x", -75)
+            .attr("rx", "4")
+            .attr("ry", "4")
+            .attr("stroke", "#df8f26")
+            .attr("stroke-width", "1");
+
+        dateWindow.append("text")
+            .attr("class", "marker-date")
+            .attr("text-anchor", "middle")
+            .attr("y", "17")
+            .attr("text-align", "middle");
 
         var verticalTrace = svg.append("line")
             .attr("stroke-dasharray", "5,5")
@@ -597,20 +631,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         marker.append("rect")
             .attr("fill", "#ffffffc9")
             .attr("width", "150px")
-            .attr("height", "50px")
+            .attr("height", "25px")
             .attr("rx", "4")
             .attr("ry", "4")
             .attr("stroke", "#df8f26")
-            .attr("stroke-width", "2");
+            .attr("stroke-width", "1");
 
         marker.append("text")
-            .style("font-weight", "bold")
-            .style("font-size", "18px")
+            .style("font-size", "16px")
             .style("fill", "steelblue")
             .attr("class", "marker-val");
-
-        marker.append("text")
-            .attr("class", "marker-date");
 
         var context = svg.append("g")
             .attr("class", "context");
@@ -1133,8 +1163,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var trans = width * newS * t;
             zoom.scale(newS);
             zoom.translate([-trans, 0]);
+
             marker.style("display", "none");
             verticalTrace.style("display", "none");
+            dateWindow.style("display", "none");
         }
 
         function zoomed() {
@@ -1153,8 +1185,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             //Find extent of zoomed area, what's currently at edges of graphed region
             var brushExtent = [x.invert(0), x.invert(width)];
             context.select(".brush").call(brush.extent(brushExtent));
+
             marker.style("display", "none");
             verticalTrace.style("display", "none");
+            dateWindow.style("display", "none");
         }
 
     }
