@@ -162,13 +162,6 @@ svg {
     margin-bottom: 3px;
     vertical-align: middle;
     font-weight: normal;
-    /* Disable highlighting*/
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
 
 .axis path,
@@ -725,9 +718,8 @@ table.dataTable tbody tr.selected {
     height: -webkit-calc(100% - 10px);
     height: -moz-calc(100% - 10px);
     height: calc(100% - 10px);
-    margin: 10px;
-    padding-bottom: 10px;
-    padding-right: 10px;
+    padding: 10px;
+    padding-bottom: 0;
 }
 
 #panel-right .panel {
@@ -785,17 +777,17 @@ table.dataTable tbody tr.selected {
     margin-left: -5px;
 }
 
-#dateIntervals {
-    padding: 5px;
-}
-
-#dateIntervals > button {
-    width: 33%;
-}
-
 .container-title {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
+}
+
+#plotOptionsContainer .panel-content {
+    padding: 10px;
+}
+
+#plotOptionsContainer table {
+    margin-bottom: 0;
 }
 
 #plotOptionsContainer td {
@@ -813,8 +805,8 @@ table.dataTable tbody tr.selected {
 }
 
 #plotOptionsContainer input {
-    border-bottom: 1px solid #ddd;
-    border-right: 1px solid #ddd;
+    border: 1px solid #ddd;
+    width: 100%;
 }
 
 #graphArea .alert {

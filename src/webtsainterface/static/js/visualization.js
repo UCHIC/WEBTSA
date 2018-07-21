@@ -436,7 +436,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         for (var i = 0; i < varNames.length; i++) {
             if (datasets[i].length == 0) {
                 numOfYAxes--;
-                continue;
             }
         }
 
@@ -532,32 +531,59 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
         function mousemove() {
-            marker.style("display", null);
             verticalTrace.style("display", null);
             dateWindow.style("display", null);
-            var x0 = x.invert(d3.mouse(this)[0]),
-                i = bisectDate(data[0].values, x0, 1),
-                d0 = data[0].values[i - 1],
-                d1 = data[0].values[i],
-                d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 
-            svg.select(".marker text.marker-val").text(d.val);
-            var bbox = svg.select(".marker text.marker-val").node().getBBox();
-            svg.select(".marker rect")
-                .attr("width", bbox.width + 20)
-                .attr("height", bbox.height + 20);
+            var closestDate;
+            var minDelta = Infinity;
+            var x0 = x.invert(d3.mouse(this)[0]);
 
-            // Calculate offset to prevent graph cutoff
-            var offsetX = x(d.date) > width - (bbox.width + 30) ? - (bbox.width + 30) : 10;
-            svg.select(".marker rect").attr("x", offsetX);
-            svg.select(".marker text.marker-val").attr("x", offsetX + 10);
+            // Chose the date closest to the cursor's position
+            for (var i = 0; i < self.plottedSeries.length; i++) {
+                var index = bisectDate(data[i].values, x0, 1);
+                var d0 = data[i].values[index - 1];
+                var d1 = data[i].values[index];
+                var delta = Math.min(Math.abs(x0 - d0.date), Math.abs(x0 - d1.date));
+                if (delta < minDelta) {
+                    d = Math.abs(x0 - d0.date) > Math.abs(x0 - d1.date) ? d1 : d0;
+                    closestDate = d.date;
+                }
+            }
 
-            var offsetY = y[0](d.val) + margin.top < 50 ? -y[0](d.val) + margin.top : 0;
-            svg.select(".marker rect").attr("y", offsetY - 20);
-            svg.select(".marker text.marker-val").attr("y", offsetY + 5);
+            var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
+            // Draw the markers for the chosen date
+            for (var i = 0; i < self.plottedSeries.length; i++) {
+                var index = bisectDate(data[i].values, x0, 1);
+                var d0 = data[i].values[index - 1];
+                var d1 = data[i].values[index];
+                var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 
-            // Move the marker
-            svg.select(".marker").attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[0](d.val) + margin.top) + ")");
+                // If this point did not occur in the chosen date, do not display it.
+                if (d.date - closestDate != 0) {
+                    markers[i].style("display", "none");
+                    return;
+                }
+
+                markers[i].style("display", null);
+
+                markers[i].select("text.marker-val").text(d.val + " " + varUnits[i]);
+                var bbox = markers[i].select("text.marker-val").node().getBBox();
+                markers[i].select("rect")
+                    .attr("width", bbox.width + 20)
+                    .attr("height", bbox.height + 20);
+
+                // Calculate offset to prevent graph cutoff
+                var offsetX = x(d.date) > width - (bbox.width + 30) ? -(bbox.width + 30) : 10;
+                markers[i].select("rect").attr("x", offsetX);
+                markers[i].select("text.marker-val").attr("x", offsetX + 10);
+
+                var offsetY = y[i](d.val) + margin.top < 50 ? -y[i](d.val) + margin.top : 0;
+                markers[i].select("rect").attr("y", offsetY - 20);
+                markers[i].select("text.marker-val").attr("y", offsetY + 5);
+
+                // Move the marker
+                markers[i].attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[i](d.val) + margin.top) + ")");
+            }
 
             // Move the tracing line
             svg.select(".line-dash")
@@ -567,7 +593,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             // Move the date window
             var dateLeft = Math.min(Math.max((x(d.date) + margin.left), 150), width - 20);
             svg.select(".date-window").attr("transform", "translate(" + dateLeft + "," + (height + margin.top - 40) + ")");
-            var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
             svg.select("text.marker-date").text(formatDate(d.date));
         }
 
@@ -576,16 +601,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
             .attr("height", "100%");
         //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        var marker = svg.append("g")
-            .style("display", "none")
-            .attr("class", "marker");
-
-        marker.append("circle")
-            .attr("fill", "#FFF")
-            .attr("stroke", "steelblue")
-            .attr("strokw-width", "2")
-            .attr("r", 4.5);
 
         var dateWindow = svg.append("g")
             .style("display", "none")
@@ -616,19 +631,34 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("x2", 0)
             .attr("y2", height + margin.top);
 
-        marker.append("rect")
-            .attr("fill", "#ffffffc9")
-            .attr("width", "150px")
-            .attr("height", "25px")
-            .attr("rx", "4")
-            .attr("ry", "4")
-            .attr("stroke", "#df8f26")
-            .attr("stroke-width", "1");
+        var markers = [];
+        for (var i = 0; i < self.plottedSeries.length; i++) {
+            var marker = svg.append("g")
+                .style("display", "none")
+                .attr("class", "marker");
 
-        marker.append("text")
-            .style("font-size", "16px")
-            .style("fill", "steelblue")
-            .attr("class", "marker-val");
+            marker.append("circle")
+                .attr("fill", "#FFF")
+                .attr("stroke", color(i))
+                .attr("strokw-width", "2")
+                .attr("r", 4.5);
+
+            marker.append("rect")
+                .attr("fill", "#ffffffc9")
+                .attr("width", "150px")
+                .attr("height", "25px")
+                .attr("rx", "4")
+                .attr("ry", "4")
+                .attr("stroke", "#777")
+                .attr("stroke-width", "1");
+
+            marker.append("text")
+                .style("font-size", "16px")
+                .style("fill", color(i))
+                .attr("class", "marker-val");
+
+            markers.push(marker);
+        }
 
         var context = svg.append("g")
             .attr("class", "context");
@@ -639,7 +669,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("height", "100%")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .on("mouseout", function () {
-                marker.style("display", "none");
+                svg.selectAll(".marker").style("display", "none");
                 verticalTrace.style("display", "none");
                 dateWindow.style("display", "none");
             })
@@ -1012,18 +1042,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("y", -6)
             .attr("height", height2 + 7);
 
-        function paintGridAxis(id) {
-            var gridAxis = d3.svg.axis()
-                .scale(y[id])
-                .orient("left")
-                .tickSize(-width, 0, 0)
-                .tickFormat("");
-
-            focus.insert("g", ":first-child")
-                .attr("class", "grid")
-                .style({'stroke': 'lightgray', 'stroke-width': '1.5px'})
-                .call(gridAxis);
-        }
+        // function paintGridAxis(id) {
+        //     var gridAxis = d3.svg.axis()
+        //         .scale(y[id])
+        //         .orient("left")
+        //         .tickSize(-width, 0, 0)
+        //         .tickFormat("");
+        //
+        //     focus.insert("g", ":first-child")
+        //         .attr("class", "grid")
+        //         .style({'stroke': 'lightgray', 'stroke-width': '1.5px'})
+        //         .call(gridAxis);
+        // }
 
         function onPathClick() {
             var id = $(this).parent().attr("data-id");
@@ -1165,7 +1195,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             zoom.scale(newS);
             zoom.translate([-trans, 0]);
 
-            marker.style("display", "none");
+            svg.selectAll(".marker").style("display", "none");
             verticalTrace.style("display", "none");
             dateWindow.style("display", "none");
         }
@@ -1187,11 +1217,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var brushExtent = [x.invert(0), x.invert(width)];
             context.select(".brush").call(brush.extent(brushExtent));
 
-            marker.style("display", "none");
+            svg.selectAll(".marker").style("display", "none");
             verticalTrace.style("display", "none");
             dateWindow.style("display", "none");
         }
-
     }
 
     function drawHistogram() {
@@ -1555,9 +1584,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             });
         }
 
-        setSummaryStatistics(summary[0]);                                               // Set the first summary statistics by default
+        setSummaryStatistics(summary[0]);   // Set the first summary statistics by default
 
-        $('#legendContainer .list-group-item').removeClass("highlight");                // Highlight the first row
+        $('#legendContainer .list-group-item').removeClass("highlight");    // Highlight the first row
         $('#legendContainer .list-group-item[data-id="0"]').addClass("highlight");
 
         $('#legendContainer .list-group-item').click(function (e) {
