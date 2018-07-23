@@ -431,6 +431,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var parseDate = d3.time.format("%Y-%m-%dT%I:%M:%S").parse;
         var numOfYAxes = varNames.length;
         var qualityControlLevels = _(self.plottedSeries).pluck('qualitycontrolleveldefinition');
+        var zoomsY = {};
 
         // Iterate the datasets and see which ones share y-axes
         for (var i = 0; i < varNames.length; i++) {
@@ -520,13 +521,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var canvasOffset = { width: -30, height: -10};  // Offset to prevent scroll bars from appearing in certain browsers.
 
         var svg = d3.select("#graphContainer").append("svg")
-            .style("width", ($("#graphContainer").width() + canvasOffset.width) + "px")
+            // .style("width", ($("#graphContainer").width() + canvasOffset.width) + "px")
             .style("height", (height + margin.top + margin.bottom + canvasOffset.height) + "px");
 
-        var zoom = d3.behavior.zoom().scaleExtent([1, 1000])
-            .on("zoom", zoomed);
-
-        zoom.x(x);
+        var zoomX = d3.behavior.zoom().scaleExtent([1, 1000])
+            .on("zoom", zoomedX);
 
         var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
@@ -598,8 +597,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         var focus = svg.append("g")
             .attr("class", "focus")
-            .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
-            .attr("height", "100%");
+            // .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
+            // .attr("height", "100%");
         //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var dateWindow = svg.append("g")
@@ -614,7 +613,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             .attr("x", -75)
             .attr("rx", "4")
             .attr("ry", "4")
-            .attr("stroke", "#df8f26")
+            .attr("stroke", "#777")
             .attr("stroke-width", "1");
 
         dateWindow.append("text")
@@ -673,8 +672,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 verticalTrace.style("display", "none");
                 dateWindow.style("display", "none");
             })
-            .on("mousemove", mousemove)
-            .call(zoom);
+            .on("mousemove", mousemove);
 
         var offset = 0;     // offset for the data array when a dataset is empty
 
@@ -725,7 +723,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 .range([height2, 0]);
 
             yAxis[i] = d3.svg.axis()
-                .scale(y[i])
+                .scale(y[i]);
             //.tickFormat(d3.format(".2f"))
 
             if (datasets[i].length == 0) {
@@ -853,22 +851,28 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             else {
                 // Create a new axis
                 yAxis[i].orient(axisProperties[yAxisCount].orient);
-                var text = focus.append("g")
+
+                zoomsY[i] = d3.behavior.zoom().scaleExtent([-Infinity, Infinity])
+                    .on("zoom", zoomedY);
+                zoomsY[i].y(y[i]);
+
+                var axis = focus.append("g")
                     .attr("class", "y axis")
                     .attr("data-id", i)
                     .attr("id", "yAxis-" + yAxisCount)
                     .style("fill", color(i))
                     .attr("transform", "translate(" + (axisProperties[yAxisCount].xTranslate) + " ,0)")
-                    .call(yAxis[i])
-                        .append("text")
-                        .attr("transform", "rotate(-90)")
-                        .style("text-anchor", "end")
-                        .style("font-size", "14px")
-                        .attr("dy", ".71em")
-                        .text(varNames[i] + " (" + varUnits[i] + ")");
+                    .call(yAxis[i]);
 
-                var axisHeight = $(".y.axis[data-id=" + i + "]")[0].getBBox().height;
-                var textHeight = $(".y.axis[data-id='" + i + "'] > text").text().length * 6.5;
+                var text = axis.append("text")
+                    .attr("transform", "rotate(-90)")
+                    .style("text-anchor", "end")
+                    .style("font-size", "14px")
+                    .attr("dy", ".71em")
+                    .text(varNames[i] + " (" + varUnits[i] + ")");
+
+                var axisHeight = axis.node().getBBox().height;
+                var textHeight = text.node().getBBox().width;
 
                 text.attr("x", -(axisHeight - textHeight) / 2);
                 text.attr("y", (getAxisSeparation(i) + 15) * axisProperties[yAxisCount].textdistance);
@@ -912,8 +916,17 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     margin.left += $("#yAxis-" + 4)[0].getBBox().width + axisSpacing;
                 }
 
-                focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                    .attr("width", $("#graphContainer").width() - margin.left - margin.right);
+                var axisWidth = axis.node().getBBox().width;
+
+                axis.append("rect")
+                    .attr("height", height)
+                    .attr("width", axisWidth)
+                    .attr("x", axisProperties[yAxisCount].orient == "right" ? -axisWidth : 0)
+                    .attr("fill", "transparent")
+                    .call(zoomsY[i]);
+
+                focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                    // .attr("width", $("#graphContainer").width() - margin.left - margin.right);
 
                 overlay.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                     .attr("width", $("#graphContainer").width() - margin.left - margin.right)
@@ -942,7 +955,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
         }
 
-        // Append x axis
+        // Update width after new margins produced by y-axes
         width = $("#graphContainer").width() - margin.left - margin.right;
 
         // Axes to the right
@@ -956,6 +969,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         x.range([0, width]);
         x2.range([0, width]);
+
+        zoomX.x(x);
+        overlay.call(zoomX);
 
         var xAxis = d3.svg.axis()
             .scale(x)
@@ -993,12 +1009,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var that = this;
             var path = $("#path" + that.getAttribute("data-id"));
 
-            if (that.checked) {
-                path.show();
-            }
-            else {
-                path.hide();
-            }
+            that.checked ? path.show() : path.hide();
         });
 
         // Bind unplot button event
@@ -1185,38 +1196,61 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     return lines[d.key](d.values);
                 });
             focus.select(".x.axis").call(xAxis);
-
-            // Calculate zoom
             var s = x.domain();
             var s_orig = x2.domain();
             var newS = (s_orig[1] - s_orig[0]) / (s[1] - s[0]);
             var t = (s[0] - s_orig[0]) / (s_orig[1] - s_orig[0]);
             var trans = width * newS * t;
-            zoom.scale(newS);
-            zoom.translate([-trans, 0]);
+            zoomX.scale(newS);
+            zoomX.translate([-trans, 0]);
 
+            // Hide overlay elements while brushing
             svg.selectAll(".marker").style("display", "none");
             verticalTrace.style("display", "none");
             dateWindow.style("display", "none");
         }
 
-        function zoomed() {
+        function zoomedX() {
             var t = d3.event.translate;
             var s = d3.event.scale;
             var size = width * s;
             t[0] = Math.min(t[0], 0);
             t[0] = Math.max(t[0], width - size);
-            zoom.translate(t);
+            zoomX.translate(t);
             focus.selectAll(".seriesID")
                 .selectAll("path")
                 .attr("d", function (d) {
                     return lines[d.key](d.values);
                 });
             focus.select(".x.axis").call(xAxis);
+
             //Find extent of zoomed area, what's currently at edges of graphed region
             var brushExtent = [x.invert(0), x.invert(width)];
             context.select(".brush").call(brush.extent(brushExtent));
 
+            // Hide overlay elements while zooming
+            svg.selectAll(".marker").style("display", "none");
+            verticalTrace.style("display", "none");
+            dateWindow.style("display", "none");
+        }
+
+        function zoomedY() {
+            var t = d3.event.translate;
+            var s = d3.event.scale;
+            var size = height * s;
+            var axis = d3.select(this.parentNode);
+
+            t[0] = Math.max(Math.min(t[0], 0), height - size);
+            zoomsY[axis.attr("data-id")].translate(t);
+            focus.selectAll(".seriesID")
+                .selectAll("path")
+                .attr("d", function (d) {
+                    return lines[d.key](d.values);
+                });
+
+            axis.call(yAxis[axis.attr("data-id")]);
+
+            // Hide overlay elements while zooming
             svg.selectAll(".marker").style("display", "none");
             verticalTrace.style("display", "none");
             dateWindow.style("display", "none");

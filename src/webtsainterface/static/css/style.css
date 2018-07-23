@@ -705,9 +705,9 @@ table.dataTable tbody tr.selected {
     position: absolute;
     right: 0;
     width: 307px;
-    height: -webkit-calc(100% - 43px);
-    height: -moz-calc(100% - 43px);
-    height: calc(100% - 43px);
+    height: -webkit-calc(100% - 32px);
+    height: -moz-calc(100% - 32px);
+    height: calc(100% - 32px);
     float: right;
     border-left: 1px solid #aaa;
 }
