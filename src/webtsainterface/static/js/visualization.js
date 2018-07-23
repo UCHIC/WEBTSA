@@ -538,10 +538,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var x0 = x.invert(d3.mouse(this)[0]);
 
             // Chose the date closest to the cursor's position
-            for (var i = 0; i < self.plottedSeries.length; i++) {
+            for (var i = 0; i < datasets.length; i++) {
                 var index = bisectDate(data[i].values, x0, 1);
                 var d0 = data[i].values[index - 1];
                 var d1 = data[i].values[index];
+                if (!d1) {
+                    d1 = d0;
+                }
                 var delta = Math.min(Math.abs(x0 - d0.date), Math.abs(x0 - d1.date));
                 if (delta < minDelta) {
                     d = Math.abs(x0 - d0.date) > Math.abs(x0 - d1.date) ? d1 : d0;
@@ -555,12 +558,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 var index = bisectDate(data[i].values, x0, 1);
                 var d0 = data[i].values[index - 1];
                 var d1 = data[i].values[index];
+                if (!d1) {
+                    d1 = d0;
+                }
                 var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+                var usedAxis = datasets[i].usedAxis;
 
-                // If this point did not occur in the chosen date, do not display it.
-                if (d.date - closestDate != 0) {
+                // If this point did not occur in the chosen date, or is out of display range, do not display it.
+                if (d.date - closestDate != 0 || x(d.date) < 0 || x(d.date) > width || y[usedAxis](d.val) < 0 || y[usedAxis](d.val) > height ) {
                     markers[i].style("display", "none");
-                    return;
+                    continue;
                 }
 
                 markers[i].style("display", null);
@@ -576,12 +583,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 markers[i].select("rect").attr("x", offsetX);
                 markers[i].select("text.marker-val").attr("x", offsetX + 10);
 
-                var offsetY = y[i](d.val) + margin.top < 50 ? -y[i](d.val) + margin.top : 0;
+                var offsetY = y[usedAxis](d.val) + margin.top < 50 ? -y[usedAxis](d.val) + margin.top : 0;
                 markers[i].select("rect").attr("y", offsetY - 20);
                 markers[i].select("text.marker-val").attr("y", offsetY + 5);
 
                 // Move the marker
-                markers[i].attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[i](d.val) + margin.top) + ")");
+                markers[i].attr("transform", "translate(" + (x(d.date) + margin.left) + "," + (y[usedAxis](d.val) + margin.top) + ")");
             }
 
             // Move the tracing line
@@ -596,7 +603,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         }
 
         var focus = svg.append("g")
-            .attr("class", "focus")
+            .attr("class", "focus");
             // .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
             // .attr("height", "100%");
         //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -815,7 +822,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
                 // update previous axis and use it
                 var currentDomain = y[usedAxis].domain();
-                var combinedDomain = [Math.min(newDomain[0], currentDomain[0]), Math.max(newDomain[1], currentDomain[1])]
+                var combinedDomain = [Math.min(newDomain[0], currentDomain[0]), Math.max(newDomain[1], currentDomain[1])];
                 y[usedAxis] = d3.scale.linear()
                     .domain(combinedDomain)
                     .range([height, 0]);
@@ -825,11 +832,15 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .domain(combinedDomain)
                     .range([height2, 0]);
 
-                $(".y.axis[data-id='" + usedAxis + "']").attr("style", "fill: #000");
-
                 yAxis[usedAxis].scale(y[usedAxis]);
 
-                focus.select(".y.axis[data-id='" + usedAxis + "']").call(yAxis[usedAxis]);
+                // Re-assign its zoom after the scale changes
+                zoomsY[usedAxis].y(y[usedAxis]);
+
+                focus.select(".y.axis[data-id='" + usedAxis + "']")
+                    .attr("style", "fill: #000")
+                    .call(yAxis[usedAxis])
+                    .select("rect").call(zoomsY[usedAxis]);
 
                 lines[i] = d3.svg.line()
                     .x(function (d) {
@@ -847,6 +858,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .y(function (d) {
                         return y2[usedAxis](d.val);
                     });
+
+                datasets[i]['usedAxis'] = usedAxis;
             }
             else {
                 // Create a new axis
@@ -855,6 +868,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 zoomsY[i] = d3.behavior.zoom().scaleExtent([-Infinity, Infinity])
                     .on("zoom", zoomedY);
                 zoomsY[i].y(y[i]);
+
+                datasets[i]['usedAxis'] = i;
 
                 var axis = focus.append("g")
                     .attr("class", "y axis")
@@ -1084,20 +1099,20 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             d3.select(this.parentElement).moveToFront();
             d3.selectAll(".y.axis[data-id='" + axisID + "'] .domain," + ".y.axis[data-id='" + axisID + "'] .domain .tick line").attr("stroke-width", 2.5);
 
-            if (this.parentElement.getAttribute("opacity") == "0.4") {
-                focus.selectAll(".seriesID").attr("opacity", "0.4");
+            if (this.parentElement.getAttribute("opacity") == "0.3") {
+                focus.selectAll(".seriesID").attr("opacity", "0.3");
             }
             else {
                 var paths = focus.selectAll(".seriesID")[0];
 
                 if (paths.length > 1) {
                     paths.forEach(function (path) {
-                        if (path.getAttribute("opacity") == "0.4") {
+                        if (path.getAttribute("opacity") == "0.3") {
                             path.setAttribute("opacity", "1");
                             flag = false;
                         }
                         else {
-                            path.setAttribute("opacity", "0.4");
+                            path.setAttribute("opacity", "0.3");
                         }
                     });
                 }
@@ -1134,7 +1149,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         seriesID.append("path")
             .attr("class", "line")
             .style("stroke-width", 1.5)
-            .on("click", onPathClick)
+            // .on("click", onPathClick)
             .attr("d", function (d) {
                 return lines[d.key](d.values);
             })
