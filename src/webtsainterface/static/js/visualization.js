@@ -554,7 +554,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
             // Draw the markers for the chosen date
-            for (var i = 0; i < self.plottedSeries.length; i++) {
+            for (var i = 0; i <  datasets.length; i++) {
                 var index = bisectDate(data[i].values, x0, 1);
                 var d0 = data[i].values[index - 1];
                 var d1 = data[i].values[index];
@@ -604,9 +604,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         var focus = svg.append("g")
             .attr("class", "focus");
-            // .attr("width", $("#graphContainer").width() + $("#leftPanel").width())
-            // .attr("height", "100%");
-        //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var dateWindow = svg.append("g")
             .style("display", "none")
@@ -887,9 +884,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .text(varNames[i] + " (" + varUnits[i] + ")");
 
                 var axisHeight = axis.node().getBBox().height;
-                var textHeight = text.node().getBBox().width;
+                var textWidth = text.node().getBBox().width;
 
-                text.attr("x", -(axisHeight - textHeight) / 2);
+                text.attr("x", -(axisHeight - textWidth) / 2);
                 text.attr("y", (getAxisSeparation(i) + 15) * axisProperties[yAxisCount].textdistance);
                 yAxisCount++;
 
@@ -1232,13 +1229,14 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             t[0] = Math.min(t[0], 0);
             t[0] = Math.max(t[0], width - size);
             zoomX.translate(t);
+
             focus.selectAll(".seriesID")
                 .selectAll("path")
                 .attr("d", function (d) {
                     return lines[d.key](d.values);
                 });
-            focus.select(".x.axis").call(xAxis);
 
+            focus.select(".x.axis").call(xAxis);
             //Find extent of zoomed area, what's currently at edges of graphed region
             var brushExtent = [x.invert(0), x.invert(width)];
             context.select(".brush").call(brush.extent(brushExtent));
