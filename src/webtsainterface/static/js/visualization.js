@@ -597,8 +597,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 .attr("x2", x(d.date) + margin.left);
 
             // Move the date window
-            var dateLeft = Math.min(Math.max((x(d.date) + margin.left), 150), width - 20);
-            svg.select(".date-window").attr("transform", "translate(" + dateLeft + "," + (height + margin.top - 40) + ")");
+            var dateLeft = Math.min(Math.max(x(d.date), 80), width - 80);
+            svg.select(".date-window").attr("transform", "translate(" + (dateLeft + margin.left) + "," + (height + margin.top - 40) + ")");
             svg.select("text.marker-date").text(formatDate(d.date));
         }
 
