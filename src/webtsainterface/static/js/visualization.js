@@ -543,6 +543,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             // Chose the date closest to the cursor's position
             for (var i = 0; i < datasets.length; i++) {
+                if (!data[i]) {
+                    continue;
+                }
                 var index = bisectDate(data[i].values, x0, 1);
                 var d0 = data[i].values[index - 1];
                 var d1 = data[i].values[index];
@@ -553,12 +556,16 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 if (delta < minDelta) {
                     d = Math.abs(x0 - d0.date) > Math.abs(x0 - d1.date) ? d1 : d0;
                     closestDate = d.date;
+                    minDelta = delta;
                 }
             }
 
             var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
             // Draw the markers for the chosen date
             for (var i = 0; i <  datasets.length; i++) {
+                if (!data[i]) {
+                    continue;
+                }
                 var index = bisectDate(data[i].values, x0, 1);
                 var d0 = data[i].values[index - 1];
                 var d1 = data[i].values[index];
