@@ -543,12 +543,21 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             // Chose the date closest to the cursor's position
             for (var i = 0; i < datasets.length; i++) {
-                if (!data[i]) {
+                if (!datasets[i].length) {
                     continue;
                 }
-                var index = bisectDate(data[i].values, x0, 1);
-                var d0 = data[i].values[index - 1];
-                var d1 = data[i].values[index];
+
+                var dataset;
+
+                for (var j = 0; j < data.length; j++) {
+                    if (data[j].key == i) {
+                        dataset = data[j];
+                    }
+                }
+
+                var index = bisectDate(dataset.values, x0, 1);
+                var d0 = dataset.values[index - 1];
+                var d1 = dataset.values[index];
                 if (!d1) {
                     d1 = d0;
                 }
@@ -563,17 +572,26 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             var formatDate = d3.time.format("%m/%d/%Y at %I:%M %p");
             // Draw the markers for the chosen date
             for (var i = 0; i <  datasets.length; i++) {
-                if (!data[i]) {
+                if (!datasets[i].length) {
                     continue;
                 }
-                var index = bisectDate(data[i].values, x0, 1);
-                var d0 = data[i].values[index - 1];
-                var d1 = data[i].values[index];
+
+                var dataset;
+
+                for (var j = 0; j < data.length; j++) {
+                    if (data[j].key == i) {
+                        dataset = data[j];
+                    }
+                }
+
+                var index = bisectDate(dataset.values, x0, 1);
+                var d0 = dataset.values[index - 1];
+                var d1 = dataset.values[index];
                 if (!d1) {
                     d1 = d0;
                 }
                 var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-                var usedAxis = data[i].usedAxis;
+                var usedAxis = datasets[i].usedAxis;
 
                 // If this point did not occur in the chosen date, or is out of display range, do not display it.
                 if (d.date - closestDate != 0 || x(d.date) < 0 || x(d.date) > width || y[usedAxis](d.val) < 0 || y[usedAxis](d.val) > height ) {
@@ -704,7 +722,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         }
 
         // This loop builds and draws each time series
-        for (var i = 0; i < data.length; i++) {
+        for (var i = 0; i < datasets.length; i++) {
+            if (datasets[i].length == 0) {
+                continue;
+            }
             // y-coordinate for the graph
             var domainMin = d3.min(data, function (d) {
                 if (d.key == i) {
@@ -744,66 +765,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             yAxis[i] = d3.svg.axis()
                 .scale(y[i]);
-            //.tickFormat(d3.format(".2f"))
-
-            // if (datasets[i].length == 0) {
-            //     offset++;
-            //     continue;
-            // }
-
-            // ----------------------- OPTIMIZATION BEGINS -----------------------
-            // var index = i - offset;
-            // var date1 = data[index]["values"][0].date;
-            // var val1 = parseFloat(data[index]["values"][0].val);
-            // var dataCopy = [];
-            // var marginOfError = 2; // The margin of error in degree units
-            //
-            // dataCopy.push({val: val1, date: date1, seriesID: i})
-            // var points = [];
-            // points.push({x: x(date1), y: y[i](val1)});  // push in the first point
-            //
-            // for (var j = 2; j < data[index]["values"].length - 1; j++) {
-            //     // Current point
-            //     var date2 = data[index]["values"][j - 1].date;
-            //     var val2 = parseFloat(data[index]["values"][j - 1].val);
-            //     var point2 = {x: x(date2), y: y[i](val2)};
-            //
-            //     // Last inserted
-            //     var point1 = {x: points[points.length - 1].x - point2.x, y: points[points.length - 1].y - point2.y};
-            //
-            //     // Next point
-            //     var date3 = data[index]["values"][j].date;
-            //     var val3 = data[index]["values"][j].val;
-            //     var point3 = {x: (x(date3) - point2.x), y: (y[i](val3) - point2.y)};
-            //
-            //     var dotProduct = (point1.x * point3.x + point1.y * point3.y);
-            //     var divisor = ((Math.sqrt(Math.pow(point1.x, 2) + Math.pow(point1.y, 2))) * (Math.sqrt(Math.pow(point3.x, 2) + Math.pow(point3.y, 2))));
-            //
-            //     // Angle between two vectors
-            //     var angle = Math.acos(dotProduct / divisor) * (180 / Math.PI);
-            //
-            //     if (!(angle > 180 - marginOfError && angle < 180 + marginOfError)) {
-            //         dataCopy.push({val: val2, date: date2, seriesID: i});
-            //         points.push(point2);
-            //     }
-            // }
-            //
-            // // insert last value
-            // date1 = data[index]["values"][data[index]["values"].length - 1].date;
-            // val1 = parseFloat(data[index]["values"][data[index]["values"].length - 1].val);
-            //
-            // dataCopy.push({val: val1, date: date1, seriesID: i})
-            // data[index]["values"] = dataCopy;   // Replace with new and optimized array
-
-            // Show message with number of data points
-            // $("#graphArea .alert").remove();
-            //  $("#graphArea").prepend(
-            //      '<div class="alert alert-info alert-dismissable">\
-            //        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>\
-            //        <strong></strong>' + "Number of data points: " + dataCopy.length +
-            //      '</div>'
-            //  );
-            // ----------------------- OPTIMIZATION ENDS -----------------------
 
             // Append y-axis
             var chosenYAxes = [i];
@@ -811,7 +772,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             // Check if this axis will be shared with another variable
             for (var j = 0; j < i; j++) {
                 if (i != j && varNames[i] == varNames[j] && varUnits[i] == varUnits[j]) {
-                    chosenYAxes.push(j);
+                    // If this axis was indeed created
+                    if ($(".y.axis[data-id='" + j + "']").length) {
+                        chosenYAxes.push(j);
+                    }
                 }
             }
 
@@ -878,7 +842,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                         return y2[usedAxis](d.val);
                     });
 
-                data[i]['usedAxis'] = usedAxis;
+                datasets[i]['usedAxis'] = usedAxis;
             }
             else {
                 // Create a new axis
@@ -888,7 +852,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .on("zoom", zoomedY);
                 zoomsY[i].y(y[i]);
 
-                data[i]['usedAxis'] = i;
+                datasets[i]['usedAxis'] = i;
 
                 var axis = focus.append("g")
                     .attr("class", "y axis")
@@ -969,7 +933,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
 
             // If the graph contains less than 2 data points, append circles
-            if (data[i] && data[i].values.length < 2) {
+            if (datasets[i].length < 2) {
                 focus.selectAll("circle.line")
                     .data(data[i]['values'])
                     .enter().append("svg:circle")
