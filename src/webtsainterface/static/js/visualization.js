@@ -573,7 +573,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     d1 = d0;
                 }
                 var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-                var usedAxis = datasets[i].usedAxis;
+                var usedAxis = data[i].usedAxis;
 
                 // If this point did not occur in the chosen date, or is out of display range, do not display it.
                 if (d.date - closestDate != 0 || x(d.date) < 0 || x(d.date) > width || y[usedAxis](d.val) < 0 || y[usedAxis](d.val) > height ) {
@@ -704,7 +704,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         }
 
         // This loop builds and draws each time series
-        for (var i = 0; i < datasets.length; i++) {
+        for (var i = 0; i < data.length; i++) {
             // y-coordinate for the graph
             var domainMin = d3.min(data, function (d) {
                 if (d.key == i) {
@@ -746,10 +746,10 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 .scale(y[i]);
             //.tickFormat(d3.format(".2f"))
 
-            if (datasets[i].length == 0) {
-                offset++;
-                continue;
-            }
+            // if (datasets[i].length == 0) {
+            //     offset++;
+            //     continue;
+            // }
 
             // ----------------------- OPTIMIZATION BEGINS -----------------------
             // var index = i - offset;
@@ -878,7 +878,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                         return y2[usedAxis](d.val);
                     });
 
-                datasets[i]['usedAxis'] = usedAxis;
+                data[i]['usedAxis'] = usedAxis;
             }
             else {
                 // Create a new axis
@@ -888,7 +888,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .on("zoom", zoomedY);
                 zoomsY[i].y(y[i]);
 
-                datasets[i]['usedAxis'] = i;
+                data[i]['usedAxis'] = i;
 
                 var axis = focus.append("g")
                     .attr("class", "y axis")
