@@ -414,7 +414,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         // Filter by dates if specified
         for (var i = 0; i < datasets.length; i++) {
             datasets[i] = datasets[i].filter(function (d) {
-                return (parseDate(d.date).valueOf() >= self.dateFirst.date.valueOf() && parseDate(d.date).valueOf() <= self.dateLast.date.valueOf());
+                var date = parseDate(d.date);
+                if (date >= self.dateFirst.date && date <= self.dateLast.date) {
+                    date = date;
+                }
+                return date >= self.dateFirst.date && date <= self.dateLast.date;
             });
         }
         return datasets;
@@ -499,13 +503,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         var x = d3.time.scale()
             .domain(domain)
-            .range([0, width])
-            .nice(d3.time.day);
+            .range([0, width]);
+            // .nice(d3.time.day);
 
         var x2 = d3.time.scale()
             .domain(domain)
-            .range([0, width])
-            .nice(d3.time.day);
+            .range([0, width]);
+            // .nice(d3.time.day);
 
         var color = d3.scale.category10()
             .domain(d3.keys(data[0]).filter(function (key) {
@@ -888,7 +892,6 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
                 text.attr("x", -(axisHeight - textWidth) / 2);
                 text.attr("y", (getAxisSeparation(i) + 15) * axisProperties[yAxisCount].textdistance);
-                yAxisCount++;
 
                 lines[i] = d3.svg.line()
                     .x(function (d) {
@@ -909,22 +912,22 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
                 // Update the axis properties
                 var axisSpacing = 10;
-                if (yAxisCount - 1 === 0) {
+                if (yAxisCount === 0) {
                     axisProperties[2].xTranslate = -($("#yAxis-" + 0)[0].getBBox().width + axisSpacing);
                     margin.left += $("#yAxis-" + 0)[0].getBBox().width + axisSpacing;
                 }
-                else if (yAxisCount - 1 === 1) {
+                else if (yAxisCount === 1) {
                     axisProperties[3].xTranslate = axisProperties[1].xTranslate + $("#yAxis-" + 1)[0].getBBox().width + axisSpacing;
                     margin.right += $("#yAxis-" + 1)[0].getBBox().width + axisSpacing;
                 }
-                else if (yAxisCount - 1 === 2) {
+                else if (yAxisCount === 2) {
                     axisProperties[4].xTranslate = axisProperties[2].xTranslate - ($("#yAxis-" + 2)[0].getBBox().width + axisSpacing);
                     margin.left += $("#yAxis-" + 2)[0].getBBox().width + axisSpacing;
                 }
-                else if (yAxisCount - 1 === 3) {
+                else if (yAxisCount === 3) {
                     margin.right += $("#yAxis-" + 3)[0].getBBox().width + axisSpacing;
                 }
-                else if (yAxisCount - 1 === 4) {
+                else if (yAxisCount === 4) {
                     margin.left += $("#yAxis-" + 4)[0].getBBox().width + axisSpacing;
                 }
 
@@ -933,7 +936,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 axis.append("rect")
                     .attr("height", height)
                     .attr("width", axisWidth)
-                    .attr("x", axisProperties[yAxisCount].orient == "right" ? -axisWidth : 0)
+                    .attr("x", axisProperties[yAxisCount].orient == "left" ? -axisWidth : 0)
                     .attr("fill", "transparent")
                     .call(zoomsY[i]);
 
@@ -943,6 +946,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 overlay.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                     .attr("width", $("#graphContainer").width() - margin.left - margin.right)
                     .attr("height", $("#graphContainer").height() - margin.top - margin.bottom);
+
+                yAxisCount++;
             }
 
             // If the graph contains less than 2 data points, append circles
