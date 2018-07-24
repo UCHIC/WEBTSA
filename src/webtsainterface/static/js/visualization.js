@@ -721,6 +721,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 domainMax += delta;
             }
 
+            // Add a padding of 10% to better visualize the points near the edges
+            var delta = (domainMax - domainMin) / 10;
+            domainMin -= delta;
+            domainMax += delta;
+
             y[i] = d3.scale.linear()
                 .domain([domainMin, domainMax])
                 .range([height, 0]);
@@ -824,6 +829,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 // update previous axis and use it
                 var currentDomain = y[usedAxis].domain();
                 var combinedDomain = [Math.min(newDomain[0], currentDomain[0]), Math.max(newDomain[1], currentDomain[1])];
+
+                // Add a padding of 10% to better visualize the points near the edges
+                var delta = (combinedDomain[1] - combinedDomain[0]) / 10;
+                combinedDomain[0] -= delta;
+                combinedDomain[1] += delta;
+
                 y[usedAxis] = d3.scale.linear()
                     .domain(combinedDomain)
                     .range([height, 0]);
@@ -891,7 +902,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 var textWidth = text.node().getBBox().width;
 
                 text.attr("x", -(axisHeight - textWidth) / 2);
-                text.attr("y", (getAxisSeparation(i) + 15) * axisProperties[yAxisCount].textdistance);
+                text.attr("y", (getAxisSeparation(i) + 20) * axisProperties[yAxisCount].textdistance);
 
                 lines[i] = d3.svg.line()
                     .x(function (d) {
