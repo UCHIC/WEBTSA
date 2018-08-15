@@ -166,7 +166,7 @@ define('table', ['datatablesLibraries'], function() {
             facet.filters.forEach(function(filter) {
                 if (filter.applied) {
                     filterRegex += (filterRegex === '')? '': '|';
-                    filterRegex += '(^' + filter[facet.keyfield] + '$)';
+                    filterRegex += '(^' + filter[facet.keyfield].replace('(', '\\(').replace(')', '\\)') + '$)';
                 }
             });
             column.search(filterRegex, true, false);
