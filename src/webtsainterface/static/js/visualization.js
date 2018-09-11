@@ -456,7 +456,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var margin = {top: 20, right: 40, bottom: 130, left: 10},
             width = $("#graphContainer").width() + $("#leftPanel").width(),
             height = $("#graphContainer").height() - margin.top - margin.bottom,
-            margin2 = {top: height + 63, right: margin.right, bottom: 20, left: margin.left},
+            margin2 = {top: height + 70, right: margin.right, bottom: 20, left: margin.left},
             height2 = 30;
 
         var yAxisCount = 0;     // Counter to keep track of y-axes as we place them
@@ -490,16 +490,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             return d.seriesID;
         }).entries(data);
 
-        var domain = [d3.min(data, function (d) {
-            return d3.min(d.values, function (d) {
-                return d.date;
-            });
-        }),
+        var domain = [
+            d3.min(data, function (d) {
+                return d3.min(d.values, function (d) {
+                    return d.date;
+                });
+            }),
             d3.max(data, function (d) {
                 return d3.max(d.values, function (d) {
                     return d.date;
                 });
-            })];
+            })
+        ];
 
         var x = d3.time.scale()
             .domain(domain)
@@ -969,29 +971,35 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         x.range([0, width]);
         x2.range([0, width]);
 
+        var customTimeFormat = d3.time.format.multi([
+          ["%b, %Y", function(d) { return d.getMonth() == 0 && d.getDate() == 1; }],
+          ["", function(d) { return d.getMinutes() || d.getHours(); }],
+          ["%b %d", function(d) { return d.getDate(); }],
+          ["%Y", function() { return true; }]
+        ]);
+
         zoomX.x(x);
         overlay.call(zoomX);
 
         var xAxis = d3.svg.axis()
             .scale(x)
-            .ticks(Math.max(1, (width - data.length * 51) / 60))      // Don't even...
+            .tickFormat(customTimeFormat)
             .orient("bottom");
 
         var xAxis2 = d3.svg.axis()
             .scale(x2)
-            .ticks(Math.max(1, (width - data.length * 51) / 60))
+            .tickFormat(customTimeFormat)
             .orient("bottom");
 
         focus.append("g")
             .attr("class", "x axis")
-            //.attr("width", width  - margin.left - margin.right)
             .attr("transform", "translate(0," + (height) + ")")
             .call(xAxis)
             .append("text")
-            .style("text-anchor", "end")
+            .style("text-anchor", "middle")
             .attr("x", width / 2)
-            .attr("y", 35)
-            .text("Date");
+            .attr("y", 38)
+            .text("DateTime (UTC)");
 
         context.append("g")
             .attr("class", "x axis")
