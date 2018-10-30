@@ -38,8 +38,8 @@
 	var ERR_DUPLICATED_NAME = "File already exists.";
 	var CHUNK_SIZE = 512 * 1024;
 
-	var INFLATE_JS = "static/js/vendor/zip/inflate.js";
-	var DEFLATE_JS = "static/js/vendor/zip/deflate.js";
+	var INFLATE_JS = "/static/js/vendor/zip/inflate.js";
+	var DEFLATE_JS = "/static/js/vendor/zip/deflate.js";
 	
 	var TEXT_PLAIN = "text/plain";
 	
@@ -393,7 +393,7 @@
 		}
 
 		if (obj.zip.useWebWorkers) {
-			worker = new Worker(window.location.pathname + INFLATE_JS);
+			worker = new Worker(INFLATE_JS);
 			launchWorkerProcess(worker, reader, writer, offset, size, oninflateappend, onprogress, oninflateend, onreaderror, onwriteerror);
 		} else
 			launchProcess(new obj.zip.Inflater(), reader, writer, offset, size, oninflateappend, onprogress, oninflateend, onreaderror, onwriteerror);
@@ -418,7 +418,7 @@
 		}
 
 		if (obj.zip.useWebWorkers) {
-			worker = new Worker(window.location.pathname + DEFLATE_JS);
+			worker = new Worker(DEFLATE_JS);
 			worker.addEventListener(MESSAGE_EVENT, onmessage, false);
 			worker.postMessage({
 				init : true,
