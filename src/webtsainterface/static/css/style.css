@@ -415,7 +415,6 @@ line.tick {
 }
 
 .col-sm-9 {
-    /*width: calc(100% - 326px);*/
     float: none;
     overflow: hidden;
     width: inherit;
@@ -432,7 +431,6 @@ line.tick {
 .navbar {
     margin-bottom: 0px;
     height: 81px;
-    /*padding: 0 20px;*/
 }
 
 .navbar .container {
