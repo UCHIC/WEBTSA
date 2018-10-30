@@ -5,7 +5,7 @@
     padding: 0;
     min-width: 1000px;
     overflow: auto;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
 .grid path {
@@ -431,7 +431,8 @@ line.tick {
 
 .navbar {
     margin-bottom: 0px;
-    height: 70px;
+    height: 81px;
+    /*padding: 0 20px;*/
 }
 
 .navbar .container {
@@ -439,14 +440,18 @@ line.tick {
 }
 
 .navbar-brand img {
-    max-height: 42px;
-    margin-top: -6px;
+    width: 260px;
+    margin-right: 2rem;
+    margin-left: 5px;
 }
 
 .navbar-brand {
     float: left;
     padding: 0px 15px;
-
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .nav-tabs {
@@ -663,7 +668,9 @@ table.dataTable tbody tr.selected {
 }
 
 .navbar > .container {
-    margin-left: 15px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .datepicker {
