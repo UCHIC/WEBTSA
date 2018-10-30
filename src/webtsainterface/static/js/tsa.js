@@ -6,7 +6,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
     self.data = data;
     self.table = table;
     self.visualization = visualization;
-    zip.workerScriptsPath = 'static/js/vendor/zip/';
+    zip.workerScriptsPath = '/static/js/vendor/zip/';
     
     var r =0, dir=false;
 
