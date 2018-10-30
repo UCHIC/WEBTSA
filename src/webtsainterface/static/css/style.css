@@ -1,5 +1,5 @@
 ﻿html, body {
-    height: 99.99%;
+    height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
@@ -404,8 +404,6 @@ line.tick {
     padding: 0px;
     height: 100%;
     border-right: 1px solid #ddd;
-    /*overflow-x:hidden;*/
-    /*overflow-y:auto;*/
     float: left;
 }
 
@@ -423,9 +421,9 @@ line.tick {
 .row {
     margin-right: 0px;
     margin-left: 0px;
-    height: -moz-calc(100% - 71px);
-    height: -webkit-calc(100% - 71px);
-    height: calc(100% - 71px);
+    height: -moz-calc(100% - 81px);
+    height: -webkit-calc(100% - 81px);
+    height: calc(100% - 81px);
 }
 
 .navbar {
@@ -463,9 +461,9 @@ line.tick {
 }
 
 .tab-content {
-    height: -moz-calc(100% - 47px);
-    height: -webkit-calc(100% - 47px);
-    height: calc(100% - 47px);
+    height: -moz-calc(100% - 42px);
+    height: -webkit-calc(100% - 42px);
+    height: calc(100% - 42px);
 }
 
 .tab-pane {
@@ -898,9 +896,9 @@ button.close {
 #loadingScreen {
     background: #292929;
     position: absolute;
-    height: -moz-calc(100% - 71px);
-    height: -webkit-calc(100% - 71px);
-    height: calc(100% - 71px);
+    height: -moz-calc(100% - 81px);
+    height: -webkit-calc(100% - 81px);
+    height: calc(100% - 81px);
     width: 100%;
     z-index: 999;
 }
