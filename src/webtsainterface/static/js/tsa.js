@@ -171,7 +171,7 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                                 // Append header
             csvContent +=   "# ------------------------------------------------------------------------------------------\n" +
                             "# WARNING: These data may be provisional and subject to revision. The data are released\n" +
-                            "# on the condition that neither iUTAH nor any of its participants may be held liable for any\n" +
+                            "# on the condition that Utah State University may not be held liable for any\n" +
                             "# damages resulting from thier use. The following metadata describe the data in this file:\n" +
                             "# ------------------------------------------------------------------------------------------\n#\n";
 
