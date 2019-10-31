@@ -564,6 +564,10 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
             .findWhere({name:'Network'}).filters)
             .findWhere({network:selectedNetwork});
 
+        if (!selectedVariable) {
+            self.data.toggleFilter('variablelevel', 'Common')
+        }
+
         self.data.toggleFilter('sourcedataserviceid', (networkFilter)? networkFilter.sourcedataserviceid: undefined);
         self.data.toggleFilter('sitecode', selectedSite);
         self.data.toggleFilter('variablecode', selectedVariable);
