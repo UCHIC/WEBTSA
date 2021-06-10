@@ -1,4 +1,4 @@
-Django==1.10.3
+Django==2.2.24
 django-select2-forms==1.1.28
 django-tastypie==0.13.3
 gunicorn
