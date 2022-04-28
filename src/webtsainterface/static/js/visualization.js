@@ -111,10 +111,12 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         });
 
         table.uncheckSeries(seriesid);
+        $("#btnExportPng").unbind('click')
         if (ui.getActiveView() !== 'visualization') {
             self.shouldPlot = true;
             return;
         }
+
 
         self.plotSeries(); //TODO: remove it from the plot without re-plotting.
     };
