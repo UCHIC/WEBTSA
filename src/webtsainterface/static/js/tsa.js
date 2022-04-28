@@ -511,13 +511,13 @@ define('tsa', ['data', 'map', 'table', 'ui', 'visualization', 'generalLibraries'
                 function () {
                     $("#btnCollapseToggle span").removeClass();
                     if (!dir) {
-                        //$("#graphContainer").animate({width:$("#graphContainer").width() - 280}, 800);    // animation
-                        $("#graphContainer").width($("#graphContainer").width() - slideDistance);           // no animation
+                        //$("#graph-container").animate({width:$("#graph-container").width() - 280}, 800);    // animation
+                        $("#graph-container").width($("#graph-container").width() - slideDistance);           // no animation
                         $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-right");
                     }
                     else {
-                        //$("#graphContainer").animate({width:$("#graphContainer").width() + 280}, 800);    // animation
-                        $("#graphContainer").width($("#graphContainer").width() + slideDistance);           // no animation
+                        //$("#graph-container").animate({width:$("#graph-container").width() + 280}, 800);    // animation
+                        $("#graph-container").width($("#graph-container").width() + slideDistance);           // no animation
                         $("#btnCollapseToggle span").addClass("glyphicon glyphicon-chevron-left");
                     }
                     self.visualization.plotSeries();
