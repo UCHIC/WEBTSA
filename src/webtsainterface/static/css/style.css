@@ -8,16 +8,29 @@
     font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
+:root {
+  --base-separation: 1rem;
+}
+
 .grid path {
     stroke-width: 0;
 }
 
-#transparentPixel {
-    display: none;
+.domain {
+    fill: transparent;
+    stroke: currentColor !important;
 }
 
-.seriesID {
-    clip-path: url(#clip);
+.y.axis {
+  cursor: all-scroll;
+}
+
+.axis-title {
+    fill: currentColor !important;
+}
+
+#transparentPixel {
+    display: none;
 }
 
 .brush .extent {
@@ -169,6 +182,10 @@ svg {
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
+}
+
+.seriesID {
+    clip-path: url(#clip);
 }
 
 .focus .seriesID {
@@ -684,7 +701,7 @@ table.dataTable tbody tr.selected {
     width: 100%;
 }
 
-#graphContainer {
+#graph-container {
     height: 100%;
     width: -moz-calc(100% - 307px);
     width: -webkit-calc(100% - 307px);
@@ -694,7 +711,7 @@ table.dataTable tbody tr.selected {
     overflow-y: auto;
 }
 
-#graphContainer .label {
+#graph-container .label {
     font-size: 100%;
     font-weight: normal;
 }
@@ -785,10 +802,6 @@ table.dataTable tbody tr.selected {
     font-size: 14px;
 }
 
-#plotOptionsContainer .panel-content {
-    padding: 10px;
-}
-
 #plotOptionsContainer table {
     margin-bottom: 0;
 }
@@ -803,7 +816,11 @@ table.dataTable tbody tr.selected {
     text-align: right;
 }
 
-#visualizationDropDown, #plotOptionsContainer .btn-group {
+#plotOptionsContainer .panel-content {
+  padding: 1rem 0;
+}
+
+#visualizationDropDown {
     width: 100%;
 }
 
@@ -918,4 +935,28 @@ button.close {
 #progressBar {
     border-radius: 3px;
     box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
+}
+
+
+/* FLEX HELPERS */
+.flex {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.full-width {
+  width: 100%;
+}
+
+
+
+.has-space-top {
+  margin-top: var(--base-separation);
+}
+
+.has-space-bottom {
+  margin-bottom: var(--base-separation);
 }

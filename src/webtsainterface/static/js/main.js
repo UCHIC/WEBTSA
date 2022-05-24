@@ -54,7 +54,9 @@ requirejs.config({
         ],
         d3_box: 'vendor/d3/box',
         zip: 'vendor/zip/zip',
-        markerclusterer: 'vendor/maps/markerclusterer'
+        markerclusterer: 'vendor/maps/markerclusterer',
+        canvas_to_blob: '//cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob',
+        file_saver: '//cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min',
     },
     shim: {
         jquery_browser: { deps: ['jquery'] },
@@ -69,7 +71,7 @@ requirejs.config({
 define('mapLibraries', ['async!https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyANPfBBVteHSTx4o9O-kgjC8RVMuXW0O2o&sensor=false&libraries=geometry', 'markerclusterer']);
 define('datatablesLibraries', ['datatables', 'datatables-colvis', 'datatables-scroller', 'datatables-tabletools', 'datatables_bootstrap']);
 define('generalLibraries', ['jquery', 'jquery_browser', 'underscore', 'bootstrap', 'bootstrap_datepicker']);
-define('d3Libraries', ['d3', 'd3_nvd3', 'd3_box']);
+define('d3Libraries', ['d3', 'd3_nvd3', 'd3_box', 'canvas_to_blob', 'file_saver']);
 define('zipLibraries', ['zip']);
 
 define('d3_global', ['d3'], function(d3Module) {

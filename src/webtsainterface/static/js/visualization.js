@@ -29,7 +29,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         if ($("#visualizationTab").hasClass("active")) {
             self.plotSeries();
             var offset = $("#graphArea").width() - $("#panel-right").position().left;
-            $("#graphContainer").width("calc(100% - " + offset + "px)");
+            $("#graph-container").width("calc(100% - " + offset + "px)");
         }
     }, 500));
 
@@ -111,16 +111,18 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         });
 
         table.uncheckSeries(seriesid);
+        $("#btnExportPng").unbind('click')
         if (ui.getActiveView() !== 'visualization') {
             self.shouldPlot = true;
             return;
         }
 
+
         self.plotSeries(); //TODO: remove it from the plot without re-plotting.
     };
 
     self.clearGraph = function () {
-        $("#graphContainer").empty();
+        $("#graph-container").empty();
         $("#legendContainer").find("ul").empty();
         $("#statisticsTable tbody").empty();
     };
@@ -454,8 +456,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         }
 
         var margin = {top: 20, right: 40, bottom: 130, left: 10},
-            width = $("#graphContainer").width() + $("#leftPanel").width(),
-            height = $("#graphContainer").height() - margin.top - margin.bottom,
+            width = $("#graph-container").width() + $("#leftPanel").width(),
+            height = $("#graph-container").height() - margin.top - margin.bottom,
             margin2 = {top: height + 70, right: margin.right, bottom: 20, left: margin.left},
             height2 = 30;
 
@@ -526,8 +528,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         var canvasOffset = { width: -30, height: -10};  // Offset to prevent scroll bars from appearing in certain browsers.
 
-        var svg = d3.select("#graphContainer").append("svg")
-            // .style("width", ($("#graphContainer").width() + canvasOffset.width) + "px")
+        var svg = d3.select("#graph-container").append("svg")
+            // .style("width", ($("#graph-container").width() + canvasOffset.width) + "px")
             .style("height", (height + margin.top + margin.bottom + canvasOffset.height) + "px");
 
         var zoomX = d3.behavior.zoom().scaleExtent([1, 1000])
@@ -660,9 +662,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var verticalTrace = svg.append("line")
             .attr("stroke-dasharray", "5,5")
             .attr("class", "line-dash")
-            .attr("x1", 0)
+            .attr("x1", -20)
             .attr("y1", margin.top)
-            .attr("x2", 0)
+            .attr("x2", -20)
             .attr("y2", height + margin.top);
 
         var markers = [];
@@ -674,7 +676,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             marker.append("circle")
                 .attr("fill", "#FFF")
                 .attr("stroke", color(i))
-                .attr("strokw-width", "2")
+                .attr("stroke-width", "2")
                 .attr("r", 4.5);
 
             marker.append("rect")
@@ -699,7 +701,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
         var overlay = svg.append("rect")
             .attr("class", "zoom")
-            .attr("width", $("#graphContainer").width())
+            .attr("width", $("#graph-container").width())
             .attr("height", "100%")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .on("mouseout", function () {
@@ -860,12 +862,13 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .attr("class", "y axis")
                     .attr("data-id", i)
                     .attr("id", "yAxis-" + yAxisCount)
-                    .style("fill", color(i))
+                    .style("color", color(i))
                     .attr("transform", "translate(" + (axisProperties[yAxisCount].xTranslate) + " ,0)")
                     .call(yAxis[i]);
 
                 var text = axis.append("text")
                     .attr("transform", "rotate(-90)")
+                    .attr("class", "axis-title")
                     .style("text-anchor", "end")
                     .style("font-size", "14px")
                     .attr("dy", ".71em")
@@ -925,11 +928,11 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                     .call(zoomsY[i]);
 
                 focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-                    // .attr("width", $("#graphContainer").width() - margin.left - margin.right);
+                    // .attr("width", $("#graph-container").width() - margin.left - margin.right);
 
                 overlay.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                    .attr("width", $("#graphContainer").width() - margin.left - margin.right)
-                    .attr("height", $("#graphContainer").height() - margin.top - margin.bottom);
+                    .attr("width", $("#graph-container").width() - margin.left - margin.right)
+                    .attr("height", $("#graph-container").height() - margin.top - margin.bottom);
 
                 yAxisCount++;
             }
@@ -957,7 +960,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         }
 
         // Update width after new margins produced by y-axes
-        width = $("#graphContainer").width() - margin.left - margin.right;
+        width = $("#graph-container").width() - margin.left - margin.right;
 
         // Axes to the right
         axisProperties[1].xTranslate = width;
@@ -1194,6 +1197,21 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 setSummaryStatistics(summary[id]);
             }
         });
+        
+        $("#btnExportPng").unbind('click')
+        $("#btnExportPng").click(function() {
+            if (svg) {
+                var svgString = getSVGString(svg.node());
+                var imageWidth = $("#graph-container").width() + $("#leftPanel").width();
+                var imageHeight = $("#graph-container").height() - height2 - margin2.bottom - 40;
+                svgString2Image(svgString, imageWidth, imageHeight, 'png', save); // passes Blob and filesize String to the callback
+
+                function save(dataBlob, filesize){
+                    var name = varNames.join('+') + ' ' + (new Date(Date.now()).toLocaleString())
+                    saveAs( dataBlob, name ); // FileSaver.js function
+                }
+            }
+        })
 
         function brushed() {
             x.domain(brush.empty() ? x2.domain() : brush.extent());
@@ -1281,8 +1299,8 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         var numOfDatasets = values.length;
         var colors = d3.scale.category10();
         var margin = {top: 8, right: 30, bottom: 60, left: 80},
-            width = $("#graphContainer").width() - margin.left - margin.right,
-            height = $("#graphContainer").height();
+            width = $("#graph-container").width() - margin.left - margin.right,
+            height = $("#graph-container").height();
         var numOfEmptyDatasets = 0;
 
         for (var i = 0; i < numOfDatasets; i++) {
@@ -1292,7 +1310,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         }
 
         var numOfTicks = 20 / (numOfDatasets - numOfEmptyDatasets);                // Number of divisions for columns
-        var graphHeight = ($("#graphContainer").height() / (Math.max(numOfDatasets - numOfEmptyDatasets, 1))) - margin.bottom - margin.top;
+        var graphHeight = ($("#graph-container").height() / (Math.max(numOfDatasets - numOfEmptyDatasets, 1))) - margin.bottom - margin.top;
 
         var graphs = [];
 
@@ -1373,7 +1391,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 .scale(graph.y)
                 .orient("left");
 
-            graph.svg = d3.select("#graphContainer").append("svg")
+            graph.svg = d3.select("#graph-container").append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("id", "graph-" + i)
                 .attr("data-id", i)
@@ -1646,6 +1664,22 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 setSummaryStatistics(summary[id]);
             }
         });
+
+        $("#btnExportPng").unbind('click')
+        $("#btnExportPng").click(function() {
+          for (var i = 0; i < graphs.length; i++) {
+            var svgString = getSVGString($(`#graph-${i}`)[0]);
+            var imageWidth = $(`#graph-${i}`).width() + $("#leftPanel").width();
+            var imageHeight = $(`#graph-${i}`).height();
+            var varName = varNames[i]
+            svgString2Image(svgString, imageWidth, imageHeight, 'png', save, varName); // passes Blob and filesize String to the callback
+
+            function save(dataBlob, filesize, fileName){
+                var name = fileName + ' ' + (new Date(Date.now()).toLocaleString())
+                saveAs( dataBlob, name ); // FileSaver.js function
+            }
+          }
+        })
     }
 
     function drawBoxPlot() {
@@ -1666,9 +1700,9 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         // properties for the box plots
         var margin = {top: 10, right: 0, bottom: 30, left: 0},
             width = 30,
-            height = ($("#graphContainer").height()) / Math.ceil(varNames.length / 3) - margin.top - margin.bottom;
+            height = ($("#graph-container").height()) / Math.ceil(varNames.length / 3) - margin.top - margin.bottom;
 
-        var boxContainerWidth = $("#graphContainer").width() / 3 - 30;
+        var boxContainerWidth = $("#graph-container").width() / 3 - 30;
 
         var colors = d3.scale.category10();
         var data = [];
@@ -1677,6 +1711,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
         if (self.boxWhiskerSvgs.length == 0) {
             self.clearGraph();
         }
+
         if ($(".focus").length > 0 || $(".bar").length) {
             self.clearGraph();
             self.boxWhiskerSvgs = [];
@@ -1735,6 +1770,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
             }
             var text;
             charts[i].domain([min, max]);
+
             if (self.boxWhiskerSvgs[i] != null) {
                 // update domain
                 charts[i].domain([min, max]);
@@ -1746,7 +1782,7 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 text = $("svg[data-id='" + i + "'] .yAxisLabel");
             }
             else {
-                self.boxWhiskerSvgs[i] = d3.select("#graphContainer").append("svg")
+                self.boxWhiskerSvgs[i] = d3.select("#graph-container").append("svg")
                     .data(data)
                     .attr("class", "box")
                     .attr("data-id", i)
@@ -1828,6 +1864,22 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
 
             $("svg").css("margin-left", margin.left + "px");
             $("svg[data-id='" + i + "'] rect").css("fill", colors(i));
+
+            $("#btnExportPng").unbind('click')
+            $("#btnExportPng").click(function() {
+              for (var i = 0; i < observations.length; i++) {
+                var svgString = getSVGString($("svg[data-id='" + i + "']")[0]);
+                var imageWidth = $("svg[data-id='" + i + "']").width() + $("#leftPanel").width();
+                var imageHeight = $("svg[data-id='" + i + "']").height();
+                var varName = varNames[i];
+                svgString2Image(svgString, imageWidth, imageHeight, 'png', save, varName); // passes Blob and filesize String to the callback
+
+                function save(dataBlob, filesize, fileName) {
+                  var name = fileName + ' ' + (new Date(Date.now()).toLocaleString())
+                  saveAs( dataBlob, name ); // FileSaver.js function
+                }
+              }
+            })
         }
 
         // Set the first summary statistics by default
@@ -1865,6 +1917,116 @@ define('visualization', ['jquery', 'underscore', 'd3Libraries'], function () {
                 return [i, j];
             };
         }
+    }
+
+    // http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
+    // Below are the functions that handle actual exporting:
+    // getSVGString ( svgNode ) and svgString2Image( svgString, width, height, format, callback )
+    function getSVGString( svgNode ) {
+        svgNode.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+        var cssStyleText = getCSSStyles( svgNode );
+        var styleElementId = appendCSS( cssStyleText, svgNode );
+
+        var serializer = new XMLSerializer();
+        var svgString = serializer.serializeToString(svgNode);
+        svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
+        svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+
+        setTimeout(function() {
+            $(styleElementId).remove()
+        })
+
+        return svgString;
+
+        function getCSSStyles( parentElement ) {
+            var selectorTextArr = [];
+
+            // Add Parent element Id and Classes to the list
+            selectorTextArr.push( '#'+parentElement.id );
+            for (var c = 0; c < parentElement.classList.length; c++)
+                    if ( !contains('.'+parentElement.classList[c], selectorTextArr) )
+                        selectorTextArr.push( '.'+parentElement.classList[c] );
+
+            // Add Children element Ids and Classes to the list
+            var nodes = parentElement.getElementsByTagName("*");
+            for (var i = 0; i < nodes.length; i++) {
+                var id = nodes[i].id;
+                if ( !contains('#'+id, selectorTextArr) )
+                    selectorTextArr.push( '#'+id );
+
+                var classes = nodes[i].classList;
+                for (var c = 0; c < classes.length; c++)
+                    if ( !contains('.'+classes[c], selectorTextArr) )
+                        selectorTextArr.push( '.'+classes[c] );
+            }
+
+            // Extract CSS Rules
+            var extractedCSSText = "";
+            for (var i = 0; i < document.styleSheets.length; i++) {
+                var s = document.styleSheets[i];
+
+                try {
+                    if(!s.cssRules) continue;
+                } catch( e ) {
+                    if(e.name !== 'SecurityError') throw e; // for Firefox
+                    continue;
+                }
+
+                var cssRules = s.cssRules;
+                for (var r = 0; r < cssRules.length; r++) {
+                    if ( includes( cssRules[r].selectorText, selectorTextArr ) )
+                        extractedCSSText += cssRules[r].cssText;
+                }
+            }
+
+            return extractedCSSText;
+
+            function contains(str,arr) {
+                return arr.indexOf( str ) === -1 ? false : true;
+            }
+        }
+
+        function includes(str,arr) {
+          if ("undefined" !== typeof str) {
+            for (var q = 0; q < arr.length; q++) {
+              if (str.indexOf(arr[q]) !== -1) { return true; }
+            }
+          }
+        }
+
+        function appendCSS( cssText, element ) {
+            var styleElement = document.createElement("style");
+            var id = 'append-css-' + Date.now()
+            styleElement.setAttribute("type", "text/css");
+            styleElement.setAttribute("id", id);
+            styleElement.innerHTML = cssText;
+            var refNode = element.hasChildNodes() ? element.children[0] : null;
+            element.insertBefore( styleElement, refNode );
+            return '#' + id
+        }
+    }
+
+    function svgString2Image( svgString, width, height, format, callback, varName ) {
+        var format = format ? format : 'png';
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        var image = new Image();
+        image.onload = function() {
+            context.clearRect ( 0, 0, width, height );
+            context.drawImage(image, 0, 0, width, height);
+
+            canvas.toBlob( function(blob) {
+                var filesize = Math.round( blob.length/1024 ) + ' KB';
+                if ( callback ) callback( blob, filesize, varName );
+            });
+        };
+
+        image.src = imgsrc;
     }
 
     return self;
